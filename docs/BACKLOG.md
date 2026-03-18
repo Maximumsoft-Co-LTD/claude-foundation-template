@@ -27,7 +27,7 @@
 
 | Task | Title | Depends On | Status | Priority | Assigned |
 |------|-------|------------|--------|----------|----------|
-| task-001 | Project setup & design system | — | `in-progress` | high | - |
+| task-001 | Project setup & design system | — | `done` | high | - |
 | task-002 | Hero section + navigation | task-001 | `todo` | high | - |
 | task-003 | Workflow features section | task-001 | `todo` | high | - |
 | task-004 | CTA, footer & responsive polish | task-002, task-003 | `todo` | medium | - |
@@ -38,4 +38,4 @@
 
 | Task | Sprint | Title | Completed |
 |------|--------|-------|-----------|
-| - | - | - | - |
+| task-001 | sprint-01 | Project setup & design system | 2026-03-18 |
