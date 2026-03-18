@@ -11,10 +11,41 @@
     <link rel="stylesheet" href="styles/main.css" />
   </head>
   <body>
-    <!-- nav: task-002 -->
-    <!-- hero: task-002 -->
+
+    <!-- NAVBAR -->
+    <nav class="navbar" aria-label="Main navigation">
+      <div class="navbar__inner">
+        <a href="/" class="navbar__logo">Claude Code</a>
+        <input type="checkbox" id="nav-toggle" class="navbar__toggle-input" aria-hidden="true" />
+        <label for="nav-toggle" class="navbar__toggle-btn" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </label>
+        <ul class="navbar__links" role="list">
+          <li><a href="#workflow">Workflow</a></li>
+          <li><a href="#workflow">Features</a></li>
+          <li><a href="#workflow" class="btn-primary btn-primary--sm">Get Started</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero" id="home">
+      <div class="hero__inner">
+        <h1 class="hero__headline">Ship Faster with<br /><span class="hero__headline--accent">Claude Code</span></h1>
+        <p class="hero__subheadline">A structured workflow for AI-assisted development —<br />from discovery to retrospective.</p>
+        <a href="#workflow" class="btn-primary" id="cta-hero">Explore the Workflow</a>
+      </div>
+    </section>
+
     <!-- workflow: task-003 -->
     <!-- cta: task-004 -->
     <!-- footer: task-004 -->
+
+    <script>
+      document.getElementById('cta-hero')?.addEventListener('click', function () {
+        // analytics: cta_hero_click — replace with real analytics call when available
+      });
+    </script>
+
   </body>
 </html>
