@@ -37,7 +37,82 @@
       </div>
     </section>
 
-    <!-- workflow: task-003 -->
+    <!-- WORKFLOW SECTION -->
+    <section class="workflow-section" id="workflow">
+      <div class="section-inner">
+        <div class="section-header">
+          <h2 class="section-title">How Claude Code Works</h2>
+          <p class="section-subtitle">A repeatable, structured process — from problem to shipped code.</p>
+        </div>
+        <ol class="workflow-grid" role="list">
+
+          <li class="workflow-step">
+            <div class="step-number" aria-hidden="true">1</div>
+            <div class="step-content">
+              <h3 class="step-title">Discovery</h3>
+              <p class="step-desc">Understand the problem, users, and constraints before writing a single line of code.</p>
+              <span class="step-tag">/discovery</span>
+            </div>
+          </li>
+
+          <li class="workflow-step">
+            <div class="step-number" aria-hidden="true">2</div>
+            <div class="step-content">
+              <h3 class="step-title">Sprint Planning</h3>
+              <p class="step-desc">Break the epic into focused sub-tasks with clear dependencies and estimates.</p>
+              <span class="step-tag">/new-sprint</span>
+            </div>
+          </li>
+
+          <li class="workflow-step">
+            <div class="step-number" aria-hidden="true">3</div>
+            <div class="step-content">
+              <h3 class="step-title">Design</h3>
+              <p class="step-desc">Write frontend and backend design docs with a TDD test plan — before any code.</p>
+              <span class="step-tag">/fe-design &nbsp;/be-design</span>
+            </div>
+          </li>
+
+          <li class="workflow-step">
+            <div class="step-number" aria-hidden="true">4</div>
+            <div class="step-content">
+              <h3 class="step-title">Implement</h3>
+              <p class="step-desc">Write failing tests first. Implement until all tests pass. Log bugs as issues.</p>
+              <span class="step-tag">/implement</span>
+            </div>
+          </li>
+
+          <li class="workflow-step">
+            <div class="step-number" aria-hidden="true">5</div>
+            <div class="step-content">
+              <h3 class="step-title">Code Review</h3>
+              <p class="step-desc">Review every acceptance criterion against the design docs before merging.</p>
+              <span class="step-tag">/code-review</span>
+            </div>
+          </li>
+
+          <li class="workflow-step">
+            <div class="step-number" aria-hidden="true">6</div>
+            <div class="step-content">
+              <h3 class="step-title">Testing</h3>
+              <p class="step-desc">Run the full test suite. Every AC must have a passing test before shipping.</p>
+              <span class="step-tag">/testing</span>
+            </div>
+          </li>
+
+          <li class="workflow-step">
+            <div class="step-number" aria-hidden="true">7</div>
+            <div class="step-content">
+              <h3 class="step-title">Retrospective</h3>
+              <p class="step-desc">Log learnings, mark the task done, and carry improvements to the next sprint.</p>
+              <span class="step-tag">/retro-task</span>
+            </div>
+          </li>
+
+        </ol>
+      </div>
+    </section>
+
     <!-- cta: task-004 -->
     <!-- footer: task-004 -->
 
@@ -45,6 +120,20 @@
       document.getElementById('cta-hero')?.addEventListener('click', function () {
         // analytics: cta_hero_click — replace with real analytics call when available
       });
+
+      (function () {
+        var section = document.getElementById('workflow');
+        if (!section || !window.IntersectionObserver) return;
+        var observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              // analytics: workflow_section_viewed
+              observer.disconnect();
+            }
+          });
+        }, { threshold: 0.2 });
+        observer.observe(section);
+      })();
     </script>
 
   </body>

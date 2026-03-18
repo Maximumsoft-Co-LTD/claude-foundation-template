@@ -29,7 +29,7 @@
 |------|-------|------------|--------|----------|----------|
 | task-001 | Project setup & design system | — | `done` | high | - |
 | task-002 | Hero section + navigation | task-001 | `done` | high | - |
-| task-003 | Workflow features section | task-001 | `todo` | high | - |
+| task-003 | Workflow features section | task-001 | `done` | high | - |
 | task-004 | CTA, footer & responsive polish | task-002, task-003 | `todo` | medium | - |
 
 ---
@@ -40,3 +40,4 @@
 |------|--------|-------|-----------|
 | task-001 | sprint-01 | Project setup & design system | 2026-03-18 |
 | task-002 | sprint-01 | Hero section + navigation | 2026-03-18 |
+| task-003 | sprint-01 | Workflow features section | 2026-03-18 |
