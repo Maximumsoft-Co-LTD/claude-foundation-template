@@ -22,7 +22,7 @@
 
 ---
 
-## sprint-01 — Landing Website (Claude Code Workflow)
+## sprint-01 — Landing Website (Claude Code Workflow) ✓ done
 > `docs/sprints/sprint-01/sprint-01-overview.md`
 
 | Task | Title | Depends On | Status | Priority | Assigned |
