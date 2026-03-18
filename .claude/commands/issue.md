@@ -3,7 +3,7 @@ Workflow position: **implement (loop) → START → /code-review**
 
 Log and resolve a bug found during implementation using TDD.
 Arguments: $ARGUMENTS
-Format: `[sprint-id] [task-id] [issue description]`  — e.g. `sprint-01 task-002 API returns 500 when email is null`
+Format: `[sprint-id] [task-id] [issue description]`  — e.g. `SP1 SP1-T002 API returns 500 when email is null`
 
 ---
 

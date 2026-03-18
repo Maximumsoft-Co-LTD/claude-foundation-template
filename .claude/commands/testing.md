@@ -3,7 +3,7 @@ Workflow position: **/code-review → START → /retro**
 
 Run the full test suite and verify every AC is covered.
 Arguments: $ARGUMENTS
-Format: `[sprint-id] [task-id]`  — e.g. `sprint-01 task-002`
+Format: `[sprint-id] [task-id]`  — e.g. `SP1 SP1-T002`
 
 ---
 

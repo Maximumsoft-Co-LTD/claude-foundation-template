@@ -3,7 +3,7 @@ Workflow position: **/issue (loop) → START → /testing**
 
 Review all code changes for this task against the design docs and ACs.
 Arguments: $ARGUMENTS
-Format: `[sprint-id] [task-id]`  — e.g. `sprint-01 task-002`
+Format: `[sprint-id] [task-id]`  — e.g. `SP1 SP1-T002`
 
 ---
 
@@ -74,12 +74,26 @@ Suggestions (non-blocking):
 
 ---
 
-## Step 4 — Update status and output next step
+## Step 4 — Update requirement with review results
+
+Update `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`:
+- For each AC: mark `✓` if the review confirms it is fully implemented and tested, `✗` if it has a critical issue, `~` if partially done.
+- Add a **Review Summary** section at the bottom listing: date, result (APPROVED / REQUEST CHANGES), and a one-line note per AC.
+
+---
+
+## Step 5 — Update status and output next step
 
 1. Update task status in `docs/BACKLOG.md` to `review`.
 2. Output:
 
 ```
+Review Result: APPROVED / REQUEST CHANGES
+
+ACs status:
+  ✓ AC-1: [description]
+  ✗ AC-2: [description] ← [reason]
+
 Next step:
   Critical issues found → /issue [sprint-id] [task-id] [description]  (for each one)
   No critical issues   → /testing [sprint-id] [task-id]

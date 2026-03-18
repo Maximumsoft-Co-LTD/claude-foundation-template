@@ -1,23 +1,27 @@
 # /new-sprint
-Workflow position: **/discovery → START → /plan-task or /fe-design**
+Workflow position: **/discovery → START → /fe-design**
 
 Create a new sprint from an epic description and scaffold all sub-tasks.
 Arguments: $ARGUMENTS
-Format: `[sprint-id] [epic description]`  — e.g. `sprint-02 Build user authentication with OAuth and role management`
+Format: `[sprint-id] [epic description]`  — e.g. `SP2 Build user authentication with OAuth and role management`
 
 ---
 
-## Step 1 — Validate
+## Step 1 — Validate and resolve next task number
 
 1. Parse `[sprint-id]` and `[epic description]` from `$ARGUMENTS`.
-2. Read `docs/BACKLOG.md` — if `[sprint-id]` already exists, stop and warn the user.
+   - Sprint ID format: `SP[N]` — e.g. `SP1`, `SP2`, `SP3`
+2. Read `docs/BACKLOG.md`:
+   - If `[sprint-id]` already exists → stop and warn the user.
+   - Scan ALL task IDs across every sprint to find the highest `T[NNN]` number. The next task starts at that number + 1.
+   - If no tasks exist yet → start from `T001`.
 3. Check `docs/discovery/` for any discovery doc related to this epic. If found, read it for context (Problem Statement, chosen approach, scope estimate, constraints).
 
 ---
 
 ## Step 2 — Create the sprint directory and overview
 
-1. Create directory `docs/sprints/[sprint-id]/`.
+1. Create directory `docs/sprints/[sprint-id]/`.  (e.g. `docs/sprints/SP2/`)
 2. Create `docs/sprints/[sprint-id]/[sprint-id]-overview.md` from `docs/SPRINT-OVERVIEW-TEMPLATE.md`.
 3. Pre-fill:
    - Sprint ID, epic title (derived from description)
@@ -37,16 +41,20 @@ Analyze the epic and propose a breakdown. Rules:
 - Propose 3–8 tasks depending on epic size.
 - Order tasks so dependencies are respected.
 
+Task IDs continue from the global sequence found in Step 1.
+Example: if the last task across all sprints was `T004`, this sprint starts from `SP2-T005`.
+
 Present the breakdown:
 
 ```
 Proposed sub-tasks for [sprint-id] — [epic title]:
+(Global task counter: last used T[NNN], starting from T[NNN+1])
 
-| Task ID  | Title                  | Type      | Depends On | Est. |
-|----------|------------------------|-----------|------------|------|
-| task-001 |                        | backend   | —          | 1d   |
-| task-002 |                        | frontend  | task-001   | 2d   |
-| task-003 |                        | fullstack | task-001   | 2d   |
+| Task ID    | Title                  | Type      | Depends On | Est. |
+|------------|------------------------|-----------|------------|------|
+| SP2-T005   |                        | backend   | —          | 1d   |
+| SP2-T006   |                        | frontend  | SP2-T005   | 2d   |
+| SP2-T007   |                        | fullstack | SP2-T005   | 2d   |
 ```
 
 Ask: "Does this breakdown look right? You can rename tasks, add/remove rows, or say 'confirm' to scaffold all."
@@ -78,7 +86,8 @@ For each confirmed task:
 
 | Task | Title | Depends On | Status | Priority | Assigned |
 |------|-------|------------|--------|----------|----------|
-| task-001 | ... | — | `todo` | — | — |
+| SP2-T005 | ... | — | `todo` | — | — |
+| SP2-T006 | ... | SP2-T005 | `todo` | — | — |
 ```
 
 ---

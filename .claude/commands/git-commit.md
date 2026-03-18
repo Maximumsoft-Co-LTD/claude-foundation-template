@@ -3,7 +3,7 @@ Workflow position: **/retro-task → START → /next-task (or /retro-sprint if s
 
 Stage and commit all changes for a completed task.
 Arguments: $ARGUMENTS
-Format: `[sprint-id] [task-id]`  — e.g. `sprint-01 task-002`
+Format: `[sprint-id] [task-id]`  — e.g. `SP1 SP1-T002`
 
 ---
 
@@ -20,7 +20,7 @@ Run in parallel:
 ## Step 2 — Check branch name
 
 Expected pattern: `[sprint-id]/[task-id]-[short-description]`
-Example: `sprint-01/task-002-user-auth`
+Example: `SP1/SP1-T002-user-auth`
 
 If the branch doesn't match this pattern → warn the user:
 > "Branch `[current]` doesn't follow the expected pattern `[sprint-id]/[task-id]-[desc]`. Continue anyway? (yes/no)"

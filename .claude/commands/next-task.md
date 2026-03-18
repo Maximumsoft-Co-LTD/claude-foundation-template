@@ -7,7 +7,27 @@ Format: `[sprint-id] [task-id]`  — both optional. If omitted, auto-selects the
 
 ---
 
-## Step 1 — Read backlog and show sprint progress
+## Step 1 — Reconcile and update all statuses
+
+Before picking the next task, audit the current state:
+
+1. Read `docs/BACKLOG.md` — collect every task and its recorded status.
+2. For each task that is NOT `todo` or `done`, read its latest doc files:
+   - If `[task-id]-retro.md` exists → status should be `done`. Update if it isn't.
+   - If `[task-id]-requirement.md` has all ACs marked `✓` and no open issues → flag for user to confirm if it should be `done`.
+   - If status is `review` or `testing` but no code review / test run has occurred → revert to `in-progress`.
+3. Write all corrections back to `docs/BACKLOG.md` before proceeding.
+
+Output any corrections made:
+```
+Status corrections:
+  [task-id]: in-progress → done  (retro file found)
+  [task-id]: review → in-progress  (no code review doc found)
+```
+
+---
+
+## Step 2 — Read backlog and show sprint progress
 
 Read `docs/BACKLOG.md` and print a progress summary for every active sprint:
 ```
@@ -17,7 +37,7 @@ sprint-02 — [Epic Title]: 0 done / 0 in-progress / 5 todo / 0 blocked  (5 tota
 
 ---
 
-## Step 2 — Determine target task
+## Step 3 — Determine target task
 
 - **Both args given** (`sprint-id` + `task-id`) → use them directly.
 - **Sprint only** → pick first `todo` task in that sprint.
@@ -29,7 +49,7 @@ sprint-02 — [Epic Title]: 0 done / 0 in-progress / 5 todo / 0 blocked  (5 tota
 
 ---
 
-## Step 3 — Load context
+## Step 4 — Load context
 
 Read all files for the target task:
 - `docs/sprints/[sprint-id]/[sprint-id]-overview.md` (epic context)
@@ -40,7 +60,7 @@ Read all files for the target task:
 
 ---
 
-## Step 4 — Output task context card
+## Step 5 — Output task context card
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -67,13 +87,13 @@ Readiness:
 
 ---
 
-## Step 5 — Update status
+## Step 6 — Update status
 
 If the task status was `todo`, update it to `in-progress` in `docs/BACKLOG.md`.
 
 ---
 
-## Step 6 — Suggest next command
+## Step 7 — Suggest next command
 
 Based on readiness, output exactly ONE next step:
 

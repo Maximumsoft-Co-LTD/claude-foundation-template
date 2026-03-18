@@ -22,12 +22,12 @@
 
 ---
 
-## sprint-01 — Example Epic
-> `docs/sprints/sprint-01/sprint-01-overview.md`
+## SP1 — Example Epic
+> `docs/sprints/SP1/SP1-overview.md`
 
 | Task | Title | Depends On | Status | Priority | Assigned |
 |------|-------|------------|--------|----------|----------|
-| task-001 | Example Task | - | `todo` | high | - |
+| SP1-T001 | Example Task | - | `todo` | high | - |
 
 ---
 

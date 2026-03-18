@@ -4,7 +4,7 @@ Workflow position: **/testing → START → /git-commit**
 Write a retrospective for a single completed task and mark it done.
 Run this after every task. Run /retro-sprint only after ALL tasks in a sprint are done.
 Arguments: $ARGUMENTS
-Format: `[sprint-id] [task-id]`  — e.g. `sprint-01 task-002`
+Format: `[sprint-id] [task-id]`  — e.g. `SP1 SP1-T002`
 
 ---
 

@@ -3,7 +3,7 @@ Workflow position: **/be-design → START → /issue (loop) → /code-review**
 
 Implement the task following the FE and BE design docs. Always write failing tests first, then implement until all pass.
 Arguments: $ARGUMENTS
-Format: `[sprint-id] [task-id]`  — e.g. `sprint-01 task-002`
+Format: `[sprint-id] [task-id]`  — e.g. `SP1 SP1-T002`
 
 ---
 

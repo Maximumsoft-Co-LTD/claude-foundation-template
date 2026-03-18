@@ -3,7 +3,7 @@ Workflow position: **/next-task → START → /be-design**
 
 Write the complete frontend design and TDD test plan for a task. Run this BEFORE writing any code.
 Arguments: $ARGUMENTS
-Format: `[sprint-id] [task-id]`  — e.g. `sprint-01 task-002`
+Format: `[sprint-id] [task-id]`  — e.g. `SP1 SP1-T002`
 
 ---
 

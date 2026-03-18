@@ -100,18 +100,24 @@ discovery → backlog → todo → in-progress → review → testing → done
 - A bug fix always starts with a **failing test** that reproduces the bug.
 - Never skip, `.only`, or comment out a failing test — fix the code instead.
 
+### ID Format
+- Sprint: `SP[N]` — e.g. `SP1`, `SP2`, `SP3`
+- Task: `SP[N]-T[NNN]` — e.g. `SP1-T001`, `SP2-T003`
+  - Task number is **global and never resets** across sprints
+  - Sprint 1 might use T001–T004, Sprint 2 continues from T005
+
 ### Commit Format
 ```
 [task-id] type: short description (max 72 chars)
 ```
 Types: `feat` `fix` `test` `docs` `refactor` `chore`
-Example: `task-002 feat: add user authentication endpoint`
+Example: `SP2-T003 feat: add user authentication endpoint`
 
 ### Branch Format
 ```
 [sprint-id]/[task-id]-[short-description]
 ```
-Example: `sprint-01/task-002-user-auth`
+Example: `SP2/SP2-T003-user-auth`
 
 ---
 
@@ -122,17 +128,20 @@ docs/
 ├── discovery/
 │   └── disc-001-[name].md              ← /discovery output
 ├── sprints/
-│   └── sprint-01/
-│       ├── sprint-01-overview.md       ← /new-sprint output (epic doc)
-│       ├── sprint-01-retro.md          ← /retro-sprint output
-│       ├── task-001/
-│       │   ├── task-001-requirement.md ← fill manually after /new-sprint
-│       │   ├── task-001-frontend.md    ← /fe-design output
-│       │   ├── task-001-backend.md     ← /be-design output
-│       │   ├── task-001-issues.md      ← /issue output (auto-created)
-│       │   └── task-001-retro.md       ← /retro-task output
-│       └── task-002/
+│   └── SP1/
+│       ├── SP1-overview.md             ← /new-sprint output (epic doc)
+│       ├── SP1-retro.md                ← /retro-sprint output
+│       ├── SP1-T001/
+│       │   ├── SP1-T001-requirement.md ← fill manually after /new-sprint
+│       │   ├── SP1-T001-frontend.md    ← /fe-design output
+│       │   ├── SP1-T001-backend.md     ← /be-design output
+│       │   ├── SP1-T001-issues.md      ← /issue output (auto-created)
+│       │   └── SP1-T001-retro.md       ← /retro-task output
+│       └── SP1-T002/
 │           └── ...
+│   └── SP2/
+│       ├── SP2-T003/                   ← task number continues from SP1
+│       └── ...
 ├── DISCOVERY-TEMPLATE.md
 ├── SPRINT-OVERVIEW-TEMPLATE.md
 ├── REQUIREMENT-TEMPLATE.md

@@ -4,7 +4,7 @@ Workflow position: **(all tasks done + /git-commit) → START → next sprint**
 Write a sprint-level retrospective by aggregating all task retros and evaluating sprint goals.
 Run this ONCE after ALL tasks in the sprint are done and committed.
 Arguments: $ARGUMENTS
-Format: `[sprint-id]`  — e.g. `sprint-01`
+Format: `[sprint-id]`  — e.g. `SP1`
 
 ---
 
@@ -107,7 +107,7 @@ Save to `docs/sprints/[sprint-id]/[sprint-id]-retro.md`:
 
 Update the sprint section header to show `done`:
 ```markdown
-## sprint-01 — [Epic Title] ✓ done
+## SP1 — [Epic Title] ✓ done
 ```
 
 ---
