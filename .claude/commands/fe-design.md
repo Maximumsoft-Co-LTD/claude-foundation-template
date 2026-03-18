@@ -1,5 +1,5 @@
 # /fe-design
-Workflow position: **/next-task → START → /be-design → implement**
+Workflow position: **/next-task → START → /be-design**
 
 Write the complete frontend design and TDD test plan for a task. Run this BEFORE writing any code.
 Arguments: $ARGUMENTS

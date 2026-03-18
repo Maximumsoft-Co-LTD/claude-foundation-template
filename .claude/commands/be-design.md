@@ -63,9 +63,5 @@ Print the TDD Test Plan table, then:
 TDD Test Plan — write these failing tests BEFORE implementing:
 [print the test plan table]
 
-Next step: implement
-  1. Write every failing test from both FE and BE TDD Test Plans
-  2. Run tests — confirm they all fail
-  3. Implement until all tests pass
-  4. Run /issue [sprint-id] [task-id] [desc] if you hit a bug
+Next step: /implement [sprint-id] [task-id]
 ```
