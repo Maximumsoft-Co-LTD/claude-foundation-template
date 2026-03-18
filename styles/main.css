@@ -84,6 +84,7 @@ body {
   color: var(--color-text);
   background-color: var(--color-bg);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 img, svg {
@@ -332,4 +333,69 @@ ul, ol {
 }
 @media (max-width: 599px) {
   .workflow-grid { grid-template-columns: 1fr; }
+}
+
+/* =========================================
+   CTA SECTION (task-004)
+   ========================================= */
+.cta-section {
+  background-color: var(--color-bg);
+  text-align: center;
+}
+.cta-section .section-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+/* =========================================
+   FOOTER (task-004)
+   ========================================= */
+.site-footer {
+  background-color: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+}
+.footer-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+.footer-copy {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+.footer-links {
+  display: flex;
+  gap: var(--space-6);
+}
+.footer-links a {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  transition: color 0.15s ease;
+}
+.footer-links a:hover { color: var(--color-text); }
+
+/* =========================================
+   RESPONSIVE — FOOTER (task-004)
+   ========================================= */
+@media (max-width: 767px) {
+  .footer-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+/* =========================================
+   REDUCED MOTION (task-004)
+   ========================================= */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition: none !important; }
 }
