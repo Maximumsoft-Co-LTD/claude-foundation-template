@@ -18,16 +18,19 @@
 
 | ID | Title | Status | Date | Open Questions | Doc |
 |----|-------|--------|------|----------------|-----|
-| - | - | - | - | - | - |
+| disc-001 | Landing Website | `backlog` | 2026-03-18 | 3 | [disc-001](discovery/disc-001-landing-website.md) |
 
 ---
 
-## sprint-01 — Example Epic
+## sprint-01 — Landing Website (Claude Code Workflow)
 > `docs/sprints/sprint-01/sprint-01-overview.md`
 
 | Task | Title | Depends On | Status | Priority | Assigned |
 |------|-------|------------|--------|----------|----------|
-| task-001 | Example Task | - | `todo` | high | - |
+| task-001 | Project setup & design system | — | `in-progress` | high | - |
+| task-002 | Hero section + navigation | task-001 | `todo` | high | - |
+| task-003 | Workflow features section | task-001 | `todo` | high | - |
+| task-004 | CTA, footer & responsive polish | task-002, task-003 | `todo` | medium | - |
 
 ---
 
