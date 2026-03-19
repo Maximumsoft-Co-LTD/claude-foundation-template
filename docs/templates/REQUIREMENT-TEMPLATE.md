@@ -52,11 +52,31 @@
 -
 
 ## Definition of Done
-- [ ] All acceptance criteria pass
-- [ ] Success metrics are instrumented
+
+**"Done" means correct — not just complete.**
+
+### Functional Correctness
+- [ ] Every AC passes — verified in a real browser against a real API and real DB
+- [ ] Every error scenario in the Fail Case Matrix shows the correct message and behavior
+- [ ] No AC is "assumed passing" — each one has a passing E2E test to prove it
+
+### Test Coverage
 - [ ] Unit tests written and green
-- [ ] Integration tests written and green (real DB / real services — no mocks)
-- [ ] E2E tests written and green — one scenario per AC
-- [ ] Code reviewed and approved
-- [ ] Deployed to staging and smoke-tested end-to-end
+- [ ] Integration tests written and green — real DB, no mocks
+- [ ] E2E tests written and green — one scenario per AC + one per key error path
+- [ ] No test is skipped, commented out, or marked `.only`
+
+### Quality Gates
+- [ ] No console errors or warnings in the browser during normal use
+- [ ] Page load / API response within performance targets in Success Metrics
+- [ ] No regression in existing flows touched by this task (run full suite)
+- [ ] Code reviewed and approved — reviewer confirmed ACs, not just code style
+
+### Design Fidelity
+- [ ] UI matches Figma/mockup (if Design References are provided)
+- [ ] All error states render correctly — not just happy path
+
+### Delivery
+- [ ] Deployed to staging and smoke-tested end-to-end by the implementer
+- [ ] Success metrics instrumented and verified firing in staging
 - [ ] BACKLOG.md updated to `done`

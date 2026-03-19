@@ -37,7 +37,7 @@ Write a complete, implementation-ready design for every section:
 - **Service / Layer Breakdown** — responsibility of each layer: middleware, controller, service, repository.
 - **Business Logic** — non-obvious rules, calculations, decision flows in numbered steps.
 - **Event Publishing** — domain events emitted: topic, trigger, payload, consumer. Write "None" if not applicable.
-- **Error Handling Strategy** — where errors are caught, standardized format, what never to expose to the client.
+- **Error Handling Strategy** — define: (1) the standard error response envelope shape, (2) the error code catalog for every error this task can produce (HTTP status + code + when to use), (3) which layer is responsible for throwing each error type, (4) how external service failures are handled and what the client receives. Never expose stack traces or internal error details to the client.
 - **Security Considerations** — input sanitization, rate limiting, sensitive field exposure, PII in logs.
 - **Logging & Observability** — what to log at each level, fields, slow query threshold.
 - **Environment Variables** — every new env var: name, description, required, default.

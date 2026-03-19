@@ -43,7 +43,7 @@ Analyze the epic and propose a breakdown. Rules:
   - Exception: tasks that are purely infrastructure/setup (e.g. DB migrations, CI pipelines) with no user-facing behavior — mark as `infra` type and note they require integration tests instead of E2E.
 - Every non-infra task must have a clear user story that describes the E2E scenario.
 - Identify dependencies (which tasks must be done first).
-- Propose 3–8 tasks depending on epic size.
+- **No cap on number of tasks** — propose as many tasks as needed to fully cover the epic scope. Each task must still be 1–3 days.
 - Order tasks so dependencies are respected.
 
 Task IDs continue from the global sequence found in Step 1.
@@ -62,7 +62,37 @@ Proposed sub-tasks for [sprint-id] — [epic title]:
 | SP2-T007    | Admin can manage user roles         | fullstack | Admin changes role → user sees new perms | SP2-T006    | 2d   |
 ```
 
-Ask: "Does this breakdown look right? Each task should have an E2E scenario. You can rename tasks, add/remove rows, or say 'confirm' to scaffold all."
+---
+
+## Step 3b — Coverage check against discovery
+
+If a discovery doc was found in Step 1, cross-check the proposed tasks against it:
+
+1. **Goals coverage** — for each Goal / Success Metric in the discovery doc, identify which task(s) cover it. Flag any goal with no task.
+2. **In-scope coverage** — for each item listed as in-scope in the discovery doc, identify which task covers it. Flag any in-scope item with no task.
+3. **User journeys coverage** — for each To-Be user journey in the discovery doc, identify which task delivers it end-to-end. Flag any journey with no task.
+
+Present the coverage summary after the task table:
+
+```
+Coverage check vs discovery doc:
+
+✅ Covered
+  - [Goal/Scope item] → [Task ID]
+  - ...
+
+⚠️ Not covered — adding tasks:
+  - [Goal/Scope item] → adding [new Task ID]: [title]
+  - ...
+
+➖ Explicitly out of scope:
+  - [item] — reason: [why excluded]
+```
+
+- For every uncovered item: either add a new task to the breakdown or explicitly mark it as out-of-scope with a reason.
+- Do NOT silently drop any in-scope item from discovery.
+
+After showing the coverage summary, ask: "Does this breakdown look right? You can rename tasks, add/remove rows, or say 'confirm' to scaffold all."
 
 ---
 
@@ -70,13 +100,10 @@ Ask: "Does this breakdown look right? Each task should have an E2E scenario. You
 
 For each confirmed task:
 1. Create `docs/sprints/[sprint-id]/[task-id]/`
-2. Create 3 files from templates, replacing ALL placeholders:
+2. Create 1 file from template, replacing ALL placeholders:
    - `[task-id]-requirement.md` from `docs/templates/REQUIREMENT-TEMPLATE.md`
      - Pre-fill: Sprint = `[sprint-id]`, Status = `todo`
-   - `[task-id]-frontend.md` from `docs/templates/FRONTEND-DESIGN-TEMPLATE.md`
-     - Pre-fill: Requirement link = `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`
-   - `[task-id]-backend.md` from `docs/templates/BACKEND-DESIGN-TEMPLATE.md`
-     - Pre-fill: Requirement link = `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`
+   - (Frontend and backend design docs are created later by `/fe-design` and `/be-design`)
 
 ---
 
@@ -105,5 +132,6 @@ For each confirmed task:
 
 Next steps:
   1. Fill in each [task-id]-requirement.md (Problem Statement, ACs, Success Metrics)
-  2. Run /next-task to begin working through tasks in order
+  2. Run /fe-design [task-id] and /be-design [task-id] to write design docs
+  3. Run /next-task to begin working through tasks in order
 ```

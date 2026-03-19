@@ -1,22 +1,29 @@
 # [task-id] — [Title] — Frontend Design
 
 ## Metadata
-| Field | Value |
-|-------|-------|
+
+
+| Field           | Value                                                         |
+| --------------- | ------------------------------------------------------------- |
 | **Requirement** | `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` |
-| **Assignee** | - |
-| **Status** | draft / ready / implemented |
+| **Assignee**    | -                                                             |
+| **Status**      | draft / ready / implemented                                   |
+
 
 ## Design References
-<!-- Figma frames, Storybook links, or screenshots. Be specific — link to the exact frame. -->
+
+
+
 - Figma: [link]
 - Storybook: [link]
 
 ## UI/UX Overview
-<!-- Describe each screen, modal, or user flow this task introduces or changes. -->
+
+
 
 ## User Journey Map
-<!-- Map the desired user journey (to-be state). Score 1–5 per step: 1=frustrated, 5=delighted. -->
+
+
 
 ```mermaid
 journey
@@ -32,45 +39,97 @@ journey
         Navigates away         : 3 : User
 ```
 
+
+
 **Entry point:** where does the user come from before this flow?
 **Exit point:** where does the user go after this flow?
 
 ## Behavior Mapping
-<!-- For each interaction: what the user does → what the UI does → intended feeling. -->
+
+
+
+### Entry Paths
+
+
+
+
+| Entry path                          | How they get here          | Pre-loaded state / context      |
+| ----------------------------------- | -------------------------- | ------------------------------- |
+| e.g. Dashboard → click CTA          | Direct navigation          | Authenticated, no pre-fill      |
+| e.g. Email deep-link                | `/path?token=xxx`          | May or may not be authenticated |
+| e.g. Back-navigation from next step | Browser back / wizard back | Form state must be preserved    |
+
+
+*Every entry path must be handled — missing one means the feature is not fully integrated.*
+
+### Behavior Flow
+
+
 
 ```mermaid
 flowchart TD
-    A([User arrives]) --> B{First load}
-    B -->|loading| C[Skeleton screen\n😐 patient]
+    E1([Entry: Dashboard CTA]) --> B
+    E2([Entry: Deep-link / redirect]) --> AUTH{Authenticated?}
+    AUTH -->|no| LOGIN[Redirect to login\npreserve return URL]
+    AUTH -->|yes| B
+
+    B{First load} -->|loading| C[Skeleton screen\n😐 patient]
+    B -->|load failed| LERR[Page-level error\n'Something went wrong'\n😟 blocked\nCTA: Refresh]
     B -->|loaded| D[Content visible\n😊 confident]
+
     D --> E{User action}
     E -->|submits| F[Spinner + disabled\n🤔 waiting]
     F -->|success| G[Success state\n✅ accomplished]
-    F -->|error| H[Inline error\n😟 informed]
+    F -->|400 validation| H[Inline field errors\n😟 informed\nstay on form]
+    F -->|500 / network| T[Toast: friendly message\n😟 frustrated\nCTA: Retry]
+    F -->|401| LOGIN
     H --> E
-    G --> I([Exit flow])
+    T -->|retry| F
+    G --> EXIT([Exit: navigate to next screen])
 ```
 
+
+
+### Fail State Summary
+
+
+
+
+| Fail state     | What user sees                          | Feeling     | Can recover?           |
+| -------------- | --------------------------------------- | ----------- | ---------------------- |
+| Load failed    | Page-level error + Refresh button       | Blocked     | Yes — refresh          |
+| 400 validation | Inline errors on each field             | Informed    | Yes — fix and resubmit |
+| 500 / network  | Toast with retry CTA                    | Frustrated  | Yes — retry            |
+| 401 mid-flow   | Redirect to login, return URL preserved | Interrupted | Yes — re-login         |
+
+
 **Key behavioral goals:**
-<!-- What habits to reinforce? What friction to remove? -->
--
+
+
+
+- 
 
 ## Routing & Navigation
-<!-- List any new routes or changes to existing routes. -->
 
-| Route | Component | Auth required | Notes |
-|-------|-----------|---------------|-------|
-| `/path` | `PageComponent` | yes / no | |
+
+
+
+| Route   | Component       | Auth required | Notes |
+| ------- | --------------- | ------------- | ----- |
+| `/path` | `PageComponent` | yes / no      |       |
+
 
 ## Component Breakdown
-<!-- List every component to create or modify. -->
 
-| Component | File path | Type | Description |
-|-----------|-----------|------|-------------|
-| `ComponentName` | `src/components/...` | new / modify | |
+
+
+
+| Component       | File path            | Type         | Description |
+| --------------- | -------------------- | ------------ | ----------- |
+| `ComponentName` | `src/components/...` | new / modify |             |
+
 
 ## State & Data Flow
-<!-- How does data move through this feature? Where does state live? -->
 
 ```mermaid
 flowchart LR
@@ -82,73 +141,94 @@ flowchart LR
     Action -->|call| API
 ```
 
-## API Contracts Consumed
-<!-- Every backend endpoint this feature calls. Must align with be-design. -->
 
-| Method | Endpoint | Request | Response | Error handling |
-|--------|----------|---------|----------|----------------|
-| GET | `/api/...` | - | `{ ... }` | show toast / redirect |
+
+## API Contracts Consumed
+
+
+
+
+| Method | Endpoint   | Request | Response  | Error handling        |
+| ------ | ---------- | ------- | --------- | --------------------- |
+| GET    | `/api/...` | -       | `{ ... }` | show toast / redirect |
+
 
 ## Loading & Skeleton States
-<!-- Describe loading UX for every async operation. -->
 
-| State | Behavior |
-|-------|----------|
-| Initial load | Skeleton screen |
-| Submitting form | Button disabled + spinner |
-| Error | Inline error message |
-| Empty | Empty state illustration + CTA |
+
+
+
+| State           | Behavior                       |
+| --------------- | ------------------------------ |
+| Initial load    | Skeleton screen                |
+| Submitting form | Button disabled + spinner      |
+| Error           | Inline error message           |
+| Empty           | Empty state illustration + CTA |
+
 
 ## Responsive Behavior
-<!-- Define layout changes across breakpoints. -->
 
-| Breakpoint | Behavior |
-|------------|----------|
-| Mobile (< 768px) | |
-| Tablet (768–1024px) | |
-| Desktop (> 1024px) | |
+
+
+
+| Breakpoint          | Behavior |
+| ------------------- | -------- |
+| Mobile (< 768px)    |          |
+| Tablet (768–1024px) |          |
+| Desktop (> 1024px)  |          |
+
 
 ## Analytics Events
-<!-- Events to fire. Must match Analytics & Tracking section in requirement. -->
 
-| Event name | Trigger | Payload |
-|------------|---------|---------|
+
+
+
+| Event name   | Trigger       | Payload           |
+| ------------ | ------------- | ----------------- |
 | `event_name` | user clicks X | `{ userId, ... }` |
 
+
 ## Performance Considerations
-<!-- Lazy loading, code splitting, memoization, image optimization. -->
--
+
+
+
+- 
 
 ## TDD Test Plan
-<!-- Write these BEFORE implementing. One row per test case. Map each to an AC. -->
 
-| Test Case | AC | Type | Description |
-|-----------|----|------|-------------|
-| renders correctly | AC-1 | unit | snapshot or visual assertion |
-| shows skeleton while loading | AC-1 | unit | |
-| displays error message on API failure | AC-2 | unit | |
-| user action dispatches correct event | AC-3 | integration | |
-| mobile layout renders correctly | - | unit | |
+
+
+
+| Test Case                             | AC   | Type        | Description                  |
+| ------------------------------------- | ---- | ----------- | ---------------------------- |
+| renders correctly                     | AC-1 | unit        | snapshot or visual assertion |
+| shows skeleton while loading          | AC-1 | unit        |                              |
+| displays error message on API failure | AC-2 | unit        |                              |
+| user action dispatches correct event  | AC-3 | integration |                              |
+| mobile layout renders correctly       | -    | unit        |                              |
+
 
 ## E2E Test Plan
-<!-- Write these BEFORE implementing. Every AC must have at least one E2E scenario.
-     E2E tests run against real stack (real browser, real API, real DB).
-     Format: Given [starting state] → When [user actions] → Then [observable outcomes]. -->
 
-| Scenario | AC | Steps (user actions) | Expected Outcome |
-|----------|----|----------------------|------------------|
-| Happy path: [main flow] | AC-1 | 1. Navigate to [URL]<br>2. [User action]<br>3. [User action] | [What user sees / URL / state] |
-| Error path: [fail scenario] | AC-2 | 1. Navigate to [URL]<br>2. [Action that triggers error] | [Error message / behavior] |
-| Auth guard: unauthenticated access | — | 1. Visit [protected URL] without login | Redirected to login, return URL preserved |
 
-<!-- Add one row per AC. Scenarios should cover happy path + key failure paths only.
-     Do NOT duplicate unit test coverage here — focus on full user journeys. -->
+
+
+| Scenario                           | AC   | Steps (user actions)                                   | Expected Outcome                          |
+| ---------------------------------- | ---- | ------------------------------------------------------ | ----------------------------------------- |
+| Happy path: [main flow]            | AC-1 | 1. Navigate to [URL] 2. [User action] 3. [User action] | [What user sees / URL / state]            |
+| Error path: [fail scenario]        | AC-2 | 1. Navigate to [URL] 2. [Action that triggers error]   | [Error message / behavior]                |
+| Auth guard: unauthenticated access | —    | 1. Visit [protected URL] without login                 | Redirected to login, return URL preserved |
+
+
+
 
 ## Fail Cases & Fail Flows
-<!-- For every user action that can fail: what the UI shows, what data is preserved, and how the user recovers. -->
+
+
 
 ### Fail Flow Diagram
-<!-- Map all failure paths for the main action(s) in this flow. -->
+
+
 
 ```mermaid
 flowchart TD
@@ -163,46 +243,67 @@ flowchart TD
     H -->|user retries| B
 ```
 
-### Fail Case Matrix
-<!-- One row per failure scenario. Every row must map to a TDD test case. -->
 
-| Action | Fail Scenario | UI Behavior | User Can | Input Preserved? |
-|--------|--------------|-------------|----------|-----------------|
-| Submit form | 400 validation | Inline errors per field | Fix and resubmit | Yes |
-| Submit form | 500 server error | Toast + retry button | Retry or cancel | Yes |
-| Submit form | Network timeout | Retry banner | Retry | Yes |
-| Load page | 404 not found | Empty state + CTA | Navigate away | N/A |
-| Load page | 500 error | Error page + refresh | Refresh | N/A |
+
+### Fail Case Matrix
+
+
+
+
+
+
+| Action      | Fail Scenario    | Presentation | Error Message Shown to User                                    | Recovery CTA     | Input Preserved? |
+| ----------- | ---------------- | ------------ | -------------------------------------------------------------- | ---------------- | ---------------- |
+| Submit form | 400 validation   | inline       | "Please check the highlighted fields."                         | Fix and resubmit | Yes              |
+| Submit form | 500 server error | toast        | "Something went wrong. Your changes are saved — try again."    | Retry            | Yes              |
+| Submit form | Network timeout  | toast        | "No internet connection. Check your connection and try again." | Retry            | Yes              |
+| Load page   | 404 not found    | page-level   | "This page doesn't exist."                                     | Go back / Home   | N/A              |
+| Load page   | 500 error        | page-level   | "Something went wrong on our end. Try refreshing."             | Refresh          | N/A              |
+
+
+**Presentation pattern guide:**
+
+- **toast** — non-blocking, auto-dismiss (4–5s), for background ops or minor errors
+- **inline** — field-level or section-level, stays until fixed, for validation
+- **modal** — blocking, requires user action, for destructive or unrecoverable errors
+- **page-level** — replaces content entirely, for fatal load failures
 
 ### Optimistic Update Rollback
-<!-- If this feature updates the UI before the API confirms, define rollback behavior. -->
+
+
 
 - **Optimistic update used:** yes / no
 - **Rollback trigger:** [what event causes rollback]
 - **Rollback behavior:** [what reverts, what the user sees, any toast/notification]
 
-_If no optimistic updates: write "None — all UI updates wait for API confirmation."_
+*If no optimistic updates: write "None — all UI updates wait for API confirmation."*
 
 ### Partial Success Handling
-<!-- For batch or multi-step operations: what if only some parts succeed? -->
+
+
 
 - **Scenario:** e.g. uploading 5 files — 3 succeed, 2 fail
 - **UI behavior:** show success count + failed items list
 - **User path:** retry failed items or cancel remaining
 
-_If no batch operations: write "None — this flow is single atomic operation."_
+*If no batch operations: write "None — this flow is single atomic operation."*
 
 ### Multi-step / Wizard Rollback
-<!-- If this flow has multiple steps: what happens when a later step fails? -->
 
-| Fails at | Returns to | State preserved | User sees |
-|----------|-----------|-----------------|-----------|
-| Step N | Step N | Steps 1–(N-1) | Error message + option to retry |
 
-_If single-step flow: write "None — single step, no rollback needed."_
+
+
+| Fails at | Returns to | State preserved | User sees                       |
+| -------- | ---------- | --------------- | ------------------------------- |
+| Step N   | Step N     | Steps 1–(N-1)   | Error message + option to retry |
+
+
+*If single-step flow: write "None — single step, no rollback needed."*
 
 ## Edge Cases & Error States
-<!-- Boundary conditions beyond the fail flows above. -->
+
+
+
 - Network timeout:
 - Empty list:
 - Unauthorized (401):
@@ -211,5 +312,29 @@ _If single-step flow: write "None — single step, no rollback needed."_
 - Concurrent edit (another user modified same data):
 
 ## Accessibility Notes
-<!-- Keyboard nav, focus management, ARIA labels, color contrast. -->
+
+
+
 -
+
+## Definition of Done (Design)
+
+**"Done" means this design is complete enough that implementation can start without guessing.**
+
+### Coverage
+- [ ] Every AC in the requirement has at least one E2E scenario in the E2E Test Plan
+- [ ] Every entry path in the Entry Paths table is handled in the Behavior Flow
+- [ ] Every API endpoint consumed has an error handling column filled in
+- [ ] Every fail scenario in the Fail Case Matrix has: presentation pattern + error copy + recovery CTA
+
+### Correctness
+- [ ] Error messages are user-friendly — no raw HTTP status codes or stack traces shown to users
+- [ ] All fail states are reachable and testable (not "TBD" or left blank)
+- [ ] Optimistic Update Rollback, Partial Success, and Multi-step Rollback sections are explicitly filled or marked "None"
+- [ ] Design matches Figma/mockup (if Design References are provided) — deviations are noted
+
+### Alignment
+- [ ] API contracts in this doc match what the BE design defines (or BE design is not yet written — flag misalignment after /be-design)
+- [ ] Routing & Navigation entries align with the main app router — no orphan routes
+- [ ] Analytics events match the Analytics & Tracking section in the requirement
+

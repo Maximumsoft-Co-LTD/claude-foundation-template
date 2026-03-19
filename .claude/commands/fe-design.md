@@ -32,7 +32,7 @@ Write a complete, implementation-ready design for every section:
 - **Design References** — copy Figma/mockup links from requirement; reference specific frames per screen.
 - **UI/UX Overview** — describe every screen, modal, or user flow this task introduces or changes.
 - **User Journey Map** — map the desired user journey (to-be state): step-by-step what the user does, sees, and feels. Define entry point and exit point of the flow.
-- **Behavior Mapping** — for each key interaction: what does the user do → what should the UI respond → what feeling should it create. Define the key behavioral goals (habits to reinforce, friction to remove).
+- **Behavior Mapping** — must cover three things: (1) **Entry paths** — every way a user can arrive at this flow (direct nav, deep-link, redirect, back-navigation) and what pre-loaded state each entry carries; missing an entry path = missing integration with the main system. (2) **Behavior flow diagram** — map every interaction including all fail states: what the UI shows, what the user feels, and how they recover. Every fail branch must end in a labeled node (not just "error"). (3) **Fail state summary table** — quick reference of every fail state, what the user sees, and whether they can recover.
 - **Routing & Navigation** — every new or changed route: path, component, auth required.
 - **Component Breakdown** — every component to create or modify: name, file path, type (new/modify), description.
 - **State & Data Flow** — show data path: `[API/Store] → [Container] → [Props] → [UI] → [Action] → [Dispatch]`.
@@ -45,7 +45,7 @@ Write a complete, implementation-ready design for every section:
 - **E2E Test Plan** — for EACH AC: at least 1 E2E scenario covering the full user journey (real browser → real API → real DB). Format: "Given [state] → When [user actions] → Then [observable outcome]." Written BEFORE any code.
 - **Fail Cases & Fail Flows** — for every user action that can fail:
   - Draw the fail flow diagram showing all failure paths and how the user recovers.
-  - Fill the Fail Case Matrix: fail scenario → UI behavior → what user can do → is input preserved.
+  - Fill the Fail Case Matrix: for each failure scenario define — presentation pattern (toast/inline/modal/page-level), exact error message copy shown to the user (safe, friendly, actionable), recovery CTA text and placement, whether input is preserved.
   - Define Optimistic Update Rollback if the feature updates UI before API confirmation.
   - Define Partial Success Handling if the flow has batch or multi-part operations.
   - Define Multi-step Rollback if the flow has a wizard or sequential steps.

@@ -70,7 +70,20 @@ flowchart LR
 | - | - | - | - |
 
 ## Definition of Done (Sprint Level)
-- [ ] All sub-tasks are `done`
-- [ ] All success metrics are instrumented and verified
-- [ ] Deployed to production
-- [ ] Sprint retro written
+
+**"Done" means the sprint delivered its stated goals — not just that tasks were closed.**
+
+### Completeness
+- [ ] All sub-tasks are `done` (each verified against their own task-level DoD)
+- [ ] Every in-scope item from the discovery doc is covered — nothing silently dropped
+
+### Correctness
+- [ ] All sprint Goals (listed above) are observably achieved — not assumed
+- [ ] Every Success Metric shows an actual result (number), not just "instrumented"
+- [ ] No P0 or P1 bugs open against this sprint's scope
+- [ ] Full regression suite passes — no existing feature broken by this sprint
+
+### Delivery
+- [ ] Deployed to production (or staging if prod deploy is gated)
+- [ ] Smoke-tested end-to-end in the deployed environment
+- [ ] Sprint retro written — includes what went well, what didn't, and follow-up actions
