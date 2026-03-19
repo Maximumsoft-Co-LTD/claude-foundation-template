@@ -142,10 +142,14 @@ docs/
 │   └── SP2/
 │       ├── SP2-T003/                   ← task number continues from SP1
 │       └── ...
-├── DISCOVERY-TEMPLATE.md
-├── SPRINT-OVERVIEW-TEMPLATE.md
-├── REQUIREMENT-TEMPLATE.md
-├── FRONTEND-DESIGN-TEMPLATE.md
-├── BACKEND-DESIGN-TEMPLATE.md
+├── templates/
+│   ├── DISCOVERY-TEMPLATE.md
+│   ├── SPRINT-OVERVIEW-TEMPLATE.md
+│   ├── REQUIREMENT-TEMPLATE.md
+│   ├── FRONTEND-DESIGN-TEMPLATE.md
+│   ├── BACKEND-DESIGN-TEMPLATE.md
+│   ├── ISSUE-TEMPLATE.md
+│   ├── RETRO-TASK-TEMPLATE.md
+│   └── RETRO-SPRINT-TEMPLATE.md
 └── BACKLOG.md
 ```

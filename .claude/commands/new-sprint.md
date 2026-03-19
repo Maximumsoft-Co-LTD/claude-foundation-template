@@ -22,7 +22,7 @@ Format: `[sprint-id] [epic description]`  — e.g. `SP2 Build user authenticatio
 ## Step 2 — Create the sprint directory and overview
 
 1. Create directory `docs/sprints/[sprint-id]/`.  (e.g. `docs/sprints/SP2/`)
-2. Create `docs/sprints/[sprint-id]/[sprint-id]-overview.md` from `docs/SPRINT-OVERVIEW-TEMPLATE.md`.
+2. Create `docs/sprints/[sprint-id]/[sprint-id]-overview.md` from `docs/templates/SPRINT-OVERVIEW-TEMPLATE.md`.
 3. Pre-fill:
    - Sprint ID, epic title (derived from description)
    - Start Date: today
@@ -71,11 +71,11 @@ Ask: "Does this breakdown look right? Each task should have an E2E scenario. You
 For each confirmed task:
 1. Create `docs/sprints/[sprint-id]/[task-id]/`
 2. Create 3 files from templates, replacing ALL placeholders:
-   - `[task-id]-requirement.md` from `docs/REQUIREMENT-TEMPLATE.md`
+   - `[task-id]-requirement.md` from `docs/templates/REQUIREMENT-TEMPLATE.md`
      - Pre-fill: Sprint = `[sprint-id]`, Status = `todo`
-   - `[task-id]-frontend.md` from `docs/FRONTEND-DESIGN-TEMPLATE.md`
+   - `[task-id]-frontend.md` from `docs/templates/FRONTEND-DESIGN-TEMPLATE.md`
      - Pre-fill: Requirement link = `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`
-   - `[task-id]-backend.md` from `docs/BACKEND-DESIGN-TEMPLATE.md`
+   - `[task-id]-backend.md` from `docs/templates/BACKEND-DESIGN-TEMPLATE.md`
      - Pre-fill: Requirement link = `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`
 
 ---

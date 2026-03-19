@@ -9,7 +9,7 @@ Format: `[disc-id] [name]`  — e.g. `disc-001 user-authentication`
 
 ## Step 1 — Create the discovery document immediately
 
-Before asking anything, create `docs/discovery/[disc-id]-[name].md` from `docs/DISCOVERY-TEMPLATE.md` with all sections blank (filled with `TBD`).
+Before asking anything, create `docs/discovery/[disc-id]-[name].md` from `docs/templates/DISCOVERY-TEMPLATE.md` with all sections blank (filled with `TBD`).
 
 ---
 

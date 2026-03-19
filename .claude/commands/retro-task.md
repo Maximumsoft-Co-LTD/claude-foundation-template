@@ -32,7 +32,7 @@ Run: `git log --oneline` and identify commits for this task.
 
 ## Step 3 — Write the retrospective
 
-Save to `docs/sprints/[sprint-id]/[task-id]/[task-id]-retro.md`:
+Save to `docs/sprints/[sprint-id]/[task-id]/[task-id]-retro.md` using `docs/templates/RETRO-TASK-TEMPLATE.md` as the structure:
 
 ```markdown
 # [task-id] — [Task Title] — Retrospective

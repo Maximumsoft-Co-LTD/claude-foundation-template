@@ -44,7 +44,7 @@ From `[sprint-id]-overview.md`:
 
 ## Step 4 — Write the sprint retrospective
 
-Save to `docs/sprints/[sprint-id]/[sprint-id]-retro.md`:
+Save to `docs/sprints/[sprint-id]/[sprint-id]-retro.md` using `docs/templates/RETRO-SPRINT-TEMPLATE.md` as the structure:
 
 ```markdown
 # [sprint-id] — Sprint Retrospective

@@ -21,7 +21,7 @@ Validate:
 
 Read current draft:
 3. `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md`
-4. `docs/FRONTEND-DESIGN-TEMPLATE.md` — ensure all sections are covered
+4. `docs/templates/FRONTEND-DESIGN-TEMPLATE.md` — ensure all sections are covered
 
 ---
 

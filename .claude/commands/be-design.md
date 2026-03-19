@@ -21,7 +21,7 @@ Validate:
 
 Read current draft:
 4. `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md`
-5. `docs/BACKEND-DESIGN-TEMPLATE.md` — ensure all sections are covered
+5. `docs/templates/BACKEND-DESIGN-TEMPLATE.md` — ensure all sections are covered
 
 ---
 

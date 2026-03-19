@@ -63,30 +63,41 @@ Does this bug affect other tasks in the sprint?
 
 Append to `docs/sprints/[sprint-id]/[task-id]/[task-id]-issues.md` (create if it doesn't exist).
 
-If creating the file for the first time, start it with:
+If creating the file for the first time, use `docs/templates/ISSUE-TEMPLATE.md` as the starting structure (replace `[task-id]` and `[Task Title]` in the header, then fill in the first issue section).
 
-```markdown
-# [task-id] — [Task Title] — Issues
-```
-
-Then append:
+If the file already exists, append a new section using this format:
 
 ```markdown
 ## Issue: [short title]
 **Date:** [today]
 **Severity:** critical / major / minor
-**Description:** [what went wrong]
 
-**Steps to Reproduce:**
+### Description
+[what went wrong]
+
+### Steps to Reproduce
 1.
 2.
 
-**Expected:** [from design/AC]
-**Actual:** [what happened]
-**Root Cause:** [why]
-**Fix:** [what was changed and why]
-**Test Added:** [test file:line — or "none"]
-**Blocks:** [task-id list — or "none"]
+### Expected
+[from design/AC]
+
+### Actual
+[what happened]
+
+### Root Cause
+[why]
+
+### Fix
+[what was changed and why]
+
+### Test Added
+[test file:line — or "none"]
+
+### Blocks
+[task-id list — or "none"]
+
+---
 ```
 
 ---
