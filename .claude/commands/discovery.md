@@ -13,13 +13,14 @@ Before asking anything, create `docs/discovery/[disc-id]-[name].md` from `docs/t
 
 ---
 
-## Step 2 — Ask all 8 questions at once in a single message
+## Step 2 — Infer what's already known, then ask only about the gaps
 
-After creating the file, say:
-> "Created `docs/discovery/[disc-id]-[name].md`. Please answer the following questions — skip anything you don't know yet, I'll mark those as TBD:"
+Analyze the arguments and any description the user already provided. For each of the 8 topics below, decide:
+- **Already answered** → note it as understood, do not ask.
+- **Partially answered** → ask only the missing part.
+- **Unknown** → include in the questions list.
 
-Then list all 8 questions together in one message:
-
+The 8 topics to evaluate:
 1. **Problem** — What problem are we solving? Who experiences it, how often, and what happens when it's not solved?
 2. **Users & Stakeholders** — Who are the primary users affected? Any other teams, systems, or stakeholders involved?
 3. **Goals & Success** — What does success look like when this ships? How will we measure it?
@@ -28,6 +29,11 @@ Then list all 8 questions together in one message:
 6. **Approaches** — What solutions have been considered? What are the trade-offs? Even rough ideas count.
 7. **Unknowns & Open Questions** — What do we NOT know yet that could affect the solution? What needs a decision from someone else?
 8. **Risks & Scope** — What are the biggest risks? And roughly — is this a 1-sprint feature, multi-sprint, or larger?
+
+After creating the file, say:
+> "Created `docs/discovery/[disc-id]-[name].md`. Here's what I've understood so far — please fill in only the gaps:"
+
+Then show a brief summary of what's already inferred, followed by **only the unanswered questions** in one message. If everything is already clear, skip to Step 3 immediately.
 
 Wait for the user's answers before proceeding.
 

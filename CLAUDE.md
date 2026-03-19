@@ -51,11 +51,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Two levels: **Sprint (Epic)** → **Tasks (Sub-tasks)**
 
+**Single task (sequential):**
 ```
 /discovery → /new-sprint → /fe-design → /be-design → /implement
     → /issue (loop) → /code-review → /testing
     → /retro-task → /git-commit → /next-task (→ repeat per task)
     → /retro-sprint (once ALL tasks in sprint are done)
+```
+
+**Multiple tasks in parallel:**
+```
+/discovery → /new-sprint → /run-tasks [task-id] [task-id] ...
+    → /git-commit (per task) → /retro-sprint
 ```
 
 ### Commands
@@ -64,6 +71,7 @@ Two levels: **Sprint (Epic)** → **Tasks (Sub-tasks)**
 |---------|------|-------------|
 | `/discovery` | `[disc-id] [name]` | Before planning anything — understand the problem first |
 | `/new-sprint` | `[sprint-id] [epic description]` | Turn a discovered epic into a sprint with scaffolded sub-tasks |
+| `/run-tasks` | `[task-id] [task-id] ...` | Run multiple tasks in parallel through the full flow (fe-design → retro-task) |
 | `/fe-design` | `[task-id]` | Write FE design + TDD test plan before touching any code |
 | `/be-design` | `[task-id]` | Write BE design + TDD test plan before touching any code |
 | `/implement` | `[task-id]` | Write failing tests then implement following FE + BE design docs |
