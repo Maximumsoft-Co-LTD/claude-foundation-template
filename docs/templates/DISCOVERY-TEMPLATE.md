@@ -58,12 +58,30 @@ journey
 
 ---
 
-## 5. Context & Background
+## 5. Future User Journey (To-Be)
+<!-- Map how users will experience the solved flow. Score 1–5: 1=frustrated, 5=delighted. -->
+
+```mermaid
+journey
+    title Future Journey (To-Be) — [Problem Area]
+    section New Flow
+        User encounters need     : 4 : User
+        System guides user       : 5 : User
+        Task completes smoothly  : 5 : User
+        Result is reliable       : 5 : User
+```
+
+**Improvements over As-Is:**
+-
+
+---
+
+## 6. Context & Background
 <!-- Relevant history, existing systems, previous attempts, related decisions. -->
 
 ---
 
-## 6. Constraints
+## 7. Constraints
 <!-- Hard limits that shape the solution space. -->
 
 - **Technical:** (stack, existing systems, APIs)
@@ -73,7 +91,7 @@ journey
 
 ---
 
-## 7. Proposed Approaches
+## 8. Proposed Approaches
 <!-- At least 2 options considered. More options = better decision. -->
 
 ### Option A: [Name]
@@ -90,7 +108,7 @@ journey
 
 ---
 
-## 8. Decision
+## 9. Decision
 <!-- Which approach was chosen, why, and who approved it. -->
 
 **Chosen approach:**
@@ -100,7 +118,7 @@ journey
 
 ---
 
-## 9. Unknowns & Open Questions
+## 10. Unknowns & Open Questions
 <!-- What do we not know yet? Each item must be resolved before sprint planning. -->
 
 - [ ] Q1:
@@ -108,14 +126,14 @@ journey
 
 ---
 
-## 10. Risks
+## 11. Risks
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|------------|
 | - | high / med / low | high / med / low | - |
 
 ---
 
-## 11. Scope Estimate
+## 12. Scope Estimate
 <!-- Rough sizing to help sprint planning. Not a commitment. -->
 
 - **Estimated sprints:** X
@@ -125,7 +143,7 @@ journey
 
 ---
 
-## 12. Next Steps
+## 13. Next Steps
 <!-- What must happen before this is ready for /new-sprint? -->
 
 - [ ] Resolve all open questions
