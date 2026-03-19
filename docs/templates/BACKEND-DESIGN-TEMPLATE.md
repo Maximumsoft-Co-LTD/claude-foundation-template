@@ -285,6 +285,28 @@ _If no caching: write "None — this task does not introduce caching."_
 
 ---
 
+## Implementation Plan
+<!-- Ordered step-by-step plan. Each step references the design section it implements.
+     This is the blueprint /implement follows — do NOT deviate during implementation. -->
+
+| # | Phase | File path | Action | What to implement | References |
+|---|-------|-----------|--------|-------------------|------------|
+| 1 | Migrations | `db/...` | create | ... | Database Migrations |
+| 2 | Models | `src/...` | create / modify | ... | Data Models |
+| 3 | Repository | `src/...` | create / modify | ... | Data Models, Business Logic |
+| 4 | Service | `src/...` | create / modify | ... | Business Logic, Error Handling |
+| 5 | Controller | `src/...` | create / modify | ... | API Endpoints |
+| 6 | Middleware | `src/...` | create / modify | ... | Input Validation, Authorization |
+| 7 | Events | `src/...` | create / modify | ... | Event Publishing |
+| 8 | Caching | `src/...` | create / modify | ... | Caching Strategy |
+| 9 | Observability | `src/...` | create / modify | ... | Logging & Observability |
+
+<!-- Phases: (1) migrations (2) models (3) repository (4) service (5) controller/routes
+     (6) middleware/validation (7) events (8) caching (9) logging/observability.
+     Omit phases not relevant to this task. -->
+
+---
+
 ## TDD Test Plan
 <!-- Write these BEFORE implementing. Integration tests use a real DB — no mocks. -->
 

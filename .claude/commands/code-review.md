@@ -16,6 +16,11 @@ Read:
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md` — FE spec and TDD test plan
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md` — BE spec and TDD test plan
 
+Validate before proceeding:
+- If `[task-id]-requirement.md` is missing → stop: "Cannot review without a requirement doc. Run `/requirement [task-id]` first."
+- If `[task-id]-requirement.md` exists but Acceptance Criteria are all empty or unchecked placeholders → stop: "Requirement doc has no ACs. Fill them in before reviewing (run `/requirement [task-id]`)."
+- If either design doc is missing → stop: "Cannot review without both design docs. Run `/fe-design` and `/be-design` first."
+
 Run: `git diff main...HEAD` to identify all changed files.
 
 ---

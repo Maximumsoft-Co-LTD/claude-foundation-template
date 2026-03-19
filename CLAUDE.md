@@ -53,7 +53,7 @@ Two levels: **Sprint (Epic)** → **Tasks (Sub-tasks)**
 
 **Single task (sequential):**
 ```
-/discovery → /new-sprint → /fe-design → /be-design → /implement
+/discovery → /new-sprint → /requirement → /fe-design → /be-design → /implement
     → /issue (loop) → /code-review → /testing
     → /retro-task → /git-commit → /next-task (→ repeat per task)
     → /retro-sprint (once ALL tasks in sprint are done)
@@ -71,9 +71,10 @@ Two levels: **Sprint (Epic)** → **Tasks (Sub-tasks)**
 |---------|------|-------------|
 | `/discovery` | `[disc-id] [name]` | Before planning anything — understand the problem first |
 | `/new-sprint` | `[sprint-id] [epic description]` | Turn a discovered epic into a sprint with scaffolded sub-tasks |
+| `/requirement` | `[task-id]` | Draft ACs + requirement doc for a task before design begins |
 | `/run-tasks` | `[task-id] [task-id] ...` | Run multiple tasks in parallel through the full flow (fe-design → retro-task) |
-| `/fe-design` | `[task-id]` | Write FE design + TDD test plan before touching any code |
-| `/be-design` | `[task-id]` | Write BE design + TDD test plan before touching any code |
+| `/fe-design` | `[task-id]` | Write FE design + implementation plan + TDD test plan before touching any code |
+| `/be-design` | `[task-id]` | Write BE design + implementation plan + TDD test plan before touching any code |
 | `/implement` | `[task-id]` | Write failing tests then implement following FE + BE design docs |
 | `/issue` | `[task-id] [description]` | Write failing test → fix → log during implementation |
 | `/code-review` | `[task-id]` | Review code against design docs and all ACs |
@@ -96,7 +97,7 @@ discovery → backlog → todo → in-progress → review → testing → done
 | `discovery` | `/discovery` |
 | `backlog` | `/discovery` (when open questions resolved) |
 | `todo` | `/new-sprint` |
-| `in-progress` | `/next-task`, `/fe-design`, `/be-design`, `/implement` |
+| `in-progress` | `/requirement`, `/next-task`, `/fe-design`, `/be-design`, `/implement` |
 | `blocked` | `/issue` (when impact blocks other tasks) |
 | `review` | `/code-review` |
 | `testing` | `/testing` |
@@ -140,7 +141,7 @@ docs/
 │       ├── SP1-overview.md             ← /new-sprint output (epic doc)
 │       ├── SP1-retro.md                ← /retro-sprint output
 │       ├── SP1-T001/
-│       │   ├── SP1-T001-requirement.md ← fill manually after /new-sprint
+│       │   ├── SP1-T001-requirement.md ← /requirement output
 │       │   ├── SP1-T001-frontend.md    ← /fe-design output
 │       │   ├── SP1-T001-backend.md     ← /be-design output
 │       │   ├── SP1-T001-issues.md      ← /issue output (auto-created)

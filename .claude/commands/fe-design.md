@@ -1,5 +1,5 @@
 # /fe-design
-Workflow position: **/next-task → START → /be-design**
+Workflow position: **/requirement → START → /be-design**
 
 Write the complete frontend design and TDD test plan for a task. Run this BEFORE writing any code.
 Arguments: $ARGUMENTS
@@ -41,6 +41,11 @@ Write a complete, implementation-ready design for every section:
 - **Responsive Behavior** — layout changes at mobile (<768px), tablet (768–1024px), desktop (>1024px).
 - **Analytics Events** — every event to fire, mapped to Analytics section in requirement.
 - **Performance Considerations** — lazy loading, memoization, code splitting, image optimization.
+- **Implementation Plan** — ordered, step-by-step plan for how to implement this design. Each step must reference the design section it implements. Rules:
+  - List steps in dependency order (what must be done before what).
+  - Each step: `[N]. [File path] — [action: create/modify] — [what to implement] — [references: design section]`
+  - Group by logical phase: (1) routing/scaffolding, (2) components, (3) state/data flow, (4) API integration, (5) loading/error states, (6) analytics, (7) accessibility/responsive. Not all phases apply to every task — omit phases that are not relevant.
+  - This plan is the blueprint `/implement` follows. Do NOT deviate from it during implementation.
 - **TDD Test Plan** — for EACH AC: at least 1 unit test + 1 integration test. Written BEFORE any code.
 - **E2E Test Plan** — for EACH AC: at least 1 E2E scenario covering the full user journey (real browser → real API → real DB). Format: "Given [state] → When [user actions] → Then [observable outcome]." Written BEFORE any code.
 - **Fail Cases & Fail Flows** — for every user action that can fail:

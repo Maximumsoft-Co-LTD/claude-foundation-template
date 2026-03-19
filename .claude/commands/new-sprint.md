@@ -1,5 +1,5 @@
 # /new-sprint
-Workflow position: **/discovery → START → /fe-design**
+Workflow position: **/discovery → START → /requirement**
 
 Create a new sprint from an epic description and scaffold all sub-tasks.
 Arguments: $ARGUMENTS
@@ -15,7 +15,9 @@ Format: `[sprint-id] [epic description]`  — e.g. `SP2 Build user authenticatio
    - If `[sprint-id]` already exists → stop and warn the user.
    - Scan ALL task IDs across every sprint to find the highest `T[NNN]` number. The next task starts at that number + 1.
    - If no tasks exist yet → start from `T001`.
-3. Check `docs/discovery/` for any discovery doc related to this epic. If found, read it for context (Problem Statement, chosen approach, scope estimate, constraints).
+3. Check `docs/discovery/` for any discovery doc related to this epic.
+   - If **NO discovery doc found** → warn: "⚠️ No discovery doc found for this epic. Running `/discovery` first gives better task coverage and surfaces constraints early. Continue without it? (y/n)" — wait for response before proceeding.
+   - If **discovery doc found** → read it for context (Problem Statement, chosen approach, scope estimate, constraints). Then check for unresolved open questions (any item not marked resolved/answered). If any exist → warn: "⚠️ Discovery doc has unresolved open questions:" and list each one. Then ask: "These may affect task scope. Continue anyway? (y/n)" — wait for response before proceeding.
 
 ---
 
@@ -96,18 +98,7 @@ After showing the coverage summary, ask: "Does this breakdown look right? You ca
 
 ---
 
-## Step 4 — Scaffold (after user confirms)
-
-For each confirmed task:
-1. Create `docs/sprints/[sprint-id]/[task-id]/`
-2. Create 1 file from template, replacing ALL placeholders:
-   - `[task-id]-requirement.md` from `docs/templates/REQUIREMENT-TEMPLATE.md`
-     - Pre-fill: Sprint = `[sprint-id]`, Status = `todo`
-   - (Frontend and backend design docs are created later by `/fe-design` and `/be-design`)
-
----
-
-## Step 5 — Update docs
+## Step 4 — Update docs (after user confirms)
 
 1. Fill the Sub-tasks table in `[sprint-id]-overview.md` with the confirmed list.
 2. Add a new sprint section to `docs/BACKLOG.md`:
@@ -122,16 +113,16 @@ For each confirmed task:
 | SP2-T006 | ... | SP2-T005 | `todo` | — | — |
 ```
 
+No per-task files are created here. `/fe-design` and `/be-design` create their own docs when the task begins.
+
 ---
 
-## Step 6 — Output
+## Step 5 — Output
 
 ```
 ✓ Sprint created: docs/sprints/[sprint-id]/[sprint-id]-overview.md
-✓ [N] sub-tasks scaffolded
+✓ BACKLOG.md updated with [N] tasks
 
 Next steps:
-  1. Fill in each [task-id]-requirement.md (Problem Statement, ACs, Success Metrics)
-  2. Run /fe-design [task-id] and /be-design [task-id] to write design docs
-  3. Run /next-task to begin working through tasks in order
+  Run /next-task to pick up the first task and begin /fe-design or /be-design
 ```

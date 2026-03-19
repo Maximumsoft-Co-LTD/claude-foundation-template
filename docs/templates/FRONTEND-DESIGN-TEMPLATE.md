@@ -192,7 +192,25 @@ flowchart LR
 
 
 
-- 
+-
+
+## Implementation Plan
+<!-- Ordered step-by-step plan. Each step references the design section it implements.
+     This is the blueprint /implement follows — do NOT deviate during implementation. -->
+
+| # | Phase | File path | Action | What to implement | References |
+|---|-------|-----------|--------|-------------------|------------|
+| 1 | Routing | `src/...` | create / modify | ... | Routing & Navigation |
+| 2 | Components | `src/...` | create / modify | ... | Component Breakdown |
+| 3 | State | `src/...` | create / modify | ... | State & Data Flow |
+| 4 | API | `src/...` | create / modify | ... | API Contracts Consumed |
+| 5 | Loading/Error | `src/...` | create / modify | ... | Loading & Skeleton States, Fail Cases |
+| 6 | Analytics | `src/...` | create / modify | ... | Analytics Events |
+| 7 | A11y/Responsive | `src/...` | create / modify | ... | Accessibility, Responsive Behavior |
+
+<!-- Phases: (1) routing/scaffolding (2) components (3) state/data flow (4) API integration
+     (5) loading/error states (6) analytics (7) accessibility/responsive.
+     Omit phases not relevant to this task. -->
 
 ## TDD Test Plan
 

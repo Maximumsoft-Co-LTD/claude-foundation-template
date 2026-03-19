@@ -42,23 +42,23 @@
 
 ```mermaid
 flowchart LR
-    t001[task-001\nTitle] --> t002[task-002\nTitle]
-    t001 --> t003[task-003\nTitle]
-    t002 --> t004[task-004\nTitle]
-    t003 --> t004
+    T001[SP-T001\nTitle] --> T002[SP-T002\nTitle]
+    T001 --> T003[SP-T003\nTitle]
+    T002 --> T004[SP-T004\nTitle]
+    T003 --> T004
 
-    style t001 fill:#f9f,stroke:#333
-    style t002 fill:#bbf,stroke:#333
-    style t003 fill:#bbf,stroke:#333
-    style t004 fill:#bfb,stroke:#333
+    style T001 fill:#f9f,stroke:#333
+    style T002 fill:#bbf,stroke:#333
+    style T003 fill:#bbf,stroke:#333
+    style T004 fill:#bfb,stroke:#333
 ```
 
-| Task ID | Title | Depends On | Status |
-|---------|-------|------------|--------|
-| task-001 | - | — | `todo` |
-| task-002 | - | task-001 | `todo` |
-| task-003 | - | task-001 | `todo` |
-| task-004 | - | task-002, task-003 | `todo` |
+| Task ID | Title | Type | E2E Scenario | Depends On | Est. | Status |
+|---------|-------|------|--------------|------------|------|--------|
+| SP[N]-T001 | - | feat / fix / chore | [brief E2E scenario] | — | Xh | `todo` |
+| SP[N]-T002 | - | feat / fix / chore | [brief E2E scenario] | SP[N]-T001 | Xh | `todo` |
+| SP[N]-T003 | - | feat / fix / chore | [brief E2E scenario] | SP[N]-T001 | Xh | `todo` |
+| SP[N]-T004 | - | feat / fix / chore | [brief E2E scenario] | SP[N]-T002, SP[N]-T003 | Xh | `todo` |
 
 ## Technical Constraints
 <!-- Architectural decisions, existing system limitations, or non-negotiables. -->

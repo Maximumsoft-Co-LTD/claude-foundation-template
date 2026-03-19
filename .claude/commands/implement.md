@@ -18,6 +18,8 @@ Read all files **in parallel**:
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md` — BE design + TDD test plan
 
 Validate:
+- If `[task-id]-requirement.md` is missing → stop: "Run `/requirement [task-id]` first."
+- If `[task-id]-requirement.md` exists but all Acceptance Criteria are empty or unchecked placeholders → stop: "Fill in the ACs in `[task-id]-requirement.md` first (run `/requirement [task-id]`)."
 - If either design doc is incomplete or missing → stop: "Run `/fe-design` and `/be-design` first."
 - Collect ALL tests from both TDD Test Plans.
 

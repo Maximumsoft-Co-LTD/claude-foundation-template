@@ -43,6 +43,11 @@ Write a complete, implementation-ready design for every section:
 - **Environment Variables** — every new env var: name, description, required, default.
 - **Caching Strategy** — data cached, cache key pattern, TTL, invalidation trigger. Write "None" if not applicable.
 - **Database Migrations** — up SQL and down (rollback) SQL for every schema change.
+- **Implementation Plan** — ordered, step-by-step plan for how to implement this design. Each step must reference the design section it implements. Rules:
+  - List steps in dependency order (what must be done before what).
+  - Each step: `[N]. [File path] — [action: create/modify] — [what to implement] — [references: design section]`
+  - Group by logical phase: (1) migrations, (2) data models, (3) repository layer, (4) service layer, (5) controller/routes, (6) middleware/validation, (7) event publishing, (8) caching, (9) logging/observability. Not all phases apply to every task — omit phases that are not relevant.
+  - This plan is the blueprint `/implement` follows. Do NOT deviate from it during implementation.
 - **TDD Test Plan** — for EACH AC: at least 1 unit + 1 integration test. Include tests for 401, 403, 429, validation rules, and event publishing. Integration tests use a real DB. Written BEFORE any code.
 - **External Dependencies** — services called, purpose, failure behavior, timeout.
 - **Performance & Scalability Notes** — data volume, N+1 risks, index strategy, rate limiting, background jobs.

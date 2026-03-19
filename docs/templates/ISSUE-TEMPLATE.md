@@ -8,7 +8,7 @@
 
 ---
 
-## Issue 1: [short title]
+## Issue: [short title]
 
 **Date:** YYYY-MM-DD
 **Severity:** critical / major / minor
@@ -42,31 +42,5 @@
 
 ### Blocks
 <!-- [task-id] list — or "none" -->
-
----
-
-## Issue 2: [short title]
-
-**Date:** YYYY-MM-DD
-**Severity:** critical / major / minor
-
-### Description
-
-### Steps to Reproduce
-1.
-2.
-3.
-
-### Expected
-
-### Actual
-
-### Root Cause
-
-### Fix
-
-### Test Added
-
-### Blocks
 
 ---
