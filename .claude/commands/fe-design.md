@@ -42,7 +42,14 @@ Write a complete, implementation-ready design for every section:
 - **Analytics Events** — every event to fire, mapped to Analytics section in requirement.
 - **Performance Considerations** — lazy loading, memoization, code splitting, image optimization.
 - **TDD Test Plan** — for EACH AC: at least 1 unit test + 1 integration test. Written BEFORE any code.
-- **Edge Cases & Error States** — network timeout, 401, 500, empty list, boundary values.
+- **E2E Test Plan** — for EACH AC: at least 1 E2E scenario covering the full user journey (real browser → real API → real DB). Format: "Given [state] → When [user actions] → Then [observable outcome]." Written BEFORE any code.
+- **Fail Cases & Fail Flows** — for every user action that can fail:
+  - Draw the fail flow diagram showing all failure paths and how the user recovers.
+  - Fill the Fail Case Matrix: fail scenario → UI behavior → what user can do → is input preserved.
+  - Define Optimistic Update Rollback if the feature updates UI before API confirmation.
+  - Define Partial Success Handling if the flow has batch or multi-part operations.
+  - Define Multi-step Rollback if the flow has a wizard or sequential steps.
+- **Edge Cases & Error States** — network timeout, 401, 500, empty list, session expiry, concurrent edits.
 - **Accessibility Notes** — keyboard nav, focus management, ARIA labels, color contrast.
 
 ---
@@ -56,12 +63,15 @@ Write a complete, implementation-ready design for every section:
 
 ## Step 4 — Output
 
-Print the TDD Test Plan table, then:
+Print both test plan tables, then:
 ```
 ✓ FE design saved: docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md
 
 TDD Test Plan — write these failing tests BEFORE implementing:
-[print the test plan table]
+[print the TDD test plan table]
+
+E2E Test Plan — write these E2E scenarios BEFORE implementing:
+[print the E2E test plan table]
 
 Next step: /be-design [task-id]
 ```

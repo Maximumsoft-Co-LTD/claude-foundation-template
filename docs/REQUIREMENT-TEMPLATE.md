@@ -21,10 +21,12 @@
 - As a __, I want __, so that __.
 
 ## Acceptance Criteria
-<!-- Each AC must be specific, testable, and directly map to TDD test cases. -->
-- [ ] AC-1:
-- [ ] AC-2:
-- [ ] AC-3:
+<!-- Each AC must be specific, testable, and user-visible (observable from the browser/client).
+     Format: "Given [context], when [user action], then [observable outcome]."
+     Every AC must map to at least one E2E test scenario. -->
+- [ ] AC-1: Given __, when __, then __.
+- [ ] AC-2: Given __, when __, then __.
+- [ ] AC-3: Given __, when __, then __.
 
 ## Success Metrics
 <!-- How do we know this task succeeded in production? -->
@@ -53,7 +55,8 @@
 - [ ] All acceptance criteria pass
 - [ ] Success metrics are instrumented
 - [ ] Unit tests written and green
-- [ ] Integration tests written and green
+- [ ] Integration tests written and green (real DB / real services — no mocks)
+- [ ] E2E tests written and green — one scenario per AC
 - [ ] Code reviewed and approved
-- [ ] Deployed to staging and smoke-tested
+- [ ] Deployed to staging and smoke-tested end-to-end
 - [ ] BACKLOG.md updated to `done`

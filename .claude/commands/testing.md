@@ -13,7 +13,7 @@ Format: `[task-id]`  — e.g. `SP1-T002`
 
 Read:
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — ACs and success metrics
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md` — TDD Test Plan table
+- `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md` — TDD Test Plan table + E2E Test Plan table
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md` — TDD Test Plan table
 
 ---
@@ -30,8 +30,8 @@ If environment is not ready → stop and tell the user what is missing.
 
 ## Step 3 — Cross-check test coverage
 
-For every row in both TDD Test Plan tables, verify a corresponding test case exists in the codebase.
-List any **missing tests** — these are gaps that must be filled.
+For every row in the TDD Test Plan tables (FE + BE) and the E2E Test Plan table, verify a corresponding test case exists in the codebase.
+List any **missing tests** — these are gaps that must be filled before proceeding.
 
 ---
 
@@ -56,10 +56,18 @@ For each **failing test**:
 
 ---
 
-## Step 6 — Check E2E scope
+## Step 6 — Run and verify E2E tests
 
-Does this task change a critical user flow?
-- If yes → note whether an E2E test exists or is needed. Create it or log as a follow-up issue.
+E2E tests are **mandatory** for every non-infra task. They are not optional.
+
+1. Read the **E2E Test Plan** table in `[task-id]-frontend.md`.
+2. Verify every row in that table has a corresponding E2E test in the codebase.
+3. Run the E2E suite against the test/staging environment (real browser, real API, real DB).
+4. For each failing E2E test:
+   - Do NOT skip or comment out.
+   - Fix the code, then re-run.
+   - Non-trivial fix → run `/issue [task-id] [description]`.
+5. If an AC has no E2E scenario at all → **block the task** and write the missing test before continuing.
 
 ---
 
@@ -71,13 +79,14 @@ Test Results: [task-id]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Unit tests       : X passed / Y failed / Z skipped
 Integration tests: X passed / Y failed / Z skipped
+E2E tests        : X passed / Y failed / Z skipped
 Coverage         : X% (if available)
 
 AC coverage:
-  ✓ AC-1: covered
-  ✗ AC-2: no test found  ← gap
+  ✓ AC-1: unit ✓  integration ✓  e2e ✓
+  ✗ AC-2: unit ✓  integration ✓  e2e ✗ ← missing E2E scenario
 
-Missing from TDD Test Plan:
+Missing from TDD / E2E Test Plan:
   - [test case not yet implemented]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```

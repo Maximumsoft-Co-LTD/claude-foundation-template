@@ -36,7 +36,12 @@ Format: `[sprint-id] [epic description]`  — e.g. `SP2 Build user authenticatio
 
 Analyze the epic and propose a breakdown. Rules:
 - Each sub-task is completable by one person in 1–3 days.
-- Separate FE-only, BE-only, and fullstack concerns.
+- **Each task must be a vertical slice** — it delivers a complete user-visible outcome (FE + BE together). A task that is only "build the API" or only "build the UI" is not a valid task on its own, because it cannot be E2E tested.
+  - ✅ "User can log in and see their dashboard" — has FE, BE, and is E2E testable
+  - ❌ "Build login API endpoint" — BE only, no user-visible outcome
+  - ❌ "Build login form UI" — FE only, cannot run E2E without backend
+  - Exception: tasks that are purely infrastructure/setup (e.g. DB migrations, CI pipelines) with no user-facing behavior — mark as `infra` type and note they require integration tests instead of E2E.
+- Every non-infra task must have a clear user story that describes the E2E scenario.
 - Identify dependencies (which tasks must be done first).
 - Propose 3–8 tasks depending on epic size.
 - Order tasks so dependencies are respected.
@@ -50,14 +55,14 @@ Present the breakdown:
 Proposed sub-tasks for [sprint-id] — [epic title]:
 (Global task counter: last used T[NNN], starting from T[NNN+1])
 
-| Task ID         | Title                  | Type      | Depends On      | Est. |
-|-----------------|------------------------|-----------|-----------------|------|
-| SP2-T005     |                        | backend   | —               | 1d   |
-| SP2-T006     |                        | frontend  | SP2-T005     | 2d   |
-| SP2-T007     |                        | fullstack | SP2-T005     | 2d   |
+| Task ID     | Title                               | Type      | E2E Scenario (one sentence)              | Depends On  | Est. |
+|-------------|-------------------------------------|-----------|------------------------------------------|-------------|------|
+| SP2-T005    | User can register an account        | fullstack | User fills form → sees welcome screen    | —           | 2d   |
+| SP2-T006    | User can log in and access dashboard| fullstack | User logs in → lands on dashboard        | SP2-T005    | 2d   |
+| SP2-T007    | Admin can manage user roles         | fullstack | Admin changes role → user sees new perms | SP2-T006    | 2d   |
 ```
 
-Ask: "Does this breakdown look right? You can rename tasks, add/remove rows, or say 'confirm' to scaffold all."
+Ask: "Does this breakdown look right? Each task should have an E2E scenario. You can rename tasks, add/remove rows, or say 'confirm' to scaffold all."
 
 ---
 
