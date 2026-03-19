@@ -16,4 +16,4 @@ type: feedback
 
 **Why:** Previously "implement" was just a prose instruction in the `/be-design` output — not a proper command. Users need a real `/implement` command to trigger the implementation phase.
 
-**How to apply:** Always include `/implement [sprint-id] [task-id]` as the next step after `/be-design` completes.
+**How to apply:** Always include `/implement [task-id]` as the next step after `/be-design` completes.

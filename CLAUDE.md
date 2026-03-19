@@ -64,16 +64,16 @@ Two levels: **Sprint (Epic)** → **Tasks (Sub-tasks)**
 |---------|------|-------------|
 | `/discovery` | `[disc-id] [name]` | Before planning anything — understand the problem first |
 | `/new-sprint` | `[sprint-id] [epic description]` | Turn a discovered epic into a sprint with scaffolded sub-tasks |
-| `/fe-design` | `[sprint-id] [task-id]` | Write FE design + TDD test plan before touching any code |
-| `/be-design` | `[sprint-id] [task-id]` | Write BE design + TDD test plan before touching any code |
-| `/implement` | `[sprint-id] [task-id]` | Write failing tests then implement following FE + BE design docs |
-| `/issue` | `[sprint-id] [task-id] [description]` | Write failing test → fix → log during implementation |
-| `/code-review` | `[sprint-id] [task-id]` | Review code against design docs and all ACs |
-| `/testing` | `[sprint-id] [task-id]` | Run full suite, cross-check every AC has a test |
-| `/retro-task` | `[sprint-id] [task-id]` | Write retrospective for one task, mark it done |
+| `/fe-design` | `[task-id]` | Write FE design + TDD test plan before touching any code |
+| `/be-design` | `[task-id]` | Write BE design + TDD test plan before touching any code |
+| `/implement` | `[task-id]` | Write failing tests then implement following FE + BE design docs |
+| `/issue` | `[task-id] [description]` | Write failing test → fix → log during implementation |
+| `/code-review` | `[task-id]` | Review code against design docs and all ACs |
+| `/testing` | `[task-id]` | Run full suite, cross-check every AC has a test |
+| `/retro-task` | `[task-id]` | Write retrospective for one task, mark it done |
 | `/retro-sprint` | `[sprint-id]` | Aggregate all task retros → sprint retro, evaluate goals |
-| `/git-commit` | `[sprint-id] [task-id]` | Stage selectively + commit with conventional message |
-| `/next-task` | `[sprint-id] [task-id]` _(optional)_ | Load next todo task after finishing current one |
+| `/git-commit` | `[task-id]` | Stage selectively + commit with conventional message |
+| `/next-task` | `[task-id]` _(optional)_ | Load next todo task after finishing current one |
 
 ### Status Lifecycle
 

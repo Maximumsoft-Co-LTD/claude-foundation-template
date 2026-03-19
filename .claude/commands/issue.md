@@ -3,13 +3,13 @@ Workflow position: **implement (loop) → START → /code-review**
 
 Log and resolve a bug found during implementation using TDD.
 Arguments: $ARGUMENTS
-Format: `[sprint-id] [task-id] [issue description]`  — e.g. `SP1 SP1-T002 API returns 500 when email is null`
+Format: `[task-id] [issue description]`  — e.g. `SP1-T002 API returns 500 when email is null`
 
 ---
 
 ## Step 1 — Parse and classify
 
-1. Parse `[sprint-id]`, `[task-id]`, and `[issue description]` from `$ARGUMENTS`.
+1. Parse `[task-id]` and `[issue description]` from `$ARGUMENTS`. Extract `[sprint-id]` from prefix (e.g. `SP1-T001` → `SP1`).
 2. Classify severity immediately:
    - **critical** — blocks the task or breaks existing functionality
    - **major** — AC not met but workaround exists
@@ -61,7 +61,15 @@ Does this bug affect other tasks in the sprint?
 
 ## Step 7 — Append to issues file
 
-Append to `docs/sprints/[sprint-id]/[task-id]/[task-id]-issues.md` (create if it doesn't exist):
+Append to `docs/sprints/[sprint-id]/[task-id]/[task-id]-issues.md` (create if it doesn't exist).
+
+If creating the file for the first time, start it with:
+
+```markdown
+# [task-id] — [Task Title] — Issues
+```
+
+Then append:
 
 ```markdown
 ## Issue: [short title]
@@ -91,7 +99,7 @@ Append to `docs/sprints/[sprint-id]/[task-id]/[task-id]-issues.md` (create if it
   Test added: [yes/no]
   Blocks other tasks: [yes: list / no]
 
-Next step: /testing [sprint-id] [task-id]
+Next step: /testing [task-id]
 ```
 
 If unresolvable → document as `status: blocked`, list what information is needed, and ask the user directly.

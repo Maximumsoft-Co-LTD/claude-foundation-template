@@ -3,11 +3,13 @@ Workflow position: **/code-review → START → /retro**
 
 Run the full test suite and verify every AC is covered.
 Arguments: $ARGUMENTS
-Format: `[sprint-id] [task-id]`  — e.g. `SP1 SP1-T002`
+Format: `[task-id]`  — e.g. `SP1-T002`
 
 ---
 
 ## Step 1 — Load context
+
+1. Parse `[task-id]` from `$ARGUMENTS`. Extract `[sprint-id]` from prefix (e.g. `SP1-T001` → `SP1`).
 
 Read:
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — ACs and success metrics
@@ -43,7 +45,7 @@ For each **failing test**:
 - Do NOT skip, `.only`, or comment out.
 - Code bug → fix the code (not the test).
 - Test misunderstands the spec → correct the test to match the AC, then fix the code.
-- Non-trivial fix → run `/issue [sprint-id] [task-id] [description]`.
+- Non-trivial fix → run `/issue [task-id] [description]`.
 
 ---
 
@@ -89,6 +91,6 @@ Missing from TDD Test Plan:
 
 ```
 Next step:
-  Tests failing or ACs not covered → fix and re-run /testing [sprint-id] [task-id]
-  All tests pass and all ACs covered → /retro [sprint-id] [task-id]
+  Tests failing or ACs not covered → fix and re-run /testing [task-id]
+  All tests pass and all ACs covered → /retro-task [task-id]
 ```

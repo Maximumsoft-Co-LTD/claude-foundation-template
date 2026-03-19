@@ -4,11 +4,13 @@ Workflow position: **/testing → START → /git-commit**
 Write a retrospective for a single completed task and mark it done.
 Run this after every task. Run /retro-sprint only after ALL tasks in a sprint are done.
 Arguments: $ARGUMENTS
-Format: `[sprint-id] [task-id]`  — e.g. `SP1 SP1-T002`
+Format: `[task-id]`  — e.g. `SP1-T002`
 
 ---
 
 ## Step 1 — Load context
+
+1. Parse `[task-id]` from `$ARGUMENTS`. Extract `[sprint-id]` from prefix (e.g. `SP1-T001` → `SP1`).
 
 Read:
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — original estimate, ACs
@@ -33,7 +35,7 @@ Run: `git log --oneline` and identify commits for this task.
 Save to `docs/sprints/[sprint-id]/[task-id]/[task-id]-retro.md`:
 
 ```markdown
-# [task-id] — Retrospective
+# [task-id] — [Task Title] — Retrospective
 
 **Sprint:** [sprint-id]
 **Date:** [today]
@@ -92,6 +94,6 @@ After marking this task done, read `docs/BACKLOG.md` and count remaining tasks i
 ✓ Retro saved: docs/sprints/[sprint-id]/[task-id]/[task-id]-retro.md
 ✓ BACKLOG.md updated — [task-id] marked done
 
-Next step: /git-commit [sprint-id] [task-id]
+Next step: /git-commit [task-id]
 [If sprint complete]: Then → /retro-sprint [sprint-id]
 ```

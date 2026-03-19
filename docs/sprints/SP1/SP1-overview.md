@@ -1,9 +1,9 @@
-# sprint-01 — Example Epic
+# SP1 — Example Epic
 
 ## Metadata
 | Field | Value |
 |-------|-------|
-| **Sprint ID** | sprint-01 |
+| **Sprint ID** | SP1 |
 | **Status** | planning |
 | **Start Date** | YYYY-MM-DD |
 | **End Date** | YYYY-MM-DD |
@@ -38,7 +38,7 @@ This is an example sprint. Replace with the actual problem this epic solves.
 ## Sub-tasks
 | Task ID | Title | Depends On | Status |
 |---------|-------|------------|--------|
-| task-001 | Example Task | - | `todo` |
+| SP1-T001 | Example Task | - | `todo` |
 
 ## Technical Constraints
 -

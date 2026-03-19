@@ -1,4 +1,4 @@
-# [task-id] — Frontend Design
+# [task-id] — [Title] — Frontend Design
 
 ## Metadata
 | Field | Value |

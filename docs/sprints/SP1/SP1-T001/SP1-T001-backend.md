@@ -1,14 +1,14 @@
-# task-001 — Backend Design
+# SP1-T001 — Example Task — Backend Design
 
 ## Metadata
 | Field | Value |
 |-------|-------|
-| **Requirement** | `docs/sprints/sprint-01/task-001/task-001-requirement.md` |
+| **Requirement** | `docs/sprints/SP1/SP1-T001/SP1-T001-requirement.md` |
 | **Assignee** | - |
 | **Status** | draft |
 
 ## API Endpoints
-<!-- Fill in with /be-design sprint-01 task-001 -->
+<!-- Fill in with /be-design SP1 SP1-T001 -->
 
 ### `METHOD /api/path`
 - **Purpose:**

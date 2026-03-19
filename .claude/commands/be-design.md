@@ -3,14 +3,16 @@ Workflow position: **/fe-design → START → implement**
 
 Write the complete backend design and TDD test plan for a task. Run this BEFORE writing any code.
 Arguments: $ARGUMENTS
-Format: `[sprint-id] [task-id]`  — e.g. `SP1 SP1-T002`
+Format: `[task-id]`  — e.g. `SP1-T002`
 
 ---
 
 ## Step 1 — Load context
 
+1. Parse `[task-id]` from `$ARGUMENTS`. Extract `[sprint-id]` from prefix (e.g. `SP1-T001` → `SP1`).
+
 Read these files in order:
-1. `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — epic goals and technical constraints
+2. `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — epic goals and technical constraints
 2. `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — ACs, success metrics
 3. `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md` — API contracts the FE expects (align BE to this)
 
@@ -63,5 +65,5 @@ Print the TDD Test Plan table, then:
 TDD Test Plan — write these failing tests BEFORE implementing:
 [print the test plan table]
 
-Next step: /implement [sprint-id] [task-id]
+Next step: /implement [task-id]
 ```

@@ -1,9 +1,9 @@
-# task-001 — Frontend Design
+# SP1-T001 — Example Task — Frontend Design
 
 ## Metadata
 | Field | Value |
 |-------|-------|
-| **Requirement** | `docs/sprints/sprint-01/task-001/task-001-requirement.md` |
+| **Requirement** | `docs/sprints/SP1/SP1-T001/SP1-T001-requirement.md` |
 | **Assignee** | - |
 | **Status** | draft |
 
@@ -12,7 +12,7 @@
 - Storybook: [link]
 
 ## UI/UX Overview
-<!-- Fill in with /fe-design sprint-01 task-001 -->
+<!-- Fill in with /fe-design SP1 SP1-T001 -->
 
 ## Routing & Navigation
 | Route | Component | Auth required | Notes |

@@ -3,14 +3,16 @@ Workflow position: **/be-design → START → /issue (loop) → /code-review**
 
 Implement the task following the FE and BE design docs. Always write failing tests first, then implement until all pass.
 Arguments: $ARGUMENTS
-Format: `[sprint-id] [task-id]`  — e.g. `SP1 SP1-T002`
+Format: `[task-id]`  — e.g. `SP1-T002`
 
 ---
 
 ## Step 1 — Load context
 
+1. Parse `[task-id]` from `$ARGUMENTS`. Extract `[sprint-id]` from prefix (e.g. `SP1-T001` → `SP1`).
+
 Read these files in order:
-1. `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — epic goals and constraints
+2. `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — epic goals and constraints
 2. `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — ACs and success metrics
 3. `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md` — FE design + TDD test plan
 4. `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md` — BE design + TDD test plan
@@ -41,7 +43,7 @@ Follow the design docs strictly:
 Rules:
 - Implement only what the design specifies — no extras, no shortcuts.
 - Run tests after each logical unit of work.
-- If you discover a bug or unexpected behavior → run `/issue [sprint-id] [task-id] [description]` and continue.
+- If you discover a bug or unexpected behavior → run `/issue [task-id] [description]` and continue.
 
 ---
 
@@ -56,7 +58,7 @@ Rules:
 ## Step 5 — Output
 
 ```
-✓ Implementation complete: [sprint-id] [task-id]
+✓ Implementation complete: [task-id]
 
 Tests: [N] passing, 0 failing
 
@@ -65,5 +67,5 @@ ACs covered:
   ✓ AC-2: [description]
   ...
 
-Next step: /code-review [sprint-id] [task-id]
+Next step: /code-review [task-id]
 ```

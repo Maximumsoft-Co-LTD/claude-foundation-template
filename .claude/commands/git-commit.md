@@ -3,11 +3,13 @@ Workflow position: **/retro-task → START → /next-task (or /retro-sprint if s
 
 Stage and commit all changes for a completed task.
 Arguments: $ARGUMENTS
-Format: `[sprint-id] [task-id]`  — e.g. `SP1 SP1-T002`
+Format: `[task-id]`  — e.g. `SP1-T002`
 
 ---
 
-## Step 1 — Inspect current state
+## Step 1 — Parse and inspect current state
+
+Parse `[task-id]` from `$ARGUMENTS`. Extract `[sprint-id]` from prefix (e.g. `SP1-T001` → `SP1`).
 
 Run in parallel:
 - `git status` — all changed and untracked files

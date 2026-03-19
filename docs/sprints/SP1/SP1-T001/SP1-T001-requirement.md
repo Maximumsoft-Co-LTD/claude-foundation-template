@@ -1,9 +1,9 @@
-# task-001 — Example Task
+# SP1-T001 — Example Task
 
 ## Metadata
 | Field | Value |
 |-------|-------|
-| **Sprint** | sprint-01 |
+| **Sprint** | SP1 |
 | **Priority** | high |
 | **Estimate** | 1 day |
 | **Assignee** | - |

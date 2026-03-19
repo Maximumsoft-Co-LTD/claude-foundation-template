@@ -3,11 +3,13 @@ Workflow position: **/issue (loop) → START → /testing**
 
 Review all code changes for this task against the design docs and ACs.
 Arguments: $ARGUMENTS
-Format: `[sprint-id] [task-id]`  — e.g. `SP1 SP1-T002`
+Format: `[task-id]`  — e.g. `SP1-T002`
 
 ---
 
 ## Step 1 — Load context
+
+1. Parse `[task-id]` from `$ARGUMENTS`. Extract `[sprint-id]` from prefix (e.g. `SP1-T001` → `SP1`).
 
 Read:
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — ACs and success metrics
@@ -95,6 +97,6 @@ ACs status:
   ✗ AC-2: [description] ← [reason]
 
 Next step:
-  Critical issues found → /issue [sprint-id] [task-id] [description]  (for each one)
-  No critical issues   → /testing [sprint-id] [task-id]
+  Critical issues found → /issue [task-id] [description]  (for each one)
+  No critical issues   → /testing [task-id]
 ```

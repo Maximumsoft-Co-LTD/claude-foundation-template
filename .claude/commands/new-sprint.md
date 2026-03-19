@@ -50,11 +50,11 @@ Present the breakdown:
 Proposed sub-tasks for [sprint-id] — [epic title]:
 (Global task counter: last used T[NNN], starting from T[NNN+1])
 
-| Task ID    | Title                  | Type      | Depends On | Est. |
-|------------|------------------------|-----------|------------|------|
-| SP2-T005   |                        | backend   | —          | 1d   |
-| SP2-T006   |                        | frontend  | SP2-T005   | 2d   |
-| SP2-T007   |                        | fullstack | SP2-T005   | 2d   |
+| Task ID         | Title                  | Type      | Depends On      | Est. |
+|-----------------|------------------------|-----------|-----------------|------|
+| SP2-T005     |                        | backend   | —               | 1d   |
+| SP2-T006     |                        | frontend  | SP2-T005     | 2d   |
+| SP2-T007     |                        | fullstack | SP2-T005     | 2d   |
 ```
 
 Ask: "Does this breakdown look right? You can rename tasks, add/remove rows, or say 'confirm' to scaffold all."
