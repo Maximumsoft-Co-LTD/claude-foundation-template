@@ -10,14 +10,9 @@ Format: `[task-id] [task-id] ...`  — e.g. `SP1-T001 SP1-T002 SP1-T003`
 
 ## Step 1 — Parse, validate, and register all tasks
 
-**Prerequisites:** `/requirement` must have been run for each task before calling `/run-tasks`. If any task's requirement doc is missing or has empty ACs, stop immediately.
-
 1. Parse all `[task-id]` values from `$ARGUMENTS`. Extract `[sprint-id]` from each prefix.
 2. Read `docs/BACKLOG.md` — for each task collect: status, `depends_on` (if present), priority.
-3. For each task, read `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`:
-   - If the file does not exist → stop: "Run `/requirement [task-id]` first before running /run-tasks."
-   - If Acceptance Criteria are all empty → stop: "Fill in `[task-id]-requirement.md` before running /run-tasks."
-   - If a task's status is `done` or `in-progress` → warn and skip it unless it's explicitly re-runnable.
+3. If a task's status is `done` or `in-progress` → warn and skip it unless it's explicitly re-runnable.
 
 **Build dependency order:**
 - Tasks with no `depends_on` (or whose dependencies are already `done`) are **Tier 1** — run first.
@@ -30,17 +25,19 @@ For each `[task-id]`, create one task per phase:
 
 ```
 For each [task-id]:
-  p_fe[task-id]     = TaskCreate(subject: "[task-id] — fe-design",   description: "Run /fe-design for [task-id]")
-  p_be[task-id]     = TaskCreate(subject: "[task-id] — be-design",   description: "Run /be-design for [task-id]")
-  p_impl[task-id]   = TaskCreate(subject: "[task-id] — implement",   description: "Run /implement for [task-id]")
-  p_rev[task-id]    = TaskCreate(subject: "[task-id] — code-review", description: "Run /code-review for [task-id]")
-  p_test[task-id]   = TaskCreate(subject: "[task-id] — testing",     description: "Run /testing for [task-id]")
-  p_retro[task-id]  = TaskCreate(subject: "[task-id] — retro-task",  description: "Run /retro-task for [task-id]")
+  p_req[task-id]    = TaskCreate(subject: "[task-id] — requirement",  description: "Run /requirement for [task-id]")
+  p_fe[task-id]     = TaskCreate(subject: "[task-id] — fe-design",    description: "Run /fe-design for [task-id]")
+  p_be[task-id]     = TaskCreate(subject: "[task-id] — be-design",    description: "Run /be-design for [task-id]")
+  p_impl[task-id]   = TaskCreate(subject: "[task-id] — implement",    description: "Run /implement for [task-id]")
+  p_rev[task-id]    = TaskCreate(subject: "[task-id] — code-review",  description: "Run /code-review for [task-id]")
+  p_test[task-id]   = TaskCreate(subject: "[task-id] — testing",      description: "Run /testing for [task-id]")
+  p_retro[task-id]  = TaskCreate(subject: "[task-id] — retro-task",   description: "Run /retro-task for [task-id]")
 ```
 
 Wire per-task phase dependencies:
 ```
 For each [task-id]:
+  TaskUpdate(p_fe[task-id],   addBlockedBy: [p_req[task-id]])
   TaskUpdate(p_be[task-id],   addBlockedBy: [p_fe[task-id]])
   TaskUpdate(p_impl[task-id], addBlockedBy: [p_be[task-id]])
   TaskUpdate(p_rev[task-id],  addBlockedBy: [p_impl[task-id]])
@@ -51,7 +48,7 @@ For each [task-id]:
 Wire cross-task Tier dependencies:
 ```
 For each Tier 2 [task-id] that depends on a Tier 1 [dep-id]:
-  TaskUpdate(p_fe[task-id], addBlockedBy: [p_retro[dep-id]])
+  TaskUpdate(p_req[task-id], addBlockedBy: [p_retro[dep-id]])
 ```
 
 **Output task plan:**
@@ -61,12 +58,45 @@ Tasks to run: [N]
 Tier 1 (parallel): SP1-T001, SP1-T002
 Tier 2 (after Tier 1): SP1-T003  (depends_on: SP1-T001)
 
-Phases: fe-design → be-design → implement → code-review → testing → retro-task
+Phases: requirement → fe-design → be-design → implement → code-review → testing → retro-task
 ```
 
 ---
 
-## Step 2 — Phase: FE Design
+## Step 2 — Phase: Requirement
+
+Call `TaskList` to confirm which `[task-id] — requirement` tasks are unblocked (no blockedBy).
+
+For each Tier (in order), launch **parallel sub-agents** — one per task in the tier:
+
+- `TaskUpdate(p_req[task-id], status: in_progress)`
+- Launch `Agent [task-id] — Requirement` (run_in_background: true):
+  > Read `.claude/commands/requirement.md` first, then follow every step exactly for `[task-id]`.
+  > Save output to `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`.
+  > Return: DONE or BLOCKED (with reason).
+
+Wait for **all agents in the current tier** to complete before starting the next tier.
+
+On result:
+- DONE → `TaskUpdate(p_req[task-id], status: completed)`
+- BLOCKED → `TaskUpdate(p_req[task-id], status: completed)` with note, mark task as blocked in BACKLOG.md, skip remaining phases
+
+**Phase checkpoint:**
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Phase: Requirement — complete
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ✓ SP1-T001 — [Task Title]
+  ✓ SP1-T002 — [Task Title]
+  ✗ SP1-T003 — BLOCKED: [reason]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+- If any task is BLOCKED → pause that task. Continue remaining tasks through all phases.
+
+---
+
+## Step 3 — Phase: FE Design
 
 Call `TaskList` to confirm which `[task-id] — fe-design` tasks are unblocked (no blockedBy).
 
@@ -74,7 +104,7 @@ For each Tier (in order), launch **parallel sub-agents** — one per task in the
 
 - `TaskUpdate(p_fe[task-id], status: in_progress)`
 - Launch `Agent [task-id] — FE Design` (run_in_background: true):
-  > Follow the `/fe-design` command exactly for `[task-id]`.
+  > Read `.claude/commands/fe-design.md` first, then follow every step exactly for `[task-id]`.
   > Save output to `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md`.
   > Return: DONE or BLOCKED (with reason).
 
@@ -99,7 +129,7 @@ Phase: FE Design — complete
 
 ---
 
-## Step 3 — Phase: BE Design
+## Step 4 — Phase: BE Design
 
 Call `TaskList` to confirm which `[task-id] — be-design` tasks are now unblocked.
 
@@ -107,7 +137,7 @@ For each unblocked task per tier, launch **parallel sub-agents**:
 
 - `TaskUpdate(p_be[task-id], status: in_progress)`
 - Launch `Agent [task-id] — BE Design` (run_in_background: true):
-  > Follow the `/be-design` command exactly for `[task-id]`.
+  > Read `.claude/commands/be-design.md` first, then follow every step exactly for `[task-id]`.
   > Save output to `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md`.
   > Return: DONE or BLOCKED (with reason).
 
@@ -119,7 +149,7 @@ Print phase checkpoint after all tiers complete.
 
 ---
 
-## Step 4 — Phase: Implement
+## Step 5 — Phase: Implement
 
 Call `TaskList` to confirm which `[task-id] — implement` tasks are unblocked.
 
@@ -127,8 +157,8 @@ For each unblocked task per tier, launch **parallel sub-agents**:
 
 - `TaskUpdate(p_impl[task-id], status: in_progress)`
 - Launch `Agent [task-id] — Implement` (run_in_background: true):
-  > Follow the `/implement` command exactly for `[task-id]`.
-  > This includes writing failing tests first, then implementing until all pass.
+  > Read `.claude/commands/implement.md` first, then follow every step exactly for `[task-id]`.
+  > This includes the pre-implementation readiness check, writing failing tests first, then implementing until all pass.
   > Return: DONE, ISSUES_FOUND (list issues), or BLOCKED (reason).
 
 Wait for all agents per tier before advancing.
@@ -142,7 +172,7 @@ Print phase checkpoint after all tiers complete.
 
 ---
 
-## Step 5 — Phase: Code Review
+## Step 6 — Phase: Code Review
 
 Call `TaskList` to confirm which `[task-id] — code-review` tasks are unblocked.
 
@@ -150,7 +180,7 @@ For each unblocked task per tier, launch **parallel sub-agents**:
 
 - `TaskUpdate(p_rev[task-id], status: in_progress)`
 - Launch `Agent [task-id] — Code Review` (run_in_background: true):
-  > Follow the `/code-review` command exactly for `[task-id]`.
+  > Read `.claude/commands/code-review.md` first, then follow every step exactly for `[task-id]`.
   > Return: APPROVED or REQUEST_CHANGES (list critical issues).
 
 On result:
@@ -170,7 +200,7 @@ Phase: Code Review — complete
 
 ---
 
-## Step 6 — Phase: Testing
+## Step 7 — Phase: Testing
 
 Call `TaskList` to confirm which `[task-id] — testing` tasks are unblocked.
 
@@ -178,7 +208,7 @@ For each unblocked task per tier, launch **parallel sub-agents**:
 
 - `TaskUpdate(p_test[task-id], status: in_progress)`
 - Launch `Agent [task-id] — Testing` (run_in_background: true):
-  > Follow the `/testing` command exactly for `[task-id]`.
+  > Read `.claude/commands/testing.md` first, then follow every step exactly for `[task-id]`.
   > Return: ALL_PASS, FAILING (list failing tests), or MISSING_COVERAGE (list ACs).
 
 On result:
@@ -189,7 +219,7 @@ Print phase checkpoint after all tiers complete.
 
 ---
 
-## Step 7 — Phase: Retro Task
+## Step 8 — Phase: Retro Task
 
 Call `TaskList` to confirm which `[task-id] — retro-task` tasks are unblocked.
 
@@ -197,7 +227,7 @@ For each unblocked task per tier, launch **parallel sub-agents**:
 
 - `TaskUpdate(p_retro[task-id], status: in_progress)`
 - Launch `Agent [task-id] — Retro` (run_in_background: true):
-  > Follow the `/retro-task` command exactly for `[task-id]`.
+  > Read `.claude/commands/retro-task.md` first, then follow every step exactly for `[task-id]`.
   > Save output to `docs/sprints/[sprint-id]/[task-id]/[task-id]-retro.md`.
   > Update BACKLOG.md status to `done`.
   > Return: DONE.
@@ -207,7 +237,7 @@ On result:
 
 ---
 
-## Step 8 — Final summary
+## Step 9 — Final summary
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

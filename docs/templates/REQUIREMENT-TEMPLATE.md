@@ -16,9 +16,28 @@
 ## Overview
 <!-- What does this task deliver? One paragraph summary. -->
 
+## Feature Flow
+<!-- High-level flowchart of the main user flow this task enables. -->
+
+```mermaid
+flowchart TD
+    START([User starts]) --> A[Step 1]
+    A --> B{Decision?}
+    B -->|yes| C[Happy path]
+    B -->|no| D[Alternate path]
+    C --> END([Done])
+    D --> END
+```
+
 ## User Stories
-<!-- Format: As a [role], I want [goal], so that [reason]. -->
-- As a __, I want __, so that __.
+| # | Story | Maps to AC |
+|---|-------|-----------|
+| US-1 | As a __, I want __, so that __. | AC-1, AC-2 |
+
+## System Behavior
+| Trigger | System Response | Side Effects | Timing |
+|---------|----------------|-------------|--------|
+| - | - | - | sync / async |
 
 ## Acceptance Criteria
 <!-- Each AC must be specific, testable, and user-visible (observable from the browser/client).
@@ -27,6 +46,11 @@
 - [ ] AC-1: Given __, when __, then __.
 - [ ] AC-2: Given __, when __, then __.
 - [ ] AC-3: Given __, when __, then __.
+
+## Data & Business Rules
+| Rule ID | Rule | Example | Applies to AC |
+|---------|------|---------|--------------|
+| R-1 | - | - | AC-X |
 
 ## Success Metrics
 <!-- How do we know this task succeeded in production? -->
@@ -59,6 +83,19 @@
 | Empty state | |
 | Success message | |
 | Confirm dialog | |
+
+## DO / DON'T
+| DO | DON'T |
+|----|-------|
+| - | - |
+
+## Non-Functional Requirements
+| Category | Requirement | Target | How to Verify |
+|----------|------------|--------|---------------|
+| Performance | - | - | - |
+| Security | - | - | - |
+| Scalability | - | - | - |
+| Reliability | - | - | - |
 
 ## Out of Scope
 <!-- Explicitly list what is NOT included. Prevents scope creep. -->

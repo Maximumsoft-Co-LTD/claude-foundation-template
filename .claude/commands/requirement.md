@@ -16,8 +16,9 @@ Register all steps with TaskCreate — store the returned IDs:
 ```
 t1 = TaskCreate(subject: "[task-id] — load context",             description: "Read sprint overview, discovery doc, and existing requirement draft")
 t2 = TaskCreate(subject: "[task-id] — draft requirement doc",    description: "Draft complete requirement doc including ACs, user stories, and success metrics")
-t3 = TaskCreate(subject: "[task-id] — present for confirmation", description: "Show drafted requirement to user and apply edits")
-t4 = TaskCreate(subject: "[task-id] — save + update status",     description: "Save confirmed requirement doc and update task status in BACKLOG.md")
+t3 = TaskCreate(subject: "[task-id] — coverage check vs discovery", description: "Cross-check proposed ACs against discovery doc goals, in-scope items, and user journeys")
+t4 = TaskCreate(subject: "[task-id] — present for confirmation", description: "Show drafted requirement to user and apply edits")
+t5 = TaskCreate(subject: "[task-id] — save + update status",     description: "Save confirmed requirement doc and update task status in BACKLOG.md")
 ```
 
 Wire dependencies:
@@ -25,6 +26,7 @@ Wire dependencies:
 TaskUpdate(t2, addBlockedBy: [t1])
 TaskUpdate(t3, addBlockedBy: [t2])
 TaskUpdate(t4, addBlockedBy: [t3])
+TaskUpdate(t5, addBlockedBy: [t4])
 ```
 
 ```
@@ -79,10 +81,49 @@ TaskUpdate(t2, status: completed)
 
 ---
 
-## Step 3 — Present for confirmation
+## Step 2b — Coverage check against discovery
 
 ```
 TaskUpdate(t3, status: in_progress)
+```
+
+If a discovery doc was found in Step 1, cross-check the drafted ACs against it:
+
+1. **Goals coverage** — for each Goal / Success Metric in the discovery doc, identify which AC(s) cover it. Flag any goal with no AC.
+2. **In-scope coverage** — for each item listed as in-scope in the discovery doc, identify which AC covers it. Flag any in-scope item with no AC.
+3. **User journeys coverage** — for each To-Be user journey in the discovery doc that is relevant to this task, identify which AC delivers it. Flag any journey with no AC.
+
+Present the coverage summary after the drafted requirement doc:
+
+```
+Coverage check vs discovery doc:
+
+✅ Covered
+  - [Goal/Scope item] → [AC-N]
+  - ...
+
+⚠️ Not covered — adding ACs:
+  - [Goal/Scope item] → adding AC-N: [description]
+  - ...
+
+➖ Explicitly out of scope for this task:
+  - [item] — reason: [why excluded]
+```
+
+- For every uncovered item: either add a new AC to the draft or explicitly mark it as out-of-scope with a reason.
+- Do NOT silently drop any in-scope item from the discovery doc that is relevant to this task.
+- If no discovery doc exists, skip this step.
+
+```
+TaskUpdate(t3, status: completed)
+```
+
+---
+
+## Step 3 — Present for confirmation
+
+```
+TaskUpdate(t4, status: in_progress)
 ```
 
 Print the full drafted requirement doc, then ask:
@@ -96,7 +137,7 @@ Does this requirement look right?
 Wait for the user's response. Apply any edits they request.
 
 ```
-TaskUpdate(t3, status: completed)
+TaskUpdate(t4, status: completed)
 ```
 
 ---
@@ -104,7 +145,7 @@ TaskUpdate(t3, status: completed)
 ## Step 4 — Save and update status
 
 ```
-TaskUpdate(t4, status: in_progress)
+TaskUpdate(t5, status: in_progress)
 ```
 
 1. Create directory `docs/sprints/[sprint-id]/[task-id]/` if it does not exist.
@@ -112,7 +153,7 @@ TaskUpdate(t4, status: in_progress)
 3. Update task status in `docs/BACKLOG.md` to `in-progress` if it was `todo`.
 
 ```
-TaskUpdate(t4, status: completed)
+TaskUpdate(t5, status: completed)
 ```
 
 ---

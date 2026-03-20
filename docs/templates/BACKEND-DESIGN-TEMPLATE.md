@@ -27,6 +27,11 @@
 }
 ```
 
+**Request schema:**
+| Field | Type | Required | Constraints | Description |
+|-------|------|----------|-------------|-------------|
+| `field` | string | yes | minLength: 3, maxLength: 100 | - |
+
 **Response (200):**
 ```json
 {
@@ -45,6 +50,23 @@
 | 409 | Conflict / duplicate | `{ "error": "...", "code": "CONFLICT" }` |
 | 429 | Rate limit exceeded | `{ "error": "Too many requests", "code": "RATE_LIMITED" }` |
 | 500 | Unexpected error | `{ "error": "Internal server error", "code": "INTERNAL_ERROR" }` |
+
+---
+
+## Data Contracts
+| Contract | Direction | Format | Version | Owner |
+|----------|-----------|--------|---------|-------|
+| - | inbound / outbound | JSON | v1 | - |
+
+### Contract: `[Name]` v1
+```json
+{
+  "field": "type — required/optional"
+}
+```
+**Breaking change policy:** New required fields = new version. New optional fields = same version.
+
+_If no inter-service contracts: write "None — single service."_
 
 ---
 
@@ -88,6 +110,18 @@ erDiagram
         string name
     }
     OtherModel ||--o{ ModelName : "has many"
+```
+
+**Entity State Lifecycle:**
+
+```mermaid
+stateDiagram-v2
+    [*] --> Draft : created
+    Draft --> Active : published / activated
+    Active --> Suspended : suspended by admin
+    Active --> Archived : archived
+    Suspended --> Active : reinstated
+    Archived --> [*]
 ```
 
 **Indexes:**
@@ -148,6 +182,45 @@ flowchart TD
 
 ---
 
+## Class Diagram
+<!-- Domain model showing classes, their fields, methods, and relationships. -->
+
+```mermaid
+classDiagram
+    class Controller {
+        +handleRequest(req, res)
+    }
+    class Service {
+        -repository: Repository
+        +doAction(params) Result
+        +validateBusiness(entity) void
+    }
+    class Repository {
+        -db: Database
+        +findById(id) Entity
+        +findAll(filters) Entity[]
+        +save(entity) Entity
+        +delete(id) void
+    }
+    class Entity {
+        +id: UUID
+        +status: EntityStatus
+        +createdAt: DateTime
+        +updatedAt: DateTime
+    }
+    class EntityStatus {
+        <<enumeration>>
+        DRAFT
+        ACTIVE
+        ARCHIVED
+    }
+
+    Controller --> Service : uses
+    Service --> Repository : uses
+    Repository --> Entity : returns
+    Entity --> EntityStatus : has
+```
+
 ## Design Decisions
 <!-- Non-obvious choices and WHY they were made. Prevents implementers from "fixing" intentional decisions. -->
 
@@ -188,6 +261,31 @@ ELSE:
 
 _If no events: write "None — this task does not emit events."_
 
+### Domain Event Definitions
+
+#### `event.name` (v1)
+- **Aggregate:** -
+- **Triggered by:** -
+- **Idempotency key:** -
+- **Ordering guarantee:** per-aggregate
+
+**Payload schema:**
+```json
+{
+  "eventId": "uuid",
+  "eventType": "string",
+  "version": 1,
+  "timestamp": "ISO-8601",
+  "aggregateId": "uuid",
+  "data": {}
+}
+```
+
+**Consumers:**
+| Consumer | Action on Receive | Idempotent? |
+|----------|------------------|-------------|
+| - | - | yes / no |
+
 ---
 
 ## Error Handling Strategy
@@ -211,18 +309,18 @@ _If no events: write "None — this task does not emit events."_
 ### Error Code Catalog
 <!-- Define every error code this task introduces. FE maps these to UI behavior. -->
 
-| HTTP | Code | When to use |
-|------|------|-------------|
-| 400 | `VALIDATION_ERROR` | Request body fails validation rules |
-| 400 | `INVALID_INPUT` | Semantically invalid (e.g. end date before start date) |
-| 401 | `UNAUTHORIZED` | No token or token invalid/expired |
-| 403 | `FORBIDDEN` | Authenticated but lacks permission |
-| 404 | `NOT_FOUND` | Resource does not exist or not visible to this user |
-| 409 | `CONFLICT` | Duplicate or state conflict (e.g. already exists) |
-| 422 | `BUSINESS_RULE_VIOLATION` | Passes validation but violates a business rule |
-| 429 | `RATE_LIMITED` | Too many requests |
-| 500 | `INTERNAL_ERROR` | Unexpected — never expose details |
-| 503 | `SERVICE_UNAVAILABLE` | External dependency down |
+| HTTP | Code | Category | Retryable | When to use |
+|------|------|----------|-----------|-------------|
+| 400 | `VALIDATION_ERROR` | client | no | Request body fails validation rules |
+| 400 | `INVALID_INPUT` | client | no | Semantically invalid (e.g. end date before start date) |
+| 401 | `UNAUTHORIZED` | auth | no — redirect to login | No token or token invalid/expired |
+| 403 | `FORBIDDEN` | auth | no | Authenticated but lacks permission |
+| 404 | `NOT_FOUND` | client | no | Resource does not exist or not visible to this user |
+| 409 | `CONFLICT` | client | no — resolve first | Duplicate or state conflict (e.g. already exists) |
+| 422 | `BUSINESS_RULE_VIOLATION` | business | no | Passes validation but violates a business rule |
+| 429 | `RATE_LIMITED` | throttle | yes — after backoff | Too many requests |
+| 500 | `INTERNAL_ERROR` | server | yes — retry once | Unexpected — never expose details |
+| 503 | `SERVICE_UNAVAILABLE` | infra | yes — retry with backoff | External dependency down |
 
 _Add task-specific codes below if needed (e.g. `INSUFFICIENT_BALANCE`, `SLOT_ALREADY_BOOKED`)._
 

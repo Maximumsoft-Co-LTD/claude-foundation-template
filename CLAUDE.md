@@ -72,7 +72,7 @@ Two levels: **Sprint (Epic)** → **Tasks (Sub-tasks)**
 | `/discovery` | `[disc-id] [name]` | Before planning anything — understand the problem first |
 | `/new-sprint` | `[sprint-id] [epic description]` | Turn a discovered epic into a sprint with scaffolded sub-tasks |
 | `/requirement` | `[task-id]` | Draft ACs + requirement doc for a task before design begins |
-| `/run-tasks` | `[task-id] [task-id] ...` | Run multiple tasks in parallel through the full flow (fe-design → retro-task) |
+| `/run-tasks` | `[task-id] [task-id] ...` | Run multiple tasks in parallel through the full flow (requirement → fe-design → retro-task) |
 | `/fe-design` | `[task-id]` | Write FE design + implementation plan + TDD test plan before touching any code |
 | `/be-design` | `[task-id]` | Write BE design + implementation plan + TDD test plan before touching any code |
 | `/implement` | `[task-id]` | Write failing tests then implement following FE + BE design docs |

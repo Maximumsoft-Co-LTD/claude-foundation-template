@@ -9,7 +9,8 @@ flowchart TD
     B --> C
 
     subgraph TASK ["↻ repeat per task"]
-        C([/next-task\nreconcile statuses\npick next todo]) --> D([/fe-design\nFE design + TDD plan])
+        C([/next-task\nreconcile statuses\npick next todo]) --> R([/requirement\ndraft ACs +\nrequirement doc])
+        R --> D([/fe-design\nFE design + TDD plan])
         D --> E([/be-design\nBE design + TDD plan])
         E --> F([/implement\nwrite failing tests\nthen implement])
         F --> G([/issue\nTDD fix + log])
@@ -38,15 +39,17 @@ flowchart TD
 ## Status Lifecycle
 
 ```
-todo → in-progress → review → testing → done
-              ↕
-           blocked
+discovery → backlog → todo → in-progress → review → testing → done
+                                    ↕
+                                 blocked
 ```
 
 | Status | Set by |
 |--------|--------|
+| `discovery` | `/discovery` |
+| `backlog` | `/discovery` (when open questions resolved) |
 | `todo` | `/new-sprint` |
-| `in-progress` | `/next-task`, `/fe-design`, `/be-design`, `/implement` |
+| `in-progress` | `/requirement`, `/next-task`, `/fe-design`, `/be-design`, `/implement` |
 | `blocked` | `/issue` (when blocking other tasks) |
 | `review` | `/code-review` |
 | `testing` | `/testing` |
@@ -58,6 +61,8 @@ todo → in-progress → review → testing → done
 |---------|------|---------|
 | `/discovery` | `[disc-id] [name]` | Understand problem before planning |
 | `/new-sprint` | `[SP[N]] [epic description]` | Create sprint, scaffold all tasks |
+| `/requirement` | `[task-id]` | Draft ACs + requirement doc before design |
+| `/run-tasks` | `[task-id] [task-id] ...` | Run multiple tasks in parallel |
 | `/fe-design` | `[task-id]` | FE design + TDD test plan |
 | `/be-design` | `[task-id]` | BE design + TDD test plan |
 | `/implement` | `[task-id]` | Write failing tests → implement |

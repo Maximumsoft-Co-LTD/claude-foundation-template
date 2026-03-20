@@ -112,9 +112,25 @@ flowchart TD
 ## State Inventory
 <!-- Exhaustive list of every UI state per component. No state should be left to imagination. -->
 
+```mermaid
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> Loading : user triggers action / page mounts
+    Loading --> Loaded : data received
+    Loading --> Error : request failed
+    Loaded --> Loading : user refreshes / re-fetches
+    Loaded --> Submitting : user submits form
+    Submitting --> Success : 2xx response
+    Submitting --> ValidationError : 400 response
+    Submitting --> Error : 5xx / network error
+    ValidationError --> Submitting : user corrects and resubmits
+    Error --> Loading : user retries
+    Success --> [*]
+```
+
 | Component | States | Notes |
 |-----------|--------|-------|
-| `ComponentName` | default / loading / empty / error | |
+| `ComponentName` | idle / loading / loaded / error / submitting / success | |
 
 ## Design Decisions
 <!-- Non-obvious choices and WHY they were made. Prevents implementers from "fixing" intentional decisions. -->
@@ -142,6 +158,25 @@ flowchart TD
 | --------------- | -------------------- | ------------ | ----------- |
 | `ComponentName` | `src/components/...` | new / modify |             |
 
+
+## Async Interaction Sequence
+<!-- Shows timing of async events: user actions, API calls, state updates, UI feedback. -->
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant UI as UI Component
+    participant Store as State Store
+    participant API as API
+
+    U->>UI: triggers action (e.g. submit)
+    UI->>Store: set state = loading
+    UI->>API: POST /api/v1/...
+    Note over UI: button disabled, spinner shown
+    API-->>UI: 200 { data }
+    UI->>Store: set state = success, update data
+    UI-->>U: show success feedback
+```
 
 ## State & Data Flow
 

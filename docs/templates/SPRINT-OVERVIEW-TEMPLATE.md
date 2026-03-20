@@ -60,6 +60,38 @@ flowchart LR
 | SP[N]-T003 | - | feat / fix / chore | [brief E2E scenario] | SP[N]-T001 | Xh | `todo` |
 | SP[N]-T004 | - | feat / fix / chore | [brief E2E scenario] | SP[N]-T002, SP[N]-T003 | Xh | `todo` |
 
+## Architecture Overview
+<!-- System-level diagram showing how components introduced in this sprint fit together. -->
+
+```mermaid
+graph TB
+    subgraph "Frontend"
+        UI[UI Components]
+        STORE[State Store]
+    end
+    subgraph "Backend"
+        API[API Layer]
+        SVC[Service Layer]
+        REPO[Repository]
+    end
+    DB[(Database)]
+    EXT[External Services]
+
+    UI -->|HTTP| API
+    UI <--> STORE
+    API --> SVC
+    SVC --> REPO
+    REPO --> DB
+    SVC -.->|async| EXT
+```
+
+## Architecture Decision Records
+### ADR-1: [Title]
+- **Status:** proposed / accepted / superseded
+- **Context:** [Why is this decision needed?]
+- **Decision:** [What was decided]
+- **Consequences:** [Positive and negative outcomes]
+
 ## Technical Constraints
 <!-- Architectural decisions, existing system limitations, or non-negotiables. -->
 -
@@ -87,3 +119,10 @@ flowchart LR
 - [ ] Deployed to production (or staging if prod deploy is gated)
 - [ ] Smoke-tested end-to-end in the deployed environment
 - [ ] Sprint retro written — includes what went well, what didn't, and follow-up actions
+
+## Change Log
+| Date | Change | Reason | Impact | Decided by |
+|------|--------|--------|--------|------------|
+| YYYY-MM-DD | - | - | - | - |
+
+_If no changes: leave empty — a clean log means the sprint was well-scoped._

@@ -31,7 +31,14 @@
 
 ---
 
-## 3. Goals & Success Criteria
+## 3. Personas
+| Persona | Role / Description | Goal | Key Pain Point | Frequency of Use |
+|---------|--------------------|------|----------------|------------------|
+| - | - | - | - | daily / weekly / rarely |
+
+---
+
+## 4. Goals & Success Criteria
 <!-- What does success look like? Every goal must have a measurable metric. -->
 
 | Goal | Success Metric | How to Measure |
@@ -40,7 +47,7 @@
 
 ---
 
-## 4. Current User Journey (As-Is)
+## 5. Current User Journey (As-Is)
 <!-- Map how users currently solve this problem. Score 1–5: 1=frustrated, 5=delighted. -->
 
 ```mermaid
@@ -58,7 +65,7 @@ journey
 
 ---
 
-## 5. Future User Journey (To-Be)
+## 6. Future User Journey (To-Be)
 <!-- Map how users will experience the solved flow. Score 1–5: 1=frustrated, 5=delighted. -->
 
 ```mermaid
@@ -76,12 +83,12 @@ journey
 
 ---
 
-## 6. Context & Background
+## 7. Context & Background
 <!-- Relevant history, existing systems, previous attempts, related decisions. -->
 
 ---
 
-## 7. Constraints
+## 8. Constraints
 <!-- Hard limits that shape the solution space. -->
 
 - **Technical:** (stack, existing systems, APIs)
@@ -91,7 +98,36 @@ journey
 
 ---
 
-## 8. Proposed Approaches
+## 9. Event Storming
+### Domain Events (orange)
+| Event | Trigger | Aggregate | Data Produced |
+|-------|---------|-----------|---------------|
+| `EventName` | - | - | - |
+
+### Commands (blue)
+| Command | Actor | Triggers Event | Input |
+|---------|-------|----------------|-------|
+| `CommandName` | - | - | - |
+
+### Aggregates (yellow)
+| Aggregate | Key Entities | Invariants / Rules |
+|-----------|-------------|-------------------|
+| - | - | - |
+
+_If not applicable: write "Skipped — no domain modeling needed."_
+
+---
+
+## 10. SIPOC — Process Boundaries
+| Suppliers | Inputs | Process Step | Outputs | Customers |
+|-----------|--------|-------------|---------|-----------|
+| - | - | - | - | - |
+
+_If not applicable: write "Skipped — process boundaries are clear from the user journey."_
+
+---
+
+## 11. Proposed Approaches
 <!-- At least 2 options considered. More options = better decision. -->
 
 ### Option A: [Name]
@@ -100,25 +136,44 @@ journey
 - **Cons:**
 - **Estimated effort:**
 
+```mermaid
+graph TB
+    subgraph "Option A — High-Level Architecture"
+        UI[Frontend] --> API[API Layer]
+        API --> SVC[Service]
+        SVC --> DB[(Database)]
+    end
+```
+
 ### Option B: [Name]
 - **Description:**
 - **Pros:**
 - **Cons:**
 - **Estimated effort:**
 
+```mermaid
+graph TB
+    subgraph "Option B — High-Level Architecture"
+        UI[Frontend] --> GW[API Gateway]
+        GW --> SVC_A[Service A]
+        GW --> SVC_B[Service B]
+        SVC_A --> DB[(Database)]
+        SVC_B --> DB
+    end
+```
+
 ---
 
-## 9. Decision
-<!-- Which approach was chosen, why, and who approved it. -->
+## 12. Decision Log
+| # | Date | Decision | Rationale | Alternatives Rejected | Decided by |
+|---|------|----------|-----------|----------------------|------------|
+| 1 | YYYY-MM-DD | | | | |
 
-**Chosen approach:**
-**Rationale:**
-**Approved by:**
-**Date decided:**
+**Current chosen approach:** [name from row above]
 
 ---
 
-## 10. Unknowns & Open Questions
+## 13. Unknowns & Open Questions
 <!-- What do we not know yet? Each item must be resolved before sprint planning. -->
 
 - [ ] Q1:
@@ -126,14 +181,14 @@ journey
 
 ---
 
-## 11. Risks
+## 14. Risks
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|------------|
 | - | high / med / low | high / med / low | - |
 
 ---
 
-## 12. Scope Estimate
+## 15. Scope Estimate
 <!-- Rough sizing to help sprint planning. Not a commitment. -->
 
 - **Estimated sprints:** X
@@ -143,7 +198,14 @@ journey
 
 ---
 
-## 13. Next Steps
+## 16. Glossary / Ubiquitous Language
+| Term | Definition | Also Known As | NOT the Same As |
+|------|-----------|---------------|-----------------|
+| - | - | - | - |
+
+---
+
+## 17. Next Steps
 <!-- What must happen before this is ready for /new-sprint? -->
 
 - [ ] Resolve all open questions

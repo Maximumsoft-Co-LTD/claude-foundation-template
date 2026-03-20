@@ -14,10 +14,11 @@ Format: `[task-id]`  — e.g. `SP1-T002`
 Register all steps with TaskCreate — store the returned IDs:
 
 ```
-t1 = TaskCreate(subject: "[task-id] — impl: load context",         description: "Read all design docs and assess parallelization scope")
-t2 = TaskCreate(subject: "[task-id] — impl: write failing tests",  description: "Write all test files from TDD test plans — confirm every test fails (red)")
-t3 = TaskCreate(subject: "[task-id] — impl: implement",            description: "Implement FE and BE following design docs until all tests pass")
-t4 = TaskCreate(subject: "[task-id] — impl: verify all tests pass",description: "Run full test suite, confirm all new tests pass and no regressions")
+t1 = TaskCreate(subject: "[task-id] — impl: load context",              description: "Read all design docs, discovery constraints, and assess parallelization scope")
+t2 = TaskCreate(subject: "[task-id] — impl: pre-implementation check",  description: "Verify AC→test coverage, FE/BE contract alignment, and no blocking gaps before writing code")
+t3 = TaskCreate(subject: "[task-id] — impl: write failing tests",       description: "Write all test files from TDD test plans — confirm every test fails (red)")
+t4 = TaskCreate(subject: "[task-id] — impl: implement",                 description: "Implement FE and BE following design docs until all tests pass")
+t5 = TaskCreate(subject: "[task-id] — impl: verify all tests pass",     description: "Run full test suite, confirm all new tests pass and no regressions")
 ```
 
 Wire dependencies:
@@ -25,6 +26,7 @@ Wire dependencies:
 TaskUpdate(t2, addBlockedBy: [t1])
 TaskUpdate(t3, addBlockedBy: [t2])
 TaskUpdate(t4, addBlockedBy: [t3])
+TaskUpdate(t5, addBlockedBy: [t4])
 ```
 
 ```
@@ -34,8 +36,10 @@ TaskUpdate(t1, status: in_progress)
 Read all files **in parallel**:
 - `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — epic goals and constraints
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — ACs and success metrics
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md` — FE design + TDD test plan
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md` — BE design + TDD test plan
+- `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md` — FE design + implementation plan + TDD test plan
+- `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md` — BE design + implementation plan + TDD test plan
+
+Note: discovery doc constraints (security, performance, compliance, etc.) are already reflected in the design docs from the coverage checks done in `/fe-design` and `/be-design`. No need to re-read discovery here.
 
 Validate:
 - If `[task-id]-requirement.md` is missing → stop: "Run `/requirement [task-id]` first."
@@ -56,10 +60,40 @@ TaskUpdate(t1, status: completed)
 
 ---
 
-## Step 2 — Write failing tests
+## Step 1b — Pre-implementation readiness check
 
 ```
 TaskUpdate(t2, status: in_progress)
+```
+
+Before writing any code, verify the design docs are complete and consistent:
+
+1. **AC → test coverage** — for each AC in `[task-id]-requirement.md`:
+   - Is there at least one test row in the FE TDD Test Plan OR the BE TDD Test Plan that covers it?
+   - Flag any AC with no test planned.
+
+2. **FE ↔ BE contract alignment** — for each endpoint listed in `[task-id]-frontend.md` API Contracts Consumed:
+   - Does `[task-id]-backend.md` define a matching endpoint (method, path, request/response shape)?
+   - Flag any mismatch or undefined endpoint.
+
+3. **Implementation plan completeness** — for each design section in both frontend and backend docs:
+   - Does the Implementation Plan have a step that covers it?
+   - Flag any section not referenced by any implementation step.
+
+If any gaps are found → **stop**. Report the gaps and instruct the user to fix the relevant design doc before proceeding. Do NOT silently continue with gaps.
+
+If no gaps → proceed to Step 2.
+
+```
+TaskUpdate(t2, status: completed)
+```
+
+---
+
+## Step 2 — Write failing tests
+
+```
+TaskUpdate(t3, status: in_progress)
 ```
 
 **If `HAS_FE` AND `HAS_BE` (and no `SHARED_TYPES` blocker):**
@@ -85,7 +119,7 @@ Write shared type/interface files first, then launch agents A and B above.
 Write all test files sequentially in main context. Confirm all tests **fail** (red).
 
 ```
-TaskUpdate(t2, status: completed)
+TaskUpdate(t3, status: completed)
 ```
 
 ---
@@ -93,7 +127,7 @@ TaskUpdate(t2, status: completed)
 ## Step 3 — Implement
 
 ```
-TaskUpdate(t3, status: in_progress)
+TaskUpdate(t4, status: in_progress)
 ```
 
 **If `HAS_MIGRATION`:**
@@ -121,7 +155,7 @@ Wait for both agents. If either agent reported bugs/unexpected behavior → run 
 Implement sequentially in main context following the relevant design doc.
 
 ```
-TaskUpdate(t3, status: completed)
+TaskUpdate(t4, status: completed)
 ```
 
 ---
@@ -129,7 +163,7 @@ TaskUpdate(t3, status: completed)
 ## Step 4 — Verify
 
 ```
-TaskUpdate(t4, status: in_progress)
+TaskUpdate(t5, status: in_progress)
 ```
 
 Run the full test suite (**FE and BE in parallel** if separate test commands exist):
@@ -138,7 +172,7 @@ Run the full test suite (**FE and BE in parallel** if separate test commands exi
 3. Confirm each AC in `[task-id]-requirement.md` is covered by at least one passing test.
 
 ```
-TaskUpdate(t4, status: completed)
+TaskUpdate(t5, status: completed)
 ```
 
 ---
