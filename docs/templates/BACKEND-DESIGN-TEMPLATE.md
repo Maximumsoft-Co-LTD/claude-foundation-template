@@ -5,8 +5,18 @@
 |-------|-------|
 | **Requirement** | `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` |
 | **FE Design** | `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md` |
+| **Points** | 1 / 2 / 3 / 5 / 8 |
 | **Assignee** | - |
 | **Status** | draft / ready / implemented |
+
+<!-- Required sections by points — see CLAUDE.md Story Points Scale
+  1pt : API Endpoints (brief), 1 TDD test/AC
+  2pt : + Input Validation Rules, TDD Test Plan
+  3pt : + Data Models, Service/Layer Breakdown, Business Logic, Error Handling, Impl Plan
+  5pt+: + Auth Matrix, Sequence Diagram, Class Diagram, Events, Security, Logging, Env Vars, Caching, Migrations, Ext Deps, Performance, Data Contracts
+  8pt : All sections — add ADR entries in Design Decisions, explicit performance benchmarks, and rollback plan
+  Write "N/A — Xpt task" for any section not required at this points level.
+-->
 
 ---
 
@@ -54,6 +64,7 @@
 ---
 
 ## Data Contracts
+<!-- 5pt+ — inter-service contracts only. If single service: write "None — single service." -->
 | Contract | Direction | Format | Version | Owner |
 |----------|-----------|--------|---------|-------|
 | - | inbound / outbound | JSON | v1 | - |
@@ -222,7 +233,7 @@ classDiagram
 ```
 
 ## Design Decisions
-<!-- Non-obvious choices and WHY they were made. Prevents implementers from "fixing" intentional decisions. -->
+<!-- 8pt — Required at 8pt (ADR entries). Include at lower points only if a decision needs explicit justification. -->
 
 | Decision | Why | Alternatives Rejected |
 |----------|-----|----------------------|

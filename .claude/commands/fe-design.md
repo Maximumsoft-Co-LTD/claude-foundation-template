@@ -40,6 +40,16 @@ Validate:
 - If Acceptance Criteria are all empty → stop: "Fill in `[task-id]-requirement.md` first."
 - If Design References (Figma) are present → note them. The design must match those mockups.
 
+Read the **Points** value from the requirement doc Metadata. Then apply the points-based section scope below. Write `"N/A — Xpt task"` for any section not required at this level:
+
+| Points | Required sections |
+|--------|------------------|
+| **1pt** | Brief approach paragraph (replaces full doc narrative), Component list, 1 TDD test per AC |
+| **2pt** | + Component Breakdown (table), API Contracts Consumed, State & Data Flow (brief), Fail State summary table |
+| **3pt** | + UI/UX Overview, Loading & Skeleton States, Implementation Plan, E2E Test Plan, Fail Case Matrix |
+| **5pt+** | All sections — User Journey Map, Behavior Mapping, Routing, Responsive, Analytics, Performance, full Fail Flows, Accessibility, State Inventory |
+| **8pt** | All sections — add ADR entries for non-obvious design choices |
+
 Read current draft:
 4. `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md`
 5. `docs/templates/FRONTEND-DESIGN-TEMPLATE.md` — ensure all sections are covered

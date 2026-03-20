@@ -40,6 +40,16 @@ Read these files in order:
 Validate:
 - If Acceptance Criteria are empty → stop: "Fill in `[task-id]-requirement.md` first."
 
+Read the **Points** value from the requirement doc Metadata. Then apply the points-based section scope below. Write `"N/A — Xpt task"` for any section not required at this level:
+
+| Points | Required sections |
+|--------|------------------|
+| **1pt** | API Endpoints (brief spec — method, path, request, response, key errors), 1 TDD test per AC |
+| **2pt** | + Input Validation Rules, TDD Test Plan (happy path + key error per AC) |
+| **3pt** | + Data Models, Service/Layer Breakdown, Business Logic, Error Handling Strategy, Implementation Plan |
+| **5pt+** | All sections — Authorization & Roles, Sequence Diagram, Class Diagram, Event Publishing, Security, Logging, Env Vars, Caching, DB Migrations, External Dependencies, Performance |
+| **8pt** | All sections — add ADR entries, explicit performance benchmarks, and rollback plan |
+
 Read current draft:
 5. `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md`
 6. `docs/templates/BACKEND-DESIGN-TEMPLATE.md` — ensure all sections are covered

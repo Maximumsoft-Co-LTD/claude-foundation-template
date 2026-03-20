@@ -2,12 +2,26 @@
 
 ## Metadata
 
-
 | Field           | Value                                                         |
 | --------------- | ------------------------------------------------------------- |
 | **Requirement** | `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` |
+| **Points**      | 1 / 2 / 3 / 5 / 8                                            |
 | **Assignee**    | -                                                             |
 | **Status**      | draft / ready / implemented                                   |
+
+<!-- Required sections by points — see CLAUDE.md Story Points Scale
+  1pt : Approach paragraph, Component list, 1 TDD test/AC
+  2pt : + Component Breakdown, API Contracts, State & Data Flow, Fail State table
+  3pt : + UI/UX Overview, Loading States, Impl Plan, E2E Test Plan, Fail Case Matrix, Async Interaction Sequence
+  5pt+: + User Journey Map, Behavior Mapping, Routing, Responsive, Analytics, Perf, State Inventory, full Fail Flows, A11y, Edge Cases
+  8pt : All sections — add ADR entries in Design Decisions for non-obvious choices
+  Write "N/A — Xpt task" for any section not required at this points level.
+-->
+
+
+## Approach
+<!-- 1pt+ — required at all levels. For 1pt tasks this replaces the full doc narrative. -->
+
 
 
 ## Design References
@@ -133,7 +147,7 @@ stateDiagram-v2
 | `ComponentName` | idle / loading / loaded / error / submitting / success | |
 
 ## Design Decisions
-<!-- Non-obvious choices and WHY they were made. Prevents implementers from "fixing" intentional decisions. -->
+<!-- 8pt — Required at 8pt (ADR entries for non-obvious choices). Include at lower points only if a decision needs explicit justification. -->
 
 | Decision | Why | Alternatives Rejected |
 |----------|-----|----------------------|
@@ -160,7 +174,7 @@ stateDiagram-v2
 
 
 ## Async Interaction Sequence
-<!-- Shows timing of async events: user actions, API calls, state updates, UI feedback. -->
+<!-- 3pt+ — Shows timing of async events: user actions, API calls, state updates, UI feedback. -->
 
 ```mermaid
 sequenceDiagram
@@ -368,6 +382,7 @@ flowchart TD
 *If single-step flow: write "None — single step, no rollback needed."*
 
 ## Edge Cases & Error States
+<!-- 5pt+ — part of full Fail Flows. For lower points, cover edge cases inline in the Fail Case Matrix. -->
 
 
 

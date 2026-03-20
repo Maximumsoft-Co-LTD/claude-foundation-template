@@ -53,12 +53,12 @@ flowchart LR
     style T004 fill:#bfb,stroke:#333
 ```
 
-| Task ID | Title | Type | E2E Scenario | Depends On | Est. | Status |
-|---------|-------|------|--------------|------------|------|--------|
-| SP[N]-T001 | - | feat / fix / chore | [brief E2E scenario] | — | Xh | `todo` |
-| SP[N]-T002 | - | feat / fix / chore | [brief E2E scenario] | SP[N]-T001 | Xh | `todo` |
-| SP[N]-T003 | - | feat / fix / chore | [brief E2E scenario] | SP[N]-T001 | Xh | `todo` |
-| SP[N]-T004 | - | feat / fix / chore | [brief E2E scenario] | SP[N]-T002, SP[N]-T003 | Xh | `todo` |
+| Task ID | Title | Type | E2E Scenario | Depends On | Points | Status |
+|---------|-------|------|--------------|------------|--------|--------|
+| SP[N]-T001 | - | feat / fix / chore | [brief E2E scenario] | — | 1/2/3/5/8 | `todo` |
+| SP[N]-T002 | - | feat / fix / chore | [brief E2E scenario] | SP[N]-T001 | 1/2/3/5/8 | `todo` |
+| SP[N]-T003 | - | feat / fix / chore | [brief E2E scenario] | SP[N]-T001 | 1/2/3/5/8 | `todo` |
+| SP[N]-T004 | - | feat / fix / chore | [brief E2E scenario] | SP[N]-T002, SP[N]-T003 | 1/2/3/5/8 | `todo` |
 
 ## Architecture Overview
 <!-- System-level diagram showing how components introduced in this sprint fit together. -->

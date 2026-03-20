@@ -4,17 +4,26 @@
 | Field | Value |
 |-------|-------|
 | **Sprint** | sprint-XX |
+| **Points** | 1 / 2 / 3 / 5 / 8 |
 | **Priority** | critical / high / medium / low |
-| **Estimate** | X days |
 | **Assignee** | - |
 | **Requester** | - |
 | **Status** | todo |
+
+<!-- Required sections by points — see CLAUDE.md Story Points Scale
+  1pt : Problem Statement, ACs, Out of Scope, Done
+  2pt : + User Stories, Dependencies
+  3pt : + Feature Flow, System Behavior, Business Rules, Success Metrics
+  5pt+: + Design References, Analytics, UI Copy, DO/DON'T, NFR, Open Questions
+  8pt : All sections — add extra edge cases and constraints
+  Write "N/A — Xpt task" for any section not required at this points level.
+-->
 
 ## Problem Statement
 <!-- WHY does this task exist? What pain point or opportunity does it address? -->
 
 ## Overview
-<!-- What does this task deliver? One paragraph summary. -->
+<!-- 1pt+ — always required. One paragraph summary of what this task delivers. -->
 
 ## Feature Flow
 <!-- High-level flowchart of the main user flow this task enables. -->

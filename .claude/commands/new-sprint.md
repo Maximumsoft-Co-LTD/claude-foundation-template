@@ -93,12 +93,15 @@ Present the breakdown:
 Proposed sub-tasks for [sprint-id] — [epic title]:
 (Global task counter: last used T[NNN], starting from T[NNN+1])
 
-| Task ID     | Title                               | Type      | E2E Scenario (one sentence)              | Depends On  | Est. |
-|-------------|-------------------------------------|-----------|------------------------------------------|-------------|------|
-| SP2-T005    | User can register an account        | fullstack | User fills form → sees welcome screen    | —           | 2d   |
-| SP2-T006    | User can log in and access dashboard| fullstack | User logs in → lands on dashboard        | SP2-T005    | 2d   |
-| SP2-T007    | Admin can manage user roles         | fullstack | Admin changes role → user sees new perms | SP2-T006    | 2d   |
+| Task ID     | Title                               | Type      | E2E Scenario (one sentence)              | Depends On  | Points |
+|-------------|-------------------------------------|-----------|------------------------------------------|-------------|--------|
+| SP2-T005    | User can register an account        | fullstack | User fills form → sees welcome screen    | —           | 3      |
+| SP2-T006    | User can log in and access dashboard| fullstack | User logs in → lands on dashboard        | SP2-T005    | 5      |
+| SP2-T007    | Admin can manage user roles         | fullstack | Admin changes role → user sees new perms | SP2-T006    | 2      |
 ```
+
+Points scale: 1 (trivial) · 2 (small) · 3 (medium-small) · 5 (medium) · 8 (large) · 13 (too big — must split before proceeding).
+Assign points based on scope of the E2E scenario and expected implementation complexity. If a task scores 13, break it down into smaller tasks instead.
 
 ```
 TaskUpdate(t3, status: completed)
@@ -159,10 +162,10 @@ TaskUpdate(t5, status: in_progress)
 ## [sprint-id] — [Epic Title]
 > `docs/sprints/[sprint-id]/[sprint-id]-overview.md`
 
-| Task | Title | Depends On | Status | Priority | Assigned |
-|------|-------|------------|--------|----------|----------|
-| SP2-T005 | ... | — | `todo` | — | — |
-| SP2-T006 | ... | SP2-T005 | `todo` | — | — |
+| Task | Title | Depends On | Points | Status | Priority | Assigned |
+|------|-------|------------|--------|--------|----------|----------|
+| SP2-T005 | ... | — | 3 | `todo` | — | — |
+| SP2-T006 | ... | SP2-T005 | 5 | `todo` | — | — |
 ```
 
 No per-task files are created here. `/fe-design` and `/be-design` create their own docs when the task begins.

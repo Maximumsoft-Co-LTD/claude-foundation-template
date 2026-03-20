@@ -25,9 +25,9 @@
 ## SP1 — Example Epic
 > `docs/sprints/SP1/SP1-overview.md`
 
-| Task | Title | Depends On | Status | Priority | Assigned |
-|------|-------|------------|--------|----------|----------|
-| SP1-T001 | Example Task | - | `todo` | high | - |
+| Task | Title | Depends On | Points | Status | Priority | Assigned |
+|------|-------|------------|--------|--------|----------|----------|
+| SP1-T001 | Example Task | - | - | `todo` | high | - |
 
 ---
 

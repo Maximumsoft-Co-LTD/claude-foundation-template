@@ -103,6 +103,27 @@ discovery → backlog → todo → in-progress → review → testing → done
 | `testing` | `/testing` |
 | `done` | `/retro-task` |
 
+### Story Points Scale
+
+Tasks are estimated in Fibonacci points at `/new-sprint` time. Points determine documentation depth — every task gets docs, but required sections scale with complexity.
+
+| Points | Size | Rule |
+|--------|------|------|
+| **1** | Trivial | Minimal docs — what changes + ACs + brief approach |
+| **2** | Small | Core docs — ACs + user stories + approach + basic tests |
+| **3** | Medium-small | Standard docs — full requirement + core design sections |
+| **5** | Medium | Full docs — all sections |
+| **8** | Large | Full docs + extra rigor (ADRs, edge cases, perf analysis) |
+| **13** | Too big | ⛔ Block — break into smaller tasks before proceeding |
+
+**Required sections by points:**
+
+| Doc | 1pt | 2pt | 3pt | 5pt+ |
+|-----|-----|-----|-----|------|
+| **Requirement** | Problem + ACs + Out of Scope | + User Stories + Dependencies | + Feature Flow + Business Rules + Metrics | + Analytics + UI Copy + NFR + Open Questions |
+| **FE Design** | Approach + Component list + 1 test/AC | + State/Data Flow + API Contracts + Fail State table | + Loading States + Implementation Plan + E2E Tests | + User Journey + Behavior Mapping + Routing + Responsive + Analytics + Perf + full Fail Flows + A11y |
+| **BE Design** | Endpoint spec + 1 test/AC | + Input Validation + TDD Test Plan | + Data Models + Service Layer + Business Logic + Error Handling + Impl Plan | + Auth Matrix + Sequence Diagram + Events + Security + Logging + Caching + Migrations |
+
 ### TDD Rules
 - Tests are written **before** implementation code — always.
 - Integration tests use **real dependencies** (real DB, real services) — never mocks at the integration layer.

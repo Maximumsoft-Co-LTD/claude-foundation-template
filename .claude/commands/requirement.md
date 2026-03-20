@@ -41,6 +41,17 @@ Locate the task row in the sprint overview sub-task table. Extract:
 - Task title
 - E2E scenario (one-sentence description from the table)
 - Dependencies (other task IDs this task depends on)
+- **Points** (from the Points column)
+
+**Points-based section scope** — based on the task's points, fill only the sections listed below. Write `"N/A — Xpt task"` for any section not required at this level:
+
+| Points | Required sections |
+|--------|------------------|
+| **1pt** | Problem Statement, Acceptance Criteria (2–3 min), Out of Scope, Definition of Done (functional correctness only) |
+| **2pt** | + User Stories, Dependencies |
+| **3pt** | + Feature Flow (mermaid), System Behavior, Data & Business Rules, Success Metrics |
+| **5pt+** | All sections — full doc |
+| **8pt** | All sections — add extra edge cases and constraints |
 
 Read current draft (if exists):
 4. `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`
