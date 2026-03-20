@@ -15,9 +15,37 @@ Format: `[sprint-id]`  — e.g. `SP1`
    - If any task is NOT `done` → stop: "Tasks still open: [list]. Complete all tasks before running /retro-sprint."
 3. Read `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — load Goals, Success Metrics, Sub-tasks, and Definition of Done.
 
+Register all steps with TaskCreate — store the returned IDs:
+
+```
+t1 = TaskCreate(subject: "[sprint-id] — sprint-retro: validate complete",        description: "Confirm all tasks are done and read sprint overview")
+t2 = TaskCreate(subject: "[sprint-id] — sprint-retro: aggregate task retros",    description: "Read all task retros and issues files; compute aggregates")
+t3 = TaskCreate(subject: "[sprint-id] — sprint-retro: evaluate goals + metrics", description: "Evaluate each goal and success metric from sprint overview")
+t4 = TaskCreate(subject: "[sprint-id] — sprint-retro: write sprint retro",       description: "Write sprint retro doc to [sprint-id]-retro.md")
+t5 = TaskCreate(subject: "[sprint-id] — sprint-retro: update BACKLOG.md",        description: "Mark sprint as done in BACKLOG.md")
+```
+
+Wire dependencies:
+```
+TaskUpdate(t2, addBlockedBy: [t1])
+TaskUpdate(t3, addBlockedBy: [t2])
+TaskUpdate(t4, addBlockedBy: [t3])
+TaskUpdate(t5, addBlockedBy: [t4])
+```
+
+Mark t1 as done (validation already complete above):
+```
+TaskUpdate(t1, status: in_progress)
+TaskUpdate(t1, status: completed)
+```
+
 ---
 
 ## Step 2 — Aggregate all task retros
+
+```
+TaskUpdate(t2, status: in_progress)
+```
 
 For every task in the sprint, read:
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-retro.md` — estimate vs actual, what went well, improvements, TDD effectiveness, action items
@@ -31,18 +59,34 @@ Compute aggregates:
 - All knowledge sharing items combined
 - All action items combined (deduplicated)
 
+```
+TaskUpdate(t2, status: completed)
+```
+
 ---
 
 ## Step 3 — Evaluate sprint goals and success metrics
+
+```
+TaskUpdate(t3, status: in_progress)
+```
 
 From `[sprint-id]-overview.md`:
 - For each **Goal** → was it achieved? (yes / partially / no)
 - For each **Success Metric** → what was the actual result vs target?
 - **Definition of Done (Sprint Level)** → check every checkbox, mark which passed/failed
 
+```
+TaskUpdate(t3, status: completed)
+```
+
 ---
 
 ## Step 4 — Write the sprint retrospective
+
+```
+TaskUpdate(t4, status: in_progress)
+```
 
 Save to `docs/sprints/[sprint-id]/[sprint-id]-retro.md` using `docs/templates/RETRO-SPRINT-TEMPLATE.md` as the structure:
 
@@ -101,13 +145,25 @@ Save to `docs/sprints/[sprint-id]/[sprint-id]-retro.md` using `docs/templates/RE
 - [ ] Sprint retro written
 ```
 
+```
+TaskUpdate(t4, status: completed)
+```
+
 ---
 
 ## Step 5 — Update BACKLOG.md
 
+```
+TaskUpdate(t5, status: in_progress)
+```
+
 Update the sprint section header to show `done`:
 ```markdown
 ## SP1 — [Epic Title] ✓ done
+```
+
+```
+TaskUpdate(t5, status: completed)
 ```
 
 ---

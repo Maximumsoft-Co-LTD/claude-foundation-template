@@ -11,6 +11,26 @@ Format: `[task-id]`  — e.g. `SP1-T002`
 
 1. Parse `[task-id]` from `$ARGUMENTS`. Extract `[sprint-id]` from prefix (e.g. `SP1-T001` → `SP1`).
 
+Register all steps with TaskCreate — store the returned IDs:
+
+```
+t1 = TaskCreate(subject: "[task-id] — impl: load context",         description: "Read all design docs and assess parallelization scope")
+t2 = TaskCreate(subject: "[task-id] — impl: write failing tests",  description: "Write all test files from TDD test plans — confirm every test fails (red)")
+t3 = TaskCreate(subject: "[task-id] — impl: implement",            description: "Implement FE and BE following design docs until all tests pass")
+t4 = TaskCreate(subject: "[task-id] — impl: verify all tests pass",description: "Run full test suite, confirm all new tests pass and no regressions")
+```
+
+Wire dependencies:
+```
+TaskUpdate(t2, addBlockedBy: [t1])
+TaskUpdate(t3, addBlockedBy: [t2])
+TaskUpdate(t4, addBlockedBy: [t3])
+```
+
+```
+TaskUpdate(t1, status: in_progress)
+```
+
 Read all files **in parallel**:
 - `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — epic goals and constraints
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — ACs and success metrics
@@ -30,9 +50,17 @@ Determine which of the following apply — this drives the strategy below:
 - `SHARED_TYPES`: FE and BE share type/interface definitions that must be established first
 - `HAS_MIGRATION`: BE includes DB migrations that must run before other BE work
 
+```
+TaskUpdate(t1, status: completed)
+```
+
 ---
 
 ## Step 2 — Write failing tests
+
+```
+TaskUpdate(t2, status: in_progress)
+```
 
 **If `HAS_FE` AND `HAS_BE` (and no `SHARED_TYPES` blocker):**
 
@@ -56,9 +84,17 @@ Write shared type/interface files first, then launch agents A and B above.
 **If only `HAS_FE` or only `HAS_BE`:**
 Write all test files sequentially in main context. Confirm all tests **fail** (red).
 
+```
+TaskUpdate(t2, status: completed)
+```
+
 ---
 
 ## Step 3 — Implement
+
+```
+TaskUpdate(t3, status: in_progress)
+```
 
 **If `HAS_MIGRATION`:**
 Run DB migrations first in main context before launching implementation agents.
@@ -84,14 +120,26 @@ Wait for both agents. If either agent reported bugs/unexpected behavior → run 
 **If only `HAS_FE` or only `HAS_BE`:**
 Implement sequentially in main context following the relevant design doc.
 
+```
+TaskUpdate(t3, status: completed)
+```
+
 ---
 
 ## Step 4 — Verify
+
+```
+TaskUpdate(t4, status: in_progress)
+```
 
 Run the full test suite (**FE and BE in parallel** if separate test commands exist):
 1. All new tests must **pass** (green).
 2. No existing tests may be broken.
 3. Confirm each AC in `[task-id]-requirement.md` is covered by at least one passing test.
+
+```
+TaskUpdate(t4, status: completed)
+```
 
 ---
 

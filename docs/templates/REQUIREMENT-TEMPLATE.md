@@ -43,6 +43,23 @@
 <!-- Events, funnels, or metrics to instrument as part of this task. -->
 - [ ] Event: e.g. `user_signed_up` — fired when AC-1 completes
 
+## Open Questions
+<!-- Questions that MUST be resolved before implementation starts. -->
+<!-- Implementation must NOT start until all Open Questions are resolved. -->
+| # | Question | Owner | Deadline | Decision |
+|---|----------|-------|----------|----------|
+| 1 | | | | |
+
+## UI Copy
+<!-- Exact strings for all visible text. No guessing during implementation. -->
+| Location | Copy |
+|----------|------|
+| Page heading | |
+| Submit button | |
+| Empty state | |
+| Success message | |
+| Confirm dialog | |
+
 ## Out of Scope
 <!-- Explicitly list what is NOT included. Prevents scope creep. -->
 -

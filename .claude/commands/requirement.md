@@ -11,6 +11,26 @@ Format: `[task-id]`  — e.g. `SP1-T001`
 
 1. Parse `[task-id]` from `$ARGUMENTS`. Extract `[sprint-id]` from prefix (e.g. `SP1-T001` → `SP1`).
 
+Register all steps with TaskCreate — store the returned IDs:
+
+```
+t1 = TaskCreate(subject: "[task-id] — load context",             description: "Read sprint overview, discovery doc, and existing requirement draft")
+t2 = TaskCreate(subject: "[task-id] — draft requirement doc",    description: "Draft complete requirement doc including ACs, user stories, and success metrics")
+t3 = TaskCreate(subject: "[task-id] — present for confirmation", description: "Show drafted requirement to user and apply edits")
+t4 = TaskCreate(subject: "[task-id] — save + update status",     description: "Save confirmed requirement doc and update task status in BACKLOG.md")
+```
+
+Wire dependencies:
+```
+TaskUpdate(t2, addBlockedBy: [t1])
+TaskUpdate(t3, addBlockedBy: [t2])
+TaskUpdate(t4, addBlockedBy: [t3])
+```
+
+```
+TaskUpdate(t1, status: in_progress)
+```
+
 Read these files in order:
 2. `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — epic goals, sub-task table, E2E scenarios, dependencies
 3. `docs/discovery/` — scan for any discovery doc related to this sprint's epic. If found, read it for: Problem Statement, goals, in-scope items, constraints, open questions.
@@ -24,9 +44,17 @@ Read current draft (if exists):
 4. `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`
 5. `docs/templates/REQUIREMENT-TEMPLATE.md` — ensure all sections will be covered
 
+```
+TaskUpdate(t1, status: completed)
+```
+
 ---
 
 ## Step 2 — Propose the requirement doc
+
+```
+TaskUpdate(t2, status: in_progress)
+```
 
 Using the context gathered, draft a complete requirement doc:
 
@@ -45,9 +73,17 @@ Using the context gathered, draft a complete requirement doc:
 - **Out of Scope** — explicitly list anything mentioned in the discovery or sprint overview that is NOT part of this task.
 - **Dependencies** — list dependent task IDs from the sprint overview, plus any external services or decisions.
 
+```
+TaskUpdate(t2, status: completed)
+```
+
 ---
 
 ## Step 3 — Present for confirmation
+
+```
+TaskUpdate(t3, status: in_progress)
+```
 
 Print the full drafted requirement doc, then ask:
 
@@ -59,13 +95,25 @@ Does this requirement look right?
 
 Wait for the user's response. Apply any edits they request.
 
+```
+TaskUpdate(t3, status: completed)
+```
+
 ---
 
 ## Step 4 — Save and update status
 
+```
+TaskUpdate(t4, status: in_progress)
+```
+
 1. Create directory `docs/sprints/[sprint-id]/[task-id]/` if it does not exist.
 2. Save the confirmed requirement to `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`.
 3. Update task status in `docs/BACKLOG.md` to `in-progress` if it was `todo`.
+
+```
+TaskUpdate(t4, status: completed)
+```
 
 ---
 

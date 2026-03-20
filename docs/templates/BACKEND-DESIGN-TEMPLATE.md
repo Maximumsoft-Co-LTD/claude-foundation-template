@@ -148,8 +148,30 @@ flowchart TD
 
 ---
 
+## Design Decisions
+<!-- Non-obvious choices and WHY they were made. Prevents implementers from "fixing" intentional decisions. -->
+
+| Decision | Why | Alternatives Rejected |
+|----------|-----|----------------------|
+| | | |
+
+---
+
 ## Business Logic
-<!-- Non-obvious rules, calculations, and decision flows. Number each rule. -->
+<!-- Non-obvious rules, calculations, and decision flows.
+     Write each rule as pseudocode — not prose. Prose is ambiguous; pseudocode is not. -->
+
+<!--
+Rule N: [Rule name]
+```
+IF condition:
+  do X
+ELSE IF condition:
+  do Y
+ELSE:
+  do Z
+```
+-->
 
 1.
 2.

@@ -11,21 +11,47 @@ Format: `[task-id]`  — e.g. `SP1-T002`
 
 1. Parse `[task-id]` from `$ARGUMENTS`. Extract `[sprint-id]` from prefix (e.g. `SP1-T001` → `SP1`).
 
+Register all steps with TaskCreate — store the returned IDs:
+
+```
+t1 = TaskCreate(subject: "[task-id] — fe: load context",        description: "Read sprint overview, requirement doc, and existing frontend design draft")
+t2 = TaskCreate(subject: "[task-id] — fe: fill design",         description: "Write complete FE design, implementation plan, TDD test plan, and E2E test plan")
+t3 = TaskCreate(subject: "[task-id] — fe: save + update status",description: "Save frontend design doc and update task status in BACKLOG.md")
+```
+
+Wire dependencies:
+```
+TaskUpdate(t2, addBlockedBy: [t1])
+TaskUpdate(t3, addBlockedBy: [t2])
+```
+
+```
+TaskUpdate(t1, status: in_progress)
+```
+
 Read these files in order:
 2. `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — epic goals and constraints
-2. `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — ACs, success metrics, design references
+3. `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — ACs, success metrics, design references
 
 Validate:
 - If Acceptance Criteria are all empty → stop: "Fill in `[task-id]-requirement.md` first."
 - If Design References (Figma) are present → note them. The design must match those mockups.
 
 Read current draft:
-3. `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md`
-4. `docs/templates/FRONTEND-DESIGN-TEMPLATE.md` — ensure all sections are covered
+4. `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md`
+5. `docs/templates/FRONTEND-DESIGN-TEMPLATE.md` — ensure all sections are covered
+
+```
+TaskUpdate(t1, status: completed)
+```
 
 ---
 
 ## Step 2 — Fill in the complete FE design
+
+```
+TaskUpdate(t2, status: in_progress)
+```
 
 Write a complete, implementation-ready design for every section:
 
@@ -57,12 +83,24 @@ Write a complete, implementation-ready design for every section:
 - **Edge Cases & Error States** — network timeout, 401, 500, empty list, session expiry, concurrent edits.
 - **Accessibility Notes** — keyboard nav, focus management, ARIA labels, color contrast.
 
+```
+TaskUpdate(t2, status: completed)
+```
+
 ---
 
 ## Step 3 — Save and update status
 
+```
+TaskUpdate(t3, status: in_progress)
+```
+
 1. Save the completed design to `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md`.
 2. Update task status in `docs/BACKLOG.md` to `in-progress` if it was `todo`.
+
+```
+TaskUpdate(t3, status: completed)
+```
 
 ---
 

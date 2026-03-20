@@ -19,9 +19,37 @@ Format: `[sprint-id] [epic description]`  — e.g. `SP2 Build user authenticatio
    - If **NO discovery doc found** → warn: "⚠️ No discovery doc found for this epic. Running `/discovery` first gives better task coverage and surfaces constraints early. Continue without it? (y/n)" — wait for response before proceeding.
    - If **discovery doc found** → read it for context (Problem Statement, chosen approach, scope estimate, constraints). Then check for unresolved open questions (any item not marked resolved/answered). If any exist → warn: "⚠️ Discovery doc has unresolved open questions:" and list each one. Then ask: "These may affect task scope. Continue anyway? (y/n)" — wait for response before proceeding.
 
+Register all steps with TaskCreate — store the returned IDs:
+
+```
+t1 = TaskCreate(subject: "[sprint-id] — validate + resolve task counter",    description: "Validate sprint ID, find highest task number, check discovery doc")
+t2 = TaskCreate(subject: "[sprint-id] — create sprint directory + overview", description: "Create docs/sprints/[sprint-id]/ and [sprint-id]-overview.md from template")
+t3 = TaskCreate(subject: "[sprint-id] — propose sub-task breakdown",         description: "Analyze epic and propose vertical-slice sub-tasks with E2E scenarios")
+t4 = TaskCreate(subject: "[sprint-id] — coverage check vs discovery",        description: "Cross-check proposed tasks against discovery doc goals, scope, and journeys")
+t5 = TaskCreate(subject: "[sprint-id] — update docs after confirmation",     description: "Fill sprint overview sub-tasks table and update BACKLOG.md after user confirms")
+```
+
+Wire dependencies:
+```
+TaskUpdate(t2, addBlockedBy: [t1])
+TaskUpdate(t3, addBlockedBy: [t2])
+TaskUpdate(t4, addBlockedBy: [t3])
+TaskUpdate(t5, addBlockedBy: [t4])
+```
+
+Mark t1 as done (validation already complete above):
+```
+TaskUpdate(t1, status: in_progress)
+TaskUpdate(t1, status: completed)
+```
+
 ---
 
 ## Step 2 — Create the sprint directory and overview
+
+```
+TaskUpdate(t2, status: in_progress)
+```
 
 1. Create directory `docs/sprints/[sprint-id]/`.  (e.g. `docs/sprints/SP2/`)
 2. Create `docs/sprints/[sprint-id]/[sprint-id]-overview.md` from `docs/templates/SPRINT-OVERVIEW-TEMPLATE.md`.
@@ -32,9 +60,17 @@ Format: `[sprint-id] [epic description]`  — e.g. `SP2 Build user authenticatio
    - Design References: from discovery doc if available
    - Status: `planning`
 
+```
+TaskUpdate(t2, status: completed)
+```
+
 ---
 
 ## Step 3 — Propose sub-task breakdown
+
+```
+TaskUpdate(t3, status: in_progress)
+```
 
 Analyze the epic and propose a breakdown. Rules:
 - Each sub-task is completable by one person in 1–3 days.
@@ -64,9 +100,17 @@ Proposed sub-tasks for [sprint-id] — [epic title]:
 | SP2-T007    | Admin can manage user roles         | fullstack | Admin changes role → user sees new perms | SP2-T006    | 2d   |
 ```
 
+```
+TaskUpdate(t3, status: completed)
+```
+
 ---
 
 ## Step 3b — Coverage check against discovery
+
+```
+TaskUpdate(t4, status: in_progress)
+```
 
 If a discovery doc was found in Step 1, cross-check the proposed tasks against it:
 
@@ -96,9 +140,17 @@ Coverage check vs discovery doc:
 
 After showing the coverage summary, ask: "Does this breakdown look right? You can rename tasks, add/remove rows, or say 'confirm' to scaffold all."
 
+```
+TaskUpdate(t4, status: completed)
+```
+
 ---
 
 ## Step 4 — Update docs (after user confirms)
+
+```
+TaskUpdate(t5, status: in_progress)
+```
 
 1. Fill the Sub-tasks table in `[sprint-id]-overview.md` with the confirmed list.
 2. Add a new sprint section to `docs/BACKLOG.md`:
@@ -114,6 +166,10 @@ After showing the coverage summary, ask: "Does this breakdown look right? You ca
 ```
 
 No per-task files are created here. `/fe-design` and `/be-design` create their own docs when the task begins.
+
+```
+TaskUpdate(t5, status: completed)
+```
 
 ---
 

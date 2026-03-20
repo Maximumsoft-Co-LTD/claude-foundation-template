@@ -109,6 +109,20 @@ flowchart TD
 
 - 
 
+## State Inventory
+<!-- Exhaustive list of every UI state per component. No state should be left to imagination. -->
+
+| Component | States | Notes |
+|-----------|--------|-------|
+| `ComponentName` | default / loading / empty / error | |
+
+## Design Decisions
+<!-- Non-obvious choices and WHY they were made. Prevents implementers from "fixing" intentional decisions. -->
+
+| Decision | Why | Alternatives Rejected |
+|----------|-----|----------------------|
+| | | |
+
 ## Routing & Navigation
 
 

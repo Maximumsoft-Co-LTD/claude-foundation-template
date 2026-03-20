@@ -11,21 +11,47 @@ Format: `[task-id]`  — e.g. `SP1-T002`
 
 1. Parse `[task-id]` from `$ARGUMENTS`. Extract `[sprint-id]` from prefix (e.g. `SP1-T001` → `SP1`).
 
+Register all steps with TaskCreate — store the returned IDs:
+
+```
+t1 = TaskCreate(subject: "[task-id] — be: load context",         description: "Read sprint overview, requirement doc, and frontend design to align BE contracts")
+t2 = TaskCreate(subject: "[task-id] — be: fill design",          description: "Write complete BE design, implementation plan, and TDD test plan")
+t3 = TaskCreate(subject: "[task-id] — be: save + update status", description: "Save backend design doc and update task status in BACKLOG.md")
+```
+
+Wire dependencies:
+```
+TaskUpdate(t2, addBlockedBy: [t1])
+TaskUpdate(t3, addBlockedBy: [t2])
+```
+
+```
+TaskUpdate(t1, status: in_progress)
+```
+
 Read these files in order:
 2. `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — epic goals and technical constraints
-2. `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — ACs, success metrics
-3. `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md` — API contracts the FE expects (align BE to this)
+3. `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — ACs, success metrics
+4. `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md` — API contracts the FE expects (align BE to this)
 
 Validate:
 - If Acceptance Criteria are empty → stop: "Fill in `[task-id]-requirement.md` first."
 
 Read current draft:
-4. `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md`
-5. `docs/templates/BACKEND-DESIGN-TEMPLATE.md` — ensure all sections are covered
+5. `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md`
+6. `docs/templates/BACKEND-DESIGN-TEMPLATE.md` — ensure all sections are covered
+
+```
+TaskUpdate(t1, status: completed)
+```
 
 ---
 
 ## Step 2 — Fill in the complete BE design
+
+```
+TaskUpdate(t2, status: in_progress)
+```
 
 Write a complete, implementation-ready design for every section:
 
@@ -52,12 +78,24 @@ Write a complete, implementation-ready design for every section:
 - **External Dependencies** — services called, purpose, failure behavior, timeout.
 - **Performance & Scalability Notes** — data volume, N+1 risks, index strategy, rate limiting, background jobs.
 
+```
+TaskUpdate(t2, status: completed)
+```
+
 ---
 
 ## Step 3 — Save and update status
 
+```
+TaskUpdate(t3, status: in_progress)
+```
+
 1. Save the completed design to `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md`.
 2. Update task status in `docs/BACKLOG.md` to `in-progress` if it was `todo`.
+
+```
+TaskUpdate(t3, status: completed)
+```
 
 ---
 

@@ -11,6 +11,29 @@ Format: `[disc-id] [name]`  — e.g. `disc-001 user-authentication`
 
 Before asking anything, create `docs/discovery/[disc-id]-[name].md` from `docs/templates/DISCOVERY-TEMPLATE.md` with all sections blank (filled with `TBD`).
 
+Then register all steps with TaskCreate — store the returned IDs:
+
+```
+t1 = TaskCreate(subject: "[disc-id] — create discovery doc",    description: "Create docs/discovery/[disc-id]-[name].md from template with TBD placeholders")
+t2 = TaskCreate(subject: "[disc-id] — ask gap questions",       description: "Analyze arguments and ask only unanswered gap questions in one message")
+t3 = TaskCreate(subject: "[disc-id] — update doc with answers", description: "Fill all sections of the discovery doc with user's answers")
+t4 = TaskCreate(subject: "[disc-id] — update BACKLOG.md",       description: "Add discovery entry to docs/BACKLOG.md")
+```
+
+Wire dependencies:
+```
+TaskUpdate(t2, addBlockedBy: [t1])
+TaskUpdate(t3, addBlockedBy: [t2])
+TaskUpdate(t4, addBlockedBy: [t3])
+```
+
+Mark t1 as already done (file was created above), then start t2:
+```
+TaskUpdate(t1, status: in_progress)
+TaskUpdate(t1, status: completed)
+TaskUpdate(t2, status: in_progress)
+```
+
 ---
 
 ## Step 2 — Infer what's already known, then ask only about the gaps
@@ -39,21 +62,41 @@ Then show a brief summary of what's already inferred, followed by **only the una
 
 Wait for the user's answers before proceeding.
 
+```
+TaskUpdate(t2, status: completed)
+```
+
 ---
 
 ## Step 3 — Update the discovery document with answers
+
+```
+TaskUpdate(t3, status: in_progress)
+```
 
 1. Fill every section of the already-created file from the user's answers. Write `TBD — needs input` for anything unanswered.
 2. For Section 8 (Proposed Approaches): structure at least 2 options. If only one was mentioned, add a placeholder Option B.
 3. For Section 10 (Unknowns & Open Questions): mark each as `- [ ]` checkbox.
 4. For Section 13 (Next Steps): always include "When ready → run `/new-sprint [sprint-id] \"[epic description]\"`".
 
+```
+TaskUpdate(t3, status: completed)
+```
+
 ---
 
 ## Step 4 — Update BACKLOG.md
 
+```
+TaskUpdate(t4, status: in_progress)
+```
+
 Add to the **Discovery Backlog** section in `docs/BACKLOG.md`:
 - Status: `discovery` if open questions remain, `backlog` if all resolved.
+
+```
+TaskUpdate(t4, status: completed)
+```
 
 ---
 
