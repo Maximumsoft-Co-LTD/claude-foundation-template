@@ -10,6 +10,15 @@
 | **Team** | - |
 | **Epic Owner** | - |
 
+## Team Capacity
+| Person | Available days | Notes |
+|--------|---------------|-------|
+| - | - | e.g. on leave Mon–Tue |
+
+- **Total SP committed:** [sum of all task points]
+- **Buffer:** [SP reserved for unplanned work / bugs — recommended 20%]
+- **Over-committed?** yes / no _(flag before sprint starts, not after)_
+
 ## Problem Statement
 <!-- WHY are we building this? What user or business problem does this sprint solve? -->
 

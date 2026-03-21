@@ -112,17 +112,17 @@ Tasks are estimated in Fibonacci points at `/new-sprint` time. Points determine 
 | **1** | Trivial | Minimal docs — what changes + ACs + brief approach |
 | **2** | Small | Core docs — ACs + user stories + approach + basic tests |
 | **3** | Medium-small | Standard docs — full requirement + core design sections |
-| **5** | Medium | Full docs — all sections |
-| **8** | Large | Full docs + extra rigor (ADRs, edge cases, perf analysis) |
+| **5** | Medium | Extended docs — most sections, system-level design |
+| **8** | Large | All sections + full rigor (ADRs, perf benchmarks, analytics, a11y) |
 | **13** | Too big | ⛔ Block — break into smaller tasks before proceeding |
 
 **Required sections by points:**
 
-| Doc | 1pt | 2pt | 3pt | 5pt+ |
-|-----|-----|-----|-----|------|
-| **Requirement** | Problem + ACs + Out of Scope | + User Stories + Dependencies | + Feature Flow + Business Rules + Metrics | + Analytics + UI Copy + NFR + Open Questions |
-| **FE Design** | Approach + Component list + 1 test/AC | + State/Data Flow + API Contracts + Fail State table | + Loading States + Implementation Plan + E2E Tests | + User Journey + Behavior Mapping + Routing + Responsive + Analytics + Perf + full Fail Flows + A11y |
-| **BE Design** | Endpoint spec + 1 test/AC | + Input Validation + TDD Test Plan | + Data Models + Service Layer + Business Logic + Error Handling + Impl Plan | + Auth Matrix + Sequence Diagram + Events + Security + Logging + Caching + Migrations |
+| Doc | 1pt | 2pt | 3pt | 5pt | 8pt |
+|-----|-----|-----|-----|-----|-----|
+| **Requirement** | Problem + ACs + Out of Scope | + User Stories + Dependencies + Test Data + Rollout Strategy | + Feature Flow + System Behavior + Business Rules + Metrics | + Design References + Analytics + UI Copy + DO/DON'T | + NFR + Open Questions |
+| **FE Design** | Approach + Existing Code Context + Component list + TDD (min. 1 test/AC) | + Env/Config Deps + Component Breakdown + API Contracts + State & Data Flow + Fail State table | + UI/UX Overview + Loading States + Impl Plan + E2E Tests + Fail Case Matrix + Async Sequence | + User Journey + Behavior Mapping + Routing + Responsive + State Inventory + Edge Cases | + Analytics Events + Performance + full Fail Flows + A11y + Design Decisions |
+| **BE Design** | Endpoint spec + Existing Code Context + TDD (min. 1 test/AC) | + API Versioning + Input Validation + full TDD Test Plan | + Data Models + Service Layer + Business Logic + Error Handling + Impl Plan | + Auth Matrix + Sequence Diagram + Data Contracts + Events + Security + Logging + Env Vars + Migrations + Ext Deps | + Class Diagram + Caching + Performance + Design Decisions |
 
 ### TDD Rules
 - Tests are written **before** implementation code — always.

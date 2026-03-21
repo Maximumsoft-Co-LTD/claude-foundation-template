@@ -12,10 +12,10 @@
 
 <!-- Required sections by points — see CLAUDE.md Story Points Scale
   1pt : Problem Statement, ACs, Out of Scope, Done
-  2pt : + User Stories, Dependencies
+  2pt : + User Stories, Dependencies, Test Data, Rollout Strategy
   3pt : + Feature Flow, System Behavior, Business Rules, Success Metrics
-  5pt+: + Design References, Analytics, UI Copy, DO/DON'T, NFR, Open Questions
-  8pt : All sections — add extra edge cases and constraints
+  5pt : + Design References, Analytics, UI Copy, DO/DON'T
+  8pt : + NFR, Open Questions — add extra edge cases and constraints
   Write "N/A — Xpt task" for any section not required at this points level.
 -->
 
@@ -50,11 +50,30 @@ flowchart TD
 
 ## Acceptance Criteria
 <!-- Each AC must be specific, testable, and user-visible (observable from the browser/client).
-     Format: "Given [context], when [user action], then [observable outcome]."
+     Format: multi-line GIVEN / WHEN / THEN / AND — no single-line summaries.
+     ❌ BAD : "user สามารถ login ได้"
+     ✅ GOOD:
+       GIVEN user กรอก email + password ถูกต้อง
+       WHEN กด submit
+       THEN redirect ไป /dashboard ภายใน 2s
+       AND session token ถูก set ใน httpOnly cookie
      Every AC must map to at least one E2E test scenario. -->
-- [ ] AC-1: Given __, when __, then __.
-- [ ] AC-2: Given __, when __, then __.
-- [ ] AC-3: Given __, when __, then __.
+
+- [ ] **AC-1: [scenario title]**
+  GIVEN [context — starting state or precondition]
+  WHEN [user action or system event]
+  THEN [observable outcome — what the user sees or what the system does]
+  AND [additional outcome] _(remove if not needed)_
+
+- [ ] **AC-2: [scenario title]**
+  GIVEN [context]
+  WHEN [action]
+  THEN [outcome]
+
+- [ ] **AC-3: [scenario title]**
+  GIVEN [context]
+  WHEN [action]
+  THEN [outcome]
 
 ## Data & Business Rules
 | Rule ID | Rule | Example | Applies to AC |
@@ -106,6 +125,14 @@ flowchart TD
 | Scalability | - | - | - |
 | Reliability | - | - | - |
 
+## Rollout / Release Strategy
+<!-- 2pt+ — required for any user-visible change. For 1pt internal/refactor tasks write "N/A — no user-facing impact."
+     How will this feature reach users? Prevents deploy-day assumptions. -->
+- **Strategy:** all-at-once / feature flag / gradual rollout / internal-only first
+- **Feature flag name:** `feature_flag_name` _(if applicable)_
+- **Rollback plan:** [how to disable or revert if something goes wrong in prod]
+- **Who gets it first:** [all users / specific cohort / internal team]
+
 ## Out of Scope
 <!-- Explicitly list what is NOT included. Prevents scope creep. -->
 -
@@ -113,6 +140,17 @@ flowchart TD
 ## Dependencies
 <!-- Other tasks, services, APIs, or team decisions this task waits on. -->
 -
+
+## Test Data / Seed Requirements
+<!-- 2pt+ — required when the task has meaningful ACs that depend on existing data or config. For 1pt tasks write "N/A — no special data needed."
+     Data or accounts needed before testing can begin. Prevents "works on my machine" blockers. -->
+| What | Value / Setup | Who sets it up |
+|------|---------------|----------------|
+| Test account | e.g. `test@example.com / password123` | - |
+| Seed data | e.g. 3 active products in DB | - |
+| Feature flag | e.g. `new_checkout=true` | - |
+
+_If no special data needed: write "None — standard dev environment is sufficient."_
 
 ## Definition of Done
 

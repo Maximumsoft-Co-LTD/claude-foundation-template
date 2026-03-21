@@ -26,6 +26,16 @@
 - Bugs caught by tests before manual QA: [N]
 - Gaps found in TDD test plan: [list or "none"]
 
+## AC Coverage Check
+<!-- Verify every AC has a passing test before closing the task. -->
+| AC | Test exists? | Test passes? | Notes |
+|----|-------------|-------------|-------|
+| AC-1 | yes / no | yes / no | |
+| AC-2 | yes / no | yes / no | |
+
+- [ ] All ACs have at least one passing test
+- [ ] No AC is "assumed passing" without a test
+
 ## Knowledge sharing
 <!-- Things learned that the team should know or that should go into CLAUDE.md -->
 -

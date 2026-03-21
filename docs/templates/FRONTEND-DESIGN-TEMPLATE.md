@@ -10,11 +10,11 @@
 | **Status**      | draft / ready / implemented                                   |
 
 <!-- Required sections by points — see CLAUDE.md Story Points Scale
-  1pt : Approach paragraph, Component list, 1 TDD test/AC
-  2pt : + Component Breakdown, API Contracts, State & Data Flow, Fail State table
+  1pt : Approach, Existing Code Context, Component list, TDD Test Plan (min. 1 test/AC)
+  2pt : + Env/Config Dependencies, Component Breakdown, API Contracts, State & Data Flow, Fail State table
   3pt : + UI/UX Overview, Loading States, Impl Plan, E2E Test Plan, Fail Case Matrix, Async Interaction Sequence
-  5pt+: + User Journey Map, Behavior Mapping, Routing, Responsive, Analytics, Perf, State Inventory, full Fail Flows, A11y, Edge Cases
-  8pt : All sections — add ADR entries in Design Decisions for non-obvious choices
+  5pt : + User Journey Map, Behavior Mapping, Routing & Navigation, Responsive, State Inventory, Edge Cases
+  8pt : + Analytics Events, Performance, full Fail Flows, A11y, Design Decisions (ADRs)
   Write "N/A — Xpt task" for any section not required at this points level.
 -->
 
@@ -162,6 +162,37 @@ stateDiagram-v2
 | ------- | --------------- | ------------- | ----- |
 | `/path` | `PageComponent` | yes / no      |       |
 
+
+## Existing Code Context
+<!-- 1pt+ — required at all levels. Even trivial tasks should check what already exists before building new.
+     List reusable components, hooks, and patterns already in the codebase.
+     Prevents duplicate code and keeps design grounded in project conventions.
+     Fill this in before Component Breakdown — reuse first, build new second. -->
+
+**Components available (use as-is):**
+| Component | File path | Notes |
+|-----------|-----------|-------|
+| `<ComponentName />` | `src/components/...` | |
+
+**Hooks available:**
+| Hook | File path | Notes |
+|------|-----------|-------|
+| `useHookName()` | `src/hooks/...` | |
+
+**Project patterns to follow:**
+- API calls: always via `src/api/client.ts` — never call `fetch` directly
+- Error handling: via `useErrorHandler()` hook
+- _(add project-specific patterns here)_
+
+## Environment / Config Dependencies
+<!-- 2pt+ — required when the task introduces API integration or new config. For 1pt tasks write "N/A — no new env vars required."
+     Env vars or feature flags the FE needs. Prevents missing-config surprises at deploy time. -->
+| Variable | Purpose | Required | Default |
+|----------|---------|----------|---------|
+| `NEXT_PUBLIC_API_URL` | API base URL | yes | - |
+| `NEXT_PUBLIC_FEATURE_FLAG` | Feature flag name | no | `false` |
+
+_If none: write "None — no new env vars required."_
 
 ## Component Breakdown
 
@@ -382,7 +413,7 @@ flowchart TD
 *If single-step flow: write "None — single step, no rollback needed."*
 
 ## Edge Cases & Error States
-<!-- 5pt+ — part of full Fail Flows. For lower points, cover edge cases inline in the Fail Case Matrix. -->
+<!-- 5pt — required at 5pt and above. For lower points, cover edge cases inline in the Fail Case Matrix. -->
 
 
 

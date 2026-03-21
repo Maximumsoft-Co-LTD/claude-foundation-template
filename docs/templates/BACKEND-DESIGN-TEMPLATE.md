@@ -10,11 +10,11 @@
 | **Status** | draft / ready / implemented |
 
 <!-- Required sections by points — see CLAUDE.md Story Points Scale
-  1pt : API Endpoints (brief), 1 TDD test/AC
-  2pt : + Input Validation Rules, TDD Test Plan
+  1pt : API Endpoints (brief), Existing Code Context, TDD Test Plan (min. 1 test/AC)
+  2pt : + API Versioning Strategy, Input Validation Rules, full TDD Test Plan
   3pt : + Data Models, Service/Layer Breakdown, Business Logic, Error Handling, Impl Plan
-  5pt+: + Auth Matrix, Sequence Diagram, Class Diagram, Events, Security, Logging, Env Vars, Caching, Migrations, Ext Deps, Performance, Data Contracts
-  8pt : All sections — add ADR entries in Design Decisions, explicit performance benchmarks, and rollback plan
+  5pt : + Auth Matrix, Sequence Diagram, Data Contracts, Events, Security, Logging, Env Vars, Migrations, Ext Deps
+  8pt : + Class Diagram, Caching, Performance, Design Decisions (ADRs)
   Write "N/A — Xpt task" for any section not required at this points level.
 -->
 
@@ -63,8 +63,20 @@
 
 ---
 
+## API Versioning Strategy
+<!-- 2pt+ — required when introducing or modifying endpoints. For 1pt tasks with no endpoint changes write "N/A."
+     How is this endpoint versioned? Prevents breaking changes from reaching existing clients. -->
+- **Version:** `v1` / `v2` / _(specify)_
+- **Versioning approach:** URL path (`/api/v1/...`) / header / query param
+- **Breaking change policy:** new required fields or removed fields = new version; new optional fields = same version
+- **Deprecation plan:** _(if modifying an existing endpoint — how long until old version is removed?)_
+
+_If new endpoint with no existing clients: write "None — new endpoint, no deprecation needed."_
+
+---
+
 ## Data Contracts
-<!-- 5pt+ — inter-service contracts only. If single service: write "None — single service." -->
+<!-- 5pt — required at 5pt and above. Inter-service contracts only. If single service: write "None — single service." -->
 | Contract | Direction | Format | Version | Owner |
 |----------|-----------|--------|---------|-------|
 | - | inbound / outbound | JSON | v1 | - |
@@ -168,6 +180,30 @@ sequenceDiagram
     S-->>Ctrl: result
     Ctrl-->>C: 200 { ... }
 ```
+
+---
+
+## Existing Code Context
+<!-- 1pt+ — required at all levels. Even trivial tasks should check what already exists before building new.
+     List reusable services, repositories, utilities, and patterns already in the codebase.
+     Prevents duplicate code and keeps design grounded in project conventions.
+     Fill this in before Service / Layer Breakdown — reuse first, build new second. -->
+
+**Services / Repositories available (use as-is or extend):**
+| Class / Function | File path | Notes |
+|-----------------|-----------|-------|
+| `ServiceName` | `src/services/...` | |
+| `RepositoryName` | `src/repositories/...` | |
+
+**Shared utilities / middleware available:**
+| Utility | File path | Notes |
+|---------|-----------|-------|
+| `utilName()` | `src/utils/...` | |
+
+**Project patterns to follow:**
+- Error handling: throw from service layer using project's `AppError` class
+- DB access: always through repository layer — never query DB directly in service
+- _(add project-specific patterns here)_
 
 ---
 
