@@ -2,112 +2,73 @@
 Workflow position: **START → /new-sprint**
 
 Run a structured discovery session before any sprint planning.
-Arguments: $ARGUMENTS
-Format: `[disc-id] [name]`  — e.g. `disc-001 user-authentication`
+Arguments: `[disc-id] [name]`  — e.g. `disc-001 user-authentication`
 
 ---
 
-## Step 1 — Create the discovery document immediately
+## Step 1 — Create doc immediately
 
-Before asking anything, create `docs/discovery/[disc-id]-[name].md` from `docs/templates/DISCOVERY-TEMPLATE.md` with all sections blank (filled with `TBD`).
+Create `docs/discovery/[disc-id]-[name].md` from `docs/templates/DISCOVERY-TEMPLATE.md` with all sections set to `TBD`.
 
-Then register all steps with TaskCreate — store the returned IDs:
-
+Register sub-tasks (wire sequentially t1→t2→t3→t4; mark in_progress/completed at each step):
 ```
-t1 = TaskCreate(subject: "[disc-id] — create discovery doc",    description: "Create docs/discovery/[disc-id]-[name].md from template with TBD placeholders")
-t2 = TaskCreate(subject: "[disc-id] — ask gap questions",       description: "Analyze arguments and ask only unanswered gap questions in one message")
-t3 = TaskCreate(subject: "[disc-id] — update doc with answers", description: "Fill all sections of the discovery doc with user's answers")
-t4 = TaskCreate(subject: "[disc-id] — update BACKLOG.md",       description: "Add discovery entry to docs/BACKLOG.md")
+t1 = TaskCreate("[disc-id] — create discovery doc")
+t2 = TaskCreate("[disc-id] — ask gap questions")
+t3 = TaskCreate("[disc-id] — fill doc with answers")
+t4 = TaskCreate("[disc-id] — update BACKLOG.md")
 ```
-
-Wire dependencies:
-```
-TaskUpdate(t2, addBlockedBy: [t1])
-TaskUpdate(t3, addBlockedBy: [t2])
-TaskUpdate(t4, addBlockedBy: [t3])
-```
-
-Mark t1 as already done (file was created above), then start t2:
-```
-TaskUpdate(t1, status: in_progress)
-TaskUpdate(t1, status: completed)
-TaskUpdate(t2, status: in_progress)
-```
+Mark t1 completed (file already created). Mark t2 in_progress.
 
 ---
 
-## Step 2 — Infer what's already known, then ask only about the gaps
+## Step 2 — Ask only about the gaps
 
-Analyze the arguments and any description the user already provided. For each of the 10 topics below, decide:
-- **Already answered** → note it as understood, do not ask.
-- **Partially answered** → ask only the missing part.
-- **Unknown** → include in the questions list.
+Analyze the user's arguments. For each of the 10 topics below, decide: already answered → skip; partially answered → ask only the missing part; unknown → include.
 
-The 10 topics to evaluate (mapped to template sections):
-1. **Problem** (§1) — What problem are we solving? Who experiences it, how often, and what happens when it's not solved?
-2. **Users & Stakeholders** (§2) — Who are the primary users affected? Any other teams, systems, or stakeholders involved?
-3. **Goals & Success** (§3) — What does success look like when this ships? How will we measure it?
-4. **As-Is Journey** (§4) — How do users currently handle this? What are the pain points in the current flow?
-5. **To-Be Journey** (§5) — How will users experience the solved flow? What does the ideal end-to-end look like?
-6. **Context & Background** (§6) — Any relevant history? Previous attempts, related systems, or decisions already made?
-7. **Constraints** (§7) — Any hard limits? (tech stack, deadline, budget, compliance, design system, existing integrations)
-8. **Approaches** (§8) — What solutions have been considered? What are the trade-offs? Even rough ideas count.
-9. **Unknowns & Open Questions** (§10) — What do we NOT know yet that could affect the solution? What needs a decision from someone else?
-10. **Risks & Scope** (§11–12) — What are the biggest risks? And roughly — is this a 1-sprint feature, multi-sprint, or larger?
+1. **Problem** — What problem? Who experiences it, how often, what happens when unsolved?
+2. **Users & Stakeholders** — Primary users? Other teams, systems, stakeholders?
+3. **Goals & Success** — What does success look like? How will we measure it?
+4. **As-Is Journey** — How do users currently handle this? Pain points?
+5. **To-Be Journey** — How will users experience the solved flow end-to-end?
+6. **Context & Background** — Previous attempts, related systems, decisions already made?
+7. **Constraints** — Hard limits: tech stack, deadline, budget, compliance, design system?
+8. **Approaches** — Solutions considered? Trade-offs? Even rough ideas count.
+9. **Unknowns & Open Questions** — What don't we know yet that could affect the solution?
+10. **Risks & Scope** — Biggest risks? Is this 1-sprint, multi-sprint, or larger?
 
-After creating the file, say:
-> "Created `docs/discovery/[disc-id]-[name].md`. Here's what I've understood so far — please fill in only the gaps:"
+Say: *"Created `docs/discovery/[disc-id]-[name].md`. Here's what I understood — fill in only the gaps:"*
+Show what's inferred, then ask only unanswered questions in **one message**.
+If everything is already clear → skip to Step 3.
 
-Then show a brief summary of what's already inferred, followed by **only the unanswered questions** in one message. If everything is already clear, skip to Step 3 immediately.
-
-Wait for the user's answers before proceeding.
-
-```
-TaskUpdate(t2, status: completed)
-```
+Wait for user's answers. Mark t2 completed, t3 in_progress.
 
 ---
 
-## Step 3 — Update the discovery document with answers
+## Step 3 — Fill the doc
 
-```
-TaskUpdate(t3, status: in_progress)
-```
+1. Fill every section from user's answers. Write `TBD — needs input` for anything unanswered.
+2. Section 8 (Approaches): structure at least 2 options. If only one mentioned, add placeholder Option B.
+3. Section 10 (Unknowns): mark each as `- [ ]` checkbox.
+4. Section 13 (Next Steps): always include "When ready → `/new-sprint [sprint-id] \"[epic description]\"`".
 
-1. Fill every section of the already-created file from the user's answers. Write `TBD — needs input` for anything unanswered.
-2. For Section 8 (Proposed Approaches): structure at least 2 options. If only one was mentioned, add a placeholder Option B.
-3. For Section 10 (Unknowns & Open Questions): mark each as `- [ ]` checkbox.
-4. For Section 13 (Next Steps): always include "When ready → run `/new-sprint [sprint-id] \"[epic description]\"`".
-
-```
-TaskUpdate(t3, status: completed)
-```
+Mark t3 completed, t4 in_progress.
 
 ---
 
 ## Step 4 — Update BACKLOG.md
 
-```
-TaskUpdate(t4, status: in_progress)
-```
+Add to the **Discovery Backlog** section:
+- Status: `discovery` if open questions remain · `backlog` if all resolved.
 
-Add to the **Discovery Backlog** section in `docs/BACKLOG.md`:
-- Status: `discovery` if open questions remain, `backlog` if all resolved.
-
-```
-TaskUpdate(t4, status: completed)
-```
+Mark t4 completed.
 
 ---
 
-## Step 5 — Output
+## Output
 
 ```
-✓ Discovery doc: docs/discovery/[disc-id]-[name].md
-  Open questions: [N] — resolve before sprint planning
-  Status: discovery / backlog
+✓ docs/discovery/[disc-id]-[name].md
+  Open questions: [N]  |  Status: discovery / backlog
 
-Next step:
-  When all questions are resolved and approach is approved →
-  /new-sprint [sprint-id] "[epic description]"
+Next: resolve open questions → /new-sprint [sprint-id] "[epic description]"
 ```

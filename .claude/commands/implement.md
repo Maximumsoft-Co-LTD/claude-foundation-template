@@ -1,193 +1,118 @@
 # /implement
 Workflow position: **/be-design → START → /issue (loop) → /code-review**
 
-Implement the task following the FE and BE design docs. Always write failing tests first, then implement until all pass.
-Arguments: $ARGUMENTS
-Format: `[task-id]`  — e.g. `SP1-T002`
+Implement the task following FE and BE design docs. Write failing tests first, then implement until all pass.
+Arguments: `[task-id]`  — e.g. `SP1-T002`
 
 ---
 
 ## Step 1 — Load context
 
-1. Parse `[task-id]` from `$ARGUMENTS`. Extract `[sprint-id]` from prefix (e.g. `SP1-T001` → `SP1`).
-
-Register all steps with TaskCreate — store the returned IDs:
-
+Parse `[task-id]`, extract `[sprint-id]`. Register sub-tasks (wire sequentially; mark in_progress/completed at each step):
 ```
-t1 = TaskCreate(subject: "[task-id] — impl: load context",              description: "Read all design docs, discovery constraints, and assess parallelization scope")
-t2 = TaskCreate(subject: "[task-id] — impl: pre-implementation check",  description: "Verify AC→test coverage, FE/BE contract alignment, and no blocking gaps before writing code")
-t3 = TaskCreate(subject: "[task-id] — impl: write failing tests",       description: "Write all test files from TDD test plans — confirm every test fails (red)")
-t4 = TaskCreate(subject: "[task-id] — impl: implement",                 description: "Implement FE and BE following design docs until all tests pass")
-t5 = TaskCreate(subject: "[task-id] — impl: verify all tests pass",     description: "Run full test suite, confirm all new tests pass and no regressions")
+t1 = TaskCreate("[task-id] — impl: load context")
+t2 = TaskCreate("[task-id] — impl: pre-implementation check")
+t3 = TaskCreate("[task-id] — impl: write failing tests")
+t4 = TaskCreate("[task-id] — impl: implement")
+t5 = TaskCreate("[task-id] — impl: verify all tests pass")
 ```
+Mark t1 in_progress.
 
-Wire dependencies:
-```
-TaskUpdate(t2, addBlockedBy: [t1])
-TaskUpdate(t3, addBlockedBy: [t2])
-TaskUpdate(t4, addBlockedBy: [t3])
-TaskUpdate(t5, addBlockedBy: [t4])
-```
-
-```
-TaskUpdate(t1, status: in_progress)
-```
-
-Read all files **in parallel**:
-- `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — epic goals and constraints
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — ACs and success metrics
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md` — FE design + implementation plan + TDD test plan
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md` — BE design + implementation plan + TDD test plan
-
-Note: discovery doc constraints (security, performance, compliance, etc.) are already reflected in the design docs from the coverage checks done in `/fe-design` and `/be-design`. No need to re-read discovery here.
+Read **in parallel**:
+- `docs/sprints/[sprint-id]/[sprint-id]-overview.md`
+- `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`
+- `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md`
+- `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md`
 
 Validate:
-- If `[task-id]-requirement.md` is missing → stop: "Run `/requirement [task-id]` first."
-- If `[task-id]-requirement.md` exists but all Acceptance Criteria are empty or unchecked placeholders → stop: "Fill in the ACs in `[task-id]-requirement.md` first (run `/requirement [task-id]`)."
-- If either design doc is incomplete or missing → stop: "Run `/fe-design` and `/be-design` first."
-- Collect ALL tests from both TDD Test Plans.
+- Missing requirement or empty ACs → stop: "Run `/requirement [task-id]` first."
+- Missing or incomplete design docs → stop: "Run `/fe-design` and `/be-design` first."
 
-**Assess parallelization scope:**
-Determine which of the following apply — this drives the strategy below:
-- `HAS_FE`: frontend design doc has test plan items
-- `HAS_BE`: backend design doc has test plan items
-- `SHARED_TYPES`: FE and BE share type/interface definitions that must be established first
-- `HAS_MIGRATION`: BE includes DB migrations that must run before other BE work
+Assess parallelization flags:
+- `HAS_FE`: FE design has test plan items
+- `HAS_BE`: BE design has test plan items
+- `SHARED_TYPES`: FE and BE share type/interface definitions
+- `HAS_MIGRATION`: BE includes DB migrations
 
-```
-TaskUpdate(t1, status: completed)
-```
+Mark t1 completed, t2 in_progress.
 
 ---
 
 ## Step 1b — Pre-implementation readiness check
 
-```
-TaskUpdate(t2, status: in_progress)
-```
+For each AC in requirement: is there at least one test row in FE or BE TDD Test Plan? Flag any AC with no test → **stop**, fix design doc first.
 
-Before writing any code, verify the design docs are complete and consistent:
-
-1. **AC → test coverage** — for each AC in `[task-id]-requirement.md`:
-   - Is there at least one test row in the FE TDD Test Plan OR the BE TDD Test Plan that covers it?
-   - Flag any AC with no test planned.
-
-2. **FE ↔ BE contract alignment** — for each endpoint listed in `[task-id]-frontend.md` API Contracts Consumed:
-   - Does `[task-id]-backend.md` define a matching endpoint (method, path, request/response shape)?
-   - Flag any mismatch or undefined endpoint.
-
-3. **Implementation plan completeness** — for each design section in both frontend and backend docs:
-   - Does the Implementation Plan have a step that covers it?
-   - Flag any section not referenced by any implementation step.
-
-If any gaps are found → **stop**. Report the gaps and instruct the user to fix the relevant design doc before proceeding. Do NOT silently continue with gaps.
-
-If no gaps → proceed to Step 2.
-
-```
-TaskUpdate(t2, status: completed)
-```
+Mark t2 completed, t3 in_progress.
 
 ---
 
 ## Step 2 — Write failing tests
 
-```
-TaskUpdate(t3, status: in_progress)
-```
+**If `SHARED_TYPES`:** write shared type/interface files first, then proceed.
 
-**If `HAS_FE` AND `HAS_BE` (and no `SHARED_TYPES` blocker):**
-
-Launch **2 sub-agents in parallel**:
+**If `HAS_FE` AND `HAS_BE`:** launch 2 parallel sub-agents:
 
 > **Agent A — FE Tests**
 > Write all test files from `[task-id]-frontend.md` TDD Test Plan.
-> Run FE tests — confirm every new test **fails** (red).
-> Do NOT write any implementation code.
+> Run FE tests — confirm every new test **fails** (red). Do NOT write implementation code.
 
 > **Agent B — BE Tests**
 > Write all test files from `[task-id]-backend.md` TDD Test Plan.
-> Run BE tests — confirm every new test **fails** (red).
-> Do NOT write any implementation code.
+> Run BE tests — confirm every new test **fails** (red). Do NOT write implementation code.
 
-Wait for both agents to complete, then collect their red-test confirmation.
+Wait for both agents. Collect red-test confirmation.
 
-**If `SHARED_TYPES`:**
-Write shared type/interface files first, then launch agents A and B above.
+**If only `HAS_FE` or only `HAS_BE`:** write all test files sequentially. Confirm all **fail** (red).
 
-**If only `HAS_FE` or only `HAS_BE`:**
-Write all test files sequentially in main context. Confirm all tests **fail** (red).
-
-```
-TaskUpdate(t3, status: completed)
-```
+Mark t3 completed, t4 in_progress.
 
 ---
 
 ## Step 3 — Implement
 
-```
-TaskUpdate(t4, status: in_progress)
-```
+**If `HAS_MIGRATION`:** run DB migrations first in main context.
 
-**If `HAS_MIGRATION`:**
-Run DB migrations first in main context before launching implementation agents.
-
-**If `HAS_FE` AND `HAS_BE` (and FE/BE are interface-stable):**
-
-Launch **2 sub-agents in parallel**:
+**If `HAS_FE` AND `HAS_BE`:** launch 2 parallel sub-agents:
 
 > **Agent C — FE Implementation**
-> Implement components, routing, state, API calls, loading/error states, analytics events, responsive behavior, and accessibility as specified in `[task-id]-frontend.md`.
+> Implement components, routing, state, API calls, loading/error states, analytics, responsive, accessibility per `[task-id]-frontend.md` Implementation Plan.
 > Implement only what the design specifies — no extras, no shortcuts.
-> Run FE tests after each logical unit. If a bug or unexpected behavior is found, log it (do NOT run /issue — report it back in output).
+> Run FE tests after each logical unit. Log any bugs found (do NOT run /issue — report in output).
 > Final state: all FE tests green.
 
 > **Agent D — BE Implementation**
-> Implement endpoints, validation, service logic, repository, event publishing, caching, logging, and security as specified in `[task-id]-backend.md`.
+> Implement endpoints, validation, service logic, repository, event publishing, caching, logging, security per `[task-id]-backend.md` Implementation Plan.
 > Implement only what the design specifies — no extras, no shortcuts.
-> Run BE tests after each logical unit. If a bug or unexpected behavior is found, log it (do NOT run /issue — report it back in output).
+> Run BE tests after each logical unit. Log any bugs found (do NOT run /issue — report in output).
 > Final state: all BE tests green.
 
-Wait for both agents. If either agent reported bugs/unexpected behavior → run `/issue [task-id] [description]` for each one, then continue.
+Wait for both agents. If either reported bugs → run `/issue [task-id] [description]` per bug.
 
-**If only `HAS_FE` or only `HAS_BE`:**
-Implement sequentially in main context following the relevant design doc.
+**If only `HAS_FE` or only `HAS_BE`:** implement sequentially in main context.
 
-```
-TaskUpdate(t4, status: completed)
-```
+Mark t4 completed, t5 in_progress.
 
 ---
 
 ## Step 4 — Verify
 
-```
-TaskUpdate(t5, status: in_progress)
-```
-
-Run the full test suite (**FE and BE in parallel** if separate test commands exist):
+Run full test suite (FE and BE in parallel if separate commands):
 1. All new tests must **pass** (green).
-2. No existing tests may be broken.
-3. Confirm each AC in `[task-id]-requirement.md` is covered by at least one passing test.
+2. No existing tests broken.
+3. Each AC in requirement has at least one passing test.
 
-```
-TaskUpdate(t5, status: completed)
-```
+Mark t5 completed.
 
 ---
 
-## Step 5 — Output
+## Output
 
 ```
 ✓ Implementation complete: [task-id]
-
-Tests: [N] passing, 0 failing
+  Tests: [N] passing, 0 failing
 
 ACs covered:
-  ✓ AC-1: [description]
-  ✓ AC-2: [description]
-  ...
+  ✓ AC-1  ✓ AC-2  ✓ AC-3
 
-Next step: /code-review [task-id]
+Next: /code-review [task-id]
 ```

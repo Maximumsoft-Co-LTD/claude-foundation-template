@@ -59,9 +59,11 @@ Two levels: **Sprint (Epic)** → **Tasks (Sub-tasks)**
     → /retro-sprint (once ALL tasks in sprint are done)
 ```
 
-**Multiple tasks in parallel:**
+**Multiple tasks in parallel (2-phase):**
 ```
 /discovery → /new-sprint → /run-tasks [task-id] [task-id] ...
+    Phase 1: requirement + fe-design + be-design (parallel) → ⏸ user reviews all plans
+    Phase 2: implement + code-review + testing + retro-task (parallel, after approval)
     → /git-commit (per task) → /retro-sprint
 ```
 

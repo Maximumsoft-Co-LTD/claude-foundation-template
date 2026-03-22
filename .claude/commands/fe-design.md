@@ -1,175 +1,132 @@
 # /fe-design
 Workflow position: **/requirement → START → /be-design**
 
-Write the complete frontend design and TDD test plan for a task. Run this BEFORE writing any code.
-Arguments: $ARGUMENTS
-Format: `[task-id]`  — e.g. `SP1-T002`
+Write the complete frontend design and TDD test plan. Run BEFORE writing any code.
+Arguments: `[task-id]`  — e.g. `SP1-T002`
 
 ---
 
 ## Step 1 — Load context
 
-1. Parse `[task-id]` from `$ARGUMENTS`. Extract `[sprint-id]` from prefix (e.g. `SP1-T001` → `SP1`).
-
-Register all steps with TaskCreate — store the returned IDs:
-
+Parse `[task-id]`, extract `[sprint-id]`. Register sub-tasks (wire sequentially; mark in_progress/completed at each step):
 ```
-t1 = TaskCreate(subject: "[task-id] — fe: load context",           description: "Read sprint overview, discovery doc, requirement doc, and existing frontend design draft")
-t2 = TaskCreate(subject: "[task-id] — fe: fill design",            description: "Write complete FE design, implementation plan, TDD test plan, and E2E test plan")
-t3 = TaskCreate(subject: "[task-id] — fe: coverage check vs ACs",  description: "Cross-check design sections and test plans against every AC and discovery constraints")
-t4 = TaskCreate(subject: "[task-id] — fe: save + update status",   description: "Save frontend design doc and update task status in BACKLOG.md")
+t1 = TaskCreate("[task-id] — fe: load context")
+t2 = TaskCreate("[task-id] — fe: fill design")
+t3 = TaskCreate("[task-id] — fe: coverage check vs ACs")
+t4 = TaskCreate("[task-id] — fe: save + update status")
 ```
+Mark t1 in_progress.
 
-Wire dependencies:
+Read in order:
+1. `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — epic goals and constraints
+2. `docs/discovery/` — scan for related doc. If found, read: constraints (technical, UX, performance, accessibility).
+3. `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — ACs, success metrics, design references
+
+Validate: if ACs are all empty → stop: "Fill in `[task-id]-requirement.md` first."
+
+**Explore existing codebase** — do this before designing anything:
+1. Glob `src/` (or equivalent) to understand folder structure — where components, pages, hooks, stores, tests live.
+2. From the ACs, identify what UI elements/screens/flows this task needs. Search the codebase for any existing component or page that is similar or overlapping.
+3. Read 2–3 of the most relevant existing components/pages to extract:
+   - Naming convention (PascalCase? kebab-case files?)
+   - State management pattern used (Redux, Zustand, Context, local state?)
+   - How API calls are made (axios instance, fetch wrapper, React Query?)
+   - How errors and loading states are handled
+   - How tests are structured (describe/it blocks, what's mocked, what test utilities exist)
+4. Check existing routing file — how routes are registered, what wrappers/guards are used.
+5. Note everything that can be **reused** (components, hooks, utilities, test helpers). Do NOT redesign what already exists.
+
+Write findings as **Existing Code Context** at the top of your design doc:
 ```
-TaskUpdate(t2, addBlockedBy: [t1])
-TaskUpdate(t3, addBlockedBy: [t2])
-TaskUpdate(t4, addBlockedBy: [t3])
+## Existing Code Context
+- File structure: src/components/ | src/pages/ | src/hooks/ | ...
+- Naming: PascalCase components, kebab-case files
+- State: [pattern found]
+- API calls: [pattern found]
+- Reusable: [list actual components/hooks/utilities to reuse]
+- Test pattern: [describe what test utilities/factories exist]
 ```
+If the codebase is empty (new project) → note "No existing code — establishing conventions" and proceed.
 
-```
-TaskUpdate(t1, status: in_progress)
-```
-
-Read these files in order:
-2. `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — epic goals and constraints
-3. `docs/discovery/` — scan for any discovery doc related to this sprint's epic. If found, read it for: Problem Statement, goals, in-scope items, constraints (technical, UX, performance, accessibility), open questions.
-4. `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — ACs, success metrics, design references
-
-Validate:
-- If Acceptance Criteria are all empty → stop: "Fill in `[task-id]-requirement.md` first."
-- If Design References (Figma) are present → note them. The design must match those mockups.
-
-Read the **Points** value from the requirement doc Metadata. Then apply the points-based section scope below. Write `"N/A — Xpt task"` for any section not required at this level:
+Read **Points** from requirement doc Metadata. Apply points-based section scope (write `"N/A — Xpt task"` for unrequired sections):
 
 | Points | Required sections |
 |--------|------------------|
-| **1pt** | Brief approach paragraph (replaces full doc narrative), Component list, 1 TDD test per AC |
-| **2pt** | + Component Breakdown (table), API Contracts Consumed, State & Data Flow (brief), Fail State summary table |
+| **1pt** | Approach paragraph, Component list, 1 TDD test per AC |
+| **2pt** | + Component Breakdown (table), API Contracts Consumed, State & Data Flow (brief), Fail State table |
 | **3pt** | + UI/UX Overview, Loading & Skeleton States, Implementation Plan, E2E Test Plan, Fail Case Matrix |
-| **5pt+** | All sections — User Journey Map, Behavior Mapping, Routing, Responsive, Analytics, Performance, full Fail Flows, Accessibility, State Inventory |
-| **8pt** | All sections — add ADR entries for non-obvious design choices |
+| **5pt+** | All sections — User Journey Map, Behavior Mapping, Routing, Responsive, Analytics, Performance, Fail Flows, Accessibility, State Inventory |
+| **8pt** | All sections + ADR entries for non-obvious design choices |
 
-Read current draft:
-4. `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md`
-5. `docs/templates/FRONTEND-DESIGN-TEMPLATE.md` — ensure all sections are covered
-
-```
-TaskUpdate(t1, status: completed)
-```
+Read existing draft `[task-id]-frontend.md` and `docs/templates/FRONTEND-DESIGN-TEMPLATE.md`.
+Mark t1 completed, t2 in_progress.
 
 ---
 
-## Step 2 — Fill in the complete FE design
+## Step 2 — Fill the complete FE design
 
-```
-TaskUpdate(t2, status: in_progress)
-```
+Write implementation-ready content for every required section:
 
-Write a complete, implementation-ready design for every section:
-
-- **Design References** — copy Figma/mockup links from requirement; reference specific frames per screen.
-- **UI/UX Overview** — describe every screen, modal, or user flow this task introduces or changes.
-- **User Journey Map** — map the desired user journey (to-be state): step-by-step what the user does, sees, and feels. Define entry point and exit point of the flow.
-- **Behavior Mapping** — must cover three things: (1) **Entry paths** — every way a user can arrive at this flow (direct nav, deep-link, redirect, back-navigation) and what pre-loaded state each entry carries; missing an entry path = missing integration with the main system. (2) **Behavior flow diagram** — map every interaction including all fail states: what the UI shows, what the user feels, and how they recover. Every fail branch must end in a labeled node (not just "error"). (3) **Fail state summary table** — quick reference of every fail state, what the user sees, and whether they can recover.
-- **Routing & Navigation** — every new or changed route: path, component, auth required.
+- **Design References** — Figma/mockup links from requirement; reference specific frames per screen.
+- **UI/UX Overview** — every screen, modal, or flow this task introduces or changes.
+- **User Journey Map** — step-by-step to-be state: what user does, sees, feels. Entry and exit point.
+- **Behavior Mapping** — (1) Entry paths: every way user can arrive + pre-loaded state per entry. (2) Behavior flow diagram: every interaction including all fail states — every fail branch ends in a labeled node. (3) Fail state summary table: fail state → what user sees → recoverable?
+- **Routing & Navigation** — every new/changed route: path, component, auth required.
 - **Component Breakdown** — every component to create or modify: name, file path, type (new/modify), description.
-- **State & Data Flow** — show data path: `[API/Store] → [Container] → [Props] → [UI] → [Action] → [Dispatch]`.
-- **API Contracts Consumed** — every endpoint called: method, path, request, response, error handling behavior.
-- **Loading & Skeleton States** — for every async op: loading behavior, empty state, error state.
+- **State & Data Flow** — `[API/Store] → [Container] → [Props] → [UI] → [Action] → [Dispatch]`.
+- **API Contracts Consumed** — every endpoint: method, path, request, response, error handling.
+- **Loading & Skeleton States** — per async op: loading, empty state, error state.
 - **Responsive Behavior** — layout changes at mobile (<768px), tablet (768–1024px), desktop (>1024px).
-- **Analytics Events** — every event to fire, mapped to Analytics section in requirement.
+- **Analytics Events** — every event mapped to Analytics section in requirement.
 - **Performance Considerations** — lazy loading, memoization, code splitting, image optimization.
-- **Implementation Plan** — ordered, step-by-step plan for how to implement this design. Each step must reference the design section it implements. Rules:
-  - List steps in dependency order (what must be done before what).
-  - Each step: `[N]. [File path] — [action: create/modify] — [what to implement] — [references: design section]`
-  - Group by logical phase: (1) routing/scaffolding, (2) components, (3) state/data flow, (4) API integration, (5) loading/error states, (6) analytics, (7) accessibility/responsive. Not all phases apply to every task — omit phases that are not relevant.
-  - This plan is the blueprint `/implement` follows. Do NOT deviate from it during implementation.
-- **TDD Test Plan** — for EACH AC: at least 1 unit test + 1 integration test. Written BEFORE any code.
-- **E2E Test Plan** — for EACH AC: at least 1 E2E scenario covering the full user journey (real browser → real API → real DB). Format: "Given [state] → When [user actions] → Then [observable outcome]." Written BEFORE any code.
-- **Fail Cases & Fail Flows** — for every user action that can fail:
-  - Draw the fail flow diagram showing all failure paths and how the user recovers.
-  - Fill the Fail Case Matrix: for each failure scenario define — presentation pattern (toast/inline/modal/page-level), exact error message copy shown to the user (safe, friendly, actionable), recovery CTA text and placement, whether input is preserved.
-  - Define Optimistic Update Rollback if the feature updates UI before API confirmation.
-  - Define Partial Success Handling if the flow has batch or multi-part operations.
-  - Define Multi-step Rollback if the flow has a wizard or sequential steps.
+- **Implementation Plan** — ordered steps in dependency order. Each step: `[N]. [actual file path] — [create/modify] — [what] — [design section ref]`. File paths must be **real paths** derived from the Existing Code Context exploration — not hypothetical. If creating a new file, place it following the discovered folder convention. Group by phase: (1) routing, (2) components, (3) state/data, (4) API, (5) loading/errors, (6) analytics, (7) a11y/responsive. Omit irrelevant phases. **`/implement` follows this plan exactly.**
+- **TDD Test Plan** — per AC: min 1 unit test + 1 integration test. Written BEFORE code.
+- **E2E Test Plan** — per AC: min 1 scenario. Format: "Given [state] → When [actions] → Then [outcome]." Written BEFORE code.
+- **Fail Cases & Fail Flows** — per user action that can fail: flow diagram, Fail Case Matrix (presentation pattern, exact error copy, recovery CTA, input preserved?), Optimistic Update Rollback, Partial Success Handling, Multi-step Rollback where applicable.
 - **Edge Cases & Error States** — network timeout, 401, 500, empty list, session expiry, concurrent edits.
 - **Accessibility Notes** — keyboard nav, focus management, ARIA labels, color contrast.
 
-```
-TaskUpdate(t2, status: completed)
-```
+Mark t2 completed, t3 in_progress.
 
 ---
 
 ## Step 2b — Coverage check vs ACs and discovery
 
-```
-TaskUpdate(t3, status: in_progress)
-```
+For each AC in requirement doc:
+- Design component/flow that implements it? TDD test? E2E scenario? Flag any missing.
 
-Cross-check the completed design against the requirement doc and discovery doc:
-
-1. **AC coverage** — for each AC in the requirement doc:
-   - Is there a component / flow / behavior in the design that implements it?
-   - Is there at least 1 TDD test in the TDD Test Plan?
-   - Is there at least 1 E2E scenario in the E2E Test Plan?
-   - Flag any AC missing any of the three.
-
-2. **Discovery constraints coverage** — if a discovery doc was found, for each constraint listed (technical, UX, performance, accessibility):
-   - Is it addressed in a relevant design section (Responsive Behavior, Performance Considerations, Accessibility Notes, etc.)?
-   - Flag any constraint with no design section addressing it.
-
-Present the coverage summary:
+For each discovery constraint (if doc found):
+- Is it addressed in a design section (Responsive, Performance, Accessibility, etc.)? Flag missing.
 
 ```
 FE Coverage check:
-
-✅ Covered
-  - AC-1: component [X] + TDD test [Y] + E2E [Z]
-  - ...
-
-⚠️ Gaps found — updating design:
-  - AC-N: missing TDD test → adding to TDD Test Plan
-  - Discovery constraint [X]: not addressed → adding to [section]
-  - ...
+✅ AC-1: component [X] + TDD [Y] + E2E [Z]
+⚠️ AC-N: missing TDD → adding to TDD Test Plan
+⚠️ Constraint [X]: not addressed → adding to [section]
 ```
-
-- Fill in any gaps immediately before moving to Step 3. Do NOT leave gaps unresolved.
-- If no discovery doc exists, skip the constraints check.
-
-```
-TaskUpdate(t3, status: completed)
-```
+Fill every gap immediately. Do NOT leave gaps unresolved. Mark t3 completed, t4 in_progress.
 
 ---
 
 ## Step 3 — Save and update status
 
-```
-TaskUpdate(t4, status: in_progress)
-```
+1. Save to `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md`.
+2. Update BACKLOG.md status to `in-progress` if was `todo`.
 
-1. Save the completed design to `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md`.
-2. Update task status in `docs/BACKLOG.md` to `in-progress` if it was `todo`.
-
-```
-TaskUpdate(t4, status: completed)
-```
+Mark t4 completed.
 
 ---
 
-## Step 4 — Output
+## Output
 
-Print both test plan tables, then:
 ```
-✓ FE design saved: docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md
+✓ docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md
 
 TDD Test Plan — write these failing tests BEFORE implementing:
-[print the TDD test plan table]
+[print TDD test plan table]
 
-E2E Test Plan — write these E2E scenarios BEFORE implementing:
-[print the E2E test plan table]
+E2E Test Plan:
+[print E2E test plan table]
 
-Next step: /be-design [task-id]
+Next: /be-design [task-id]
 ```

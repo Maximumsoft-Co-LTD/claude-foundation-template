@@ -2,161 +2,90 @@
 Workflow position: **/discovery → START → /requirement**
 
 Create a new sprint from an epic description and scaffold all sub-tasks.
-Arguments: $ARGUMENTS
-Format: `[sprint-id] [epic description]`  — e.g. `SP2 Build user authentication with OAuth and role management`
+Arguments: `[sprint-id] [epic description]`  — e.g. `SP2 Build user authentication with OAuth`
 
 ---
 
-## Step 1 — Validate and resolve next task number
+## Step 1 — Validate
 
 1. Parse `[sprint-id]` and `[epic description]` from `$ARGUMENTS`.
-   - Sprint ID format: `SP[N]` — e.g. `SP1`, `SP2`, `SP3`
 2. Read `docs/BACKLOG.md`:
-   - If `[sprint-id]` already exists → stop and warn the user.
-   - Scan ALL task IDs across every sprint to find the highest `T[NNN]` number. The next task starts at that number + 1.
-   - If no tasks exist yet → start from `T001`.
-3. Check `docs/discovery/` for any discovery doc related to this epic.
-   - If **NO discovery doc found** → warn: "⚠️ No discovery doc found for this epic. Running `/discovery` first gives better task coverage and surfaces constraints early. Continue without it? (y/n)" — wait for response before proceeding.
-   - If **discovery doc found** → read it for context (Problem Statement, chosen approach, scope estimate, constraints). Then check for unresolved open questions (any item not marked resolved/answered). If any exist → warn: "⚠️ Discovery doc has unresolved open questions:" and list each one. Then ask: "These may affect task scope. Continue anyway? (y/n)" — wait for response before proceeding.
+   - If `[sprint-id]` already exists → stop and warn.
+   - Scan ALL task IDs to find the highest `T[NNN]`. Next task starts at +1. If none → start from `T001`.
+3. Check `docs/discovery/` for a discovery doc related to this epic:
+   - **Not found** → warn: "⚠️ No discovery doc found. Running `/discovery` first is recommended. Continue? (y/n)"
+   - **Found** → read it (Problem Statement, chosen approach, scope, constraints). Check for unresolved open questions. If any → warn and list them: "These may affect task scope. Continue? (y/n)"
 
-Register all steps with TaskCreate — store the returned IDs:
-
+Register sub-tasks (wire sequentially t1→t2→t3→t4→t5; mark in_progress/completed at each step):
 ```
-t1 = TaskCreate(subject: "[sprint-id] — validate + resolve task counter",    description: "Validate sprint ID, find highest task number, check discovery doc")
-t2 = TaskCreate(subject: "[sprint-id] — create sprint directory + overview", description: "Create docs/sprints/[sprint-id]/ and [sprint-id]-overview.md from template")
-t3 = TaskCreate(subject: "[sprint-id] — propose sub-task breakdown",         description: "Analyze epic and propose vertical-slice sub-tasks with E2E scenarios")
-t4 = TaskCreate(subject: "[sprint-id] — coverage check vs discovery",        description: "Cross-check proposed tasks against discovery doc goals, scope, and journeys")
-t5 = TaskCreate(subject: "[sprint-id] — update docs after confirmation",     description: "Fill sprint overview sub-tasks table and update BACKLOG.md after user confirms")
+t1 = TaskCreate("[sprint-id] — validate + resolve task counter")
+t2 = TaskCreate("[sprint-id] — create sprint dir + overview")
+t3 = TaskCreate("[sprint-id] — propose sub-task breakdown")
+t4 = TaskCreate("[sprint-id] — coverage check vs discovery")
+t5 = TaskCreate("[sprint-id] — update docs after confirmation")
 ```
-
-Wire dependencies:
-```
-TaskUpdate(t2, addBlockedBy: [t1])
-TaskUpdate(t3, addBlockedBy: [t2])
-TaskUpdate(t4, addBlockedBy: [t3])
-TaskUpdate(t5, addBlockedBy: [t4])
-```
-
-Mark t1 as done (validation already complete above):
-```
-TaskUpdate(t1, status: in_progress)
-TaskUpdate(t1, status: completed)
-```
+Mark t1 completed. Mark t2 in_progress.
 
 ---
 
-## Step 2 — Create the sprint directory and overview
+## Step 2 — Create sprint directory and overview
 
-```
-TaskUpdate(t2, status: in_progress)
-```
-
-1. Create directory `docs/sprints/[sprint-id]/`.  (e.g. `docs/sprints/SP2/`)
+1. Create `docs/sprints/[sprint-id]/`.
 2. Create `docs/sprints/[sprint-id]/[sprint-id]-overview.md` from `docs/templates/SPRINT-OVERVIEW-TEMPLATE.md`.
-3. Pre-fill:
-   - Sprint ID, epic title (derived from description)
-   - Start Date: today
-   - Problem Statement: from epic description (or discovery doc if available)
-   - Design References: from discovery doc if available
-   - Status: `planning`
+3. Pre-fill: Sprint ID, epic title, Start Date (today), Problem Statement (from discovery or description), Status: `planning`.
 
-```
-TaskUpdate(t2, status: completed)
-```
+Mark t2 completed, t3 in_progress.
 
 ---
 
 ## Step 3 — Propose sub-task breakdown
 
-```
-TaskUpdate(t3, status: in_progress)
-```
-
-Analyze the epic and propose a breakdown. Rules:
-- Each sub-task is completable by one person in 1–3 days.
-- **Each task must be a vertical slice** — it delivers a complete user-visible outcome (FE + BE together). A task that is only "build the API" or only "build the UI" is not a valid task on its own, because it cannot be E2E tested.
-  - ✅ "User can log in and see their dashboard" — has FE, BE, and is E2E testable
-  - ❌ "Build login API endpoint" — BE only, no user-visible outcome
-  - ❌ "Build login form UI" — FE only, cannot run E2E without backend
-  - Exception: tasks that are purely infrastructure/setup (e.g. DB migrations, CI pipelines) with no user-facing behavior — mark as `infra` type and note they require integration tests instead of E2E.
-- Every non-infra task must have a clear user story that describes the E2E scenario.
-- Identify dependencies (which tasks must be done first).
-- **No cap on number of tasks** — propose as many tasks as needed to fully cover the epic scope. Each task must still be 1–3 days.
-- Order tasks so dependencies are respected.
-
-Task IDs continue from the global sequence found in Step 1.
-Example: if the last task across all sprints was `T004`, this sprint starts from `SP2-T005`.
+Rules:
+- Each task is completable by one person in 1–3 days.
+- **Each task must be a vertical slice** — delivers a complete user-visible outcome (FE + BE, E2E testable). ✅ "User can log in and see their dashboard" ❌ "Build login API" (BE only).
+  - Exception: pure infrastructure tasks (DB migrations, CI) — mark `infra` type, require integration tests.
+- No cap on task count — propose as many as needed to cover full epic scope.
+- Order by dependencies. Task IDs continue from the global counter found in Step 1.
 
 Present the breakdown:
-
 ```
 Proposed sub-tasks for [sprint-id] — [epic title]:
-(Global task counter: last used T[NNN], starting from T[NNN+1])
+(Last used: T[NNN] → starting from T[NNN+1])
 
-| Task ID     | Title                               | Type      | E2E Scenario (one sentence)              | Depends On  | Points |
-|-------------|-------------------------------------|-----------|------------------------------------------|-------------|--------|
-| SP2-T005    | User can register an account        | fullstack | User fills form → sees welcome screen    | —           | 3      |
-| SP2-T006    | User can log in and access dashboard| fullstack | User logs in → lands on dashboard        | SP2-T005    | 5      |
-| SP2-T007    | Admin can manage user roles         | fullstack | Admin changes role → user sees new perms | SP2-T006    | 2      |
+| Task ID  | Title | Type | E2E Scenario (one sentence) | Depends On | Points |
+|----------|-------|------|-----------------------------|------------|--------|
+| SP2-T005 | ...   | fullstack | User does X → sees Y   | —          | 3      |
 ```
+Points: 1 trivial · 2 small · 3 medium-small · 5 medium · 8 large · **13 = too big, split first**.
 
-Points scale: 1 (trivial) · 2 (small) · 3 (medium-small) · 5 (medium) · 8 (large) · 13 (too big — must split before proceeding).
-Assign points based on scope of the E2E scenario and expected implementation complexity. If a task scores 13, break it down into smaller tasks instead.
-
-```
-TaskUpdate(t3, status: completed)
-```
+Mark t3 completed, t4 in_progress.
 
 ---
 
-## Step 3b — Coverage check against discovery
+## Step 3b — Coverage check vs discovery
+
+If a discovery doc was found, cross-check proposed tasks against it:
+- **Goals** — which task covers each Goal / Success Metric? Flag uncovered goals.
+- **In-scope items** — which task covers each? Flag uncovered items.
+- **User journeys** — which task delivers each To-Be journey end-to-end? Flag uncovered journeys.
 
 ```
-TaskUpdate(t4, status: in_progress)
+Coverage check:
+✅ Covered:    [item] → T00N
+⚠️ Not covered → adding T00N: [title]
+➖ Out of scope: [item] — reason: [why]
 ```
+Do NOT silently drop any in-scope item. Add a task or mark explicitly out-of-scope.
 
-If a discovery doc was found in Step 1, cross-check the proposed tasks against it:
-
-1. **Goals coverage** — for each Goal / Success Metric in the discovery doc, identify which task(s) cover it. Flag any goal with no task.
-2. **In-scope coverage** — for each item listed as in-scope in the discovery doc, identify which task covers it. Flag any in-scope item with no task.
-3. **User journeys coverage** — for each To-Be user journey in the discovery doc, identify which task delivers it end-to-end. Flag any journey with no task.
-
-Present the coverage summary after the task table:
-
-```
-Coverage check vs discovery doc:
-
-✅ Covered
-  - [Goal/Scope item] → [Task ID]
-  - ...
-
-⚠️ Not covered — adding tasks:
-  - [Goal/Scope item] → adding [new Task ID]: [title]
-  - ...
-
-➖ Explicitly out of scope:
-  - [item] — reason: [why excluded]
-```
-
-- For every uncovered item: either add a new task to the breakdown or explicitly mark it as out-of-scope with a reason.
-- Do NOT silently drop any in-scope item from discovery.
-
-After showing the coverage summary, ask: "Does this breakdown look right? You can rename tasks, add/remove rows, or say 'confirm' to scaffold all."
-
-```
-TaskUpdate(t4, status: completed)
-```
+Ask: "Does this breakdown look right? Rename, add/remove rows, or say 'confirm'."
+Wait for confirmation. Mark t4 completed, t5 in_progress.
 
 ---
 
-## Step 4 — Update docs (after user confirms)
-
-```
-TaskUpdate(t5, status: in_progress)
-```
+## Step 4 — Update docs
 
 1. Fill the Sub-tasks table in `[sprint-id]-overview.md` with the confirmed list.
-2. Add a new sprint section to `docs/BACKLOG.md`:
+2. Add sprint section to `docs/BACKLOG.md`:
 
 ```markdown
 ## [sprint-id] — [Epic Title]
@@ -165,23 +94,19 @@ TaskUpdate(t5, status: in_progress)
 | Task | Title | Depends On | Points | Status | Priority | Assigned |
 |------|-------|------------|--------|--------|----------|----------|
 | SP2-T005 | ... | — | 3 | `todo` | — | — |
-| SP2-T006 | ... | SP2-T005 | 5 | `todo` | — | — |
 ```
+No per-task files created here. `/requirement` creates them when work begins.
 
-No per-task files are created here. `/fe-design` and `/be-design` create their own docs when the task begins.
-
-```
-TaskUpdate(t5, status: completed)
-```
+Mark t5 completed.
 
 ---
 
-## Step 5 — Output
+## Output
 
 ```
-✓ Sprint created: docs/sprints/[sprint-id]/[sprint-id]-overview.md
-✓ BACKLOG.md updated with [N] tasks
+✓ docs/sprints/[sprint-id]/[sprint-id]-overview.md
+✓ BACKLOG.md updated — [N] tasks added
 
-Next steps:
-  Run /next-task to pick up the first task and begin /fe-design or /be-design
+Next: /run-tasks [task-id] [task-id] ...   ← parallel
+  or: /next-task                            ← sequential
 ```

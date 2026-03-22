@@ -1,109 +1,69 @@
 # /retro-sprint
 Workflow position: **(all tasks done + /git-commit) → START → next sprint**
 
-Write a sprint-level retrospective by aggregating all task retros and evaluating sprint goals.
-Run this ONCE after ALL tasks in the sprint are done and committed.
-Arguments: $ARGUMENTS
-Format: `[sprint-id]`  — e.g. `SP1`
+Write a sprint-level retrospective. Run ONCE after ALL tasks are done and committed.
+Arguments: `[sprint-id]`  — e.g. `SP1`
 
 ---
 
 ## Step 1 — Validate sprint is complete
 
-1. Parse `[sprint-id]` from `$ARGUMENTS`.
-2. Read `docs/BACKLOG.md` — check the sprint table.
-   - If any task is NOT `done` → stop: "Tasks still open: [list]. Complete all tasks before running /retro-sprint."
-3. Read `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — load Goals, Success Metrics, Sub-tasks, and Definition of Done.
+Parse `[sprint-id]`. Read `docs/BACKLOG.md`:
+- Any task NOT `done` → stop: "Tasks still open: [list]. Complete all before running /retro-sprint."
 
-Register all steps with TaskCreate — store the returned IDs:
+Read `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — Goals, Success Metrics, Sub-tasks, Definition of Done.
 
+Register sub-tasks (wire sequentially; mark in_progress/completed at each step):
 ```
-t1 = TaskCreate(subject: "[sprint-id] — sprint-retro: validate complete",        description: "Confirm all tasks are done and read sprint overview")
-t2 = TaskCreate(subject: "[sprint-id] — sprint-retro: aggregate task retros",    description: "Read all task retros and issues files; compute aggregates")
-t3 = TaskCreate(subject: "[sprint-id] — sprint-retro: evaluate goals + metrics", description: "Evaluate each goal and success metric from sprint overview")
-t4 = TaskCreate(subject: "[sprint-id] — sprint-retro: write sprint retro",       description: "Write sprint retro doc to [sprint-id]-retro.md")
-t5 = TaskCreate(subject: "[sprint-id] — sprint-retro: update BACKLOG.md",        description: "Mark sprint as done in BACKLOG.md")
+t1 = TaskCreate("[sprint-id] — sprint-retro: validate complete")
+t2 = TaskCreate("[sprint-id] — sprint-retro: aggregate task retros")
+t3 = TaskCreate("[sprint-id] — sprint-retro: evaluate goals + metrics")
+t4 = TaskCreate("[sprint-id] — sprint-retro: write sprint retro")
+t5 = TaskCreate("[sprint-id] — sprint-retro: update BACKLOG.md")
 ```
-
-Wire dependencies:
-```
-TaskUpdate(t2, addBlockedBy: [t1])
-TaskUpdate(t3, addBlockedBy: [t2])
-TaskUpdate(t4, addBlockedBy: [t3])
-TaskUpdate(t5, addBlockedBy: [t4])
-```
-
-Mark t1 as done (validation already complete above):
-```
-TaskUpdate(t1, status: in_progress)
-TaskUpdate(t1, status: completed)
-```
+Mark t1 completed, t2 in_progress.
 
 ---
 
 ## Step 2 — Aggregate all task retros
 
-```
-TaskUpdate(t2, status: in_progress)
-```
+For every task in the sprint, read `[task-id]-retro.md` and `[task-id]-issues.md` (if exists).
 
-For every task in the sprint, read:
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-retro.md` — estimate vs actual, what went well, improvements, TDD effectiveness, action items
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-issues.md` (if exists) — bug count and severity
-
-Compute aggregates:
-- Total estimated days vs total actual days across all tasks
+Compute:
+- Total estimated vs actual days across all tasks
 - Total issues: X critical / Y major / Z minor
 - TDD score: how many tasks had tests written before implementation?
 - Recurring themes in "what went well" and "what could be improved"
 - All knowledge sharing items combined
 - All action items combined (deduplicated)
 
-```
-TaskUpdate(t2, status: completed)
-```
+Mark t2 completed, t3 in_progress.
 
 ---
 
 ## Step 3 — Evaluate sprint goals and success metrics
 
-```
-TaskUpdate(t3, status: in_progress)
-```
-
 From `[sprint-id]-overview.md`:
-- For each **Goal** → was it achieved? (yes / partially / no)
-- For each **Success Metric** → what was the actual result vs target?
-- **Definition of Done (Sprint Level)** → check every checkbox, mark which passed/failed
+- Each **Goal** → achieved / partially / no
+- Each **Success Metric** → actual result vs target
+- **Definition of Done (Sprint Level)** → check each checkbox, mark passed/failed
 
-```
-TaskUpdate(t3, status: completed)
-```
+Mark t3 completed, t4 in_progress.
 
 ---
 
 ## Step 4 — Write the sprint retrospective
 
-```
-TaskUpdate(t4, status: in_progress)
-```
-
-Save to `docs/sprints/[sprint-id]/[sprint-id]-retro.md` using `docs/templates/RETRO-SPRINT-TEMPLATE.md` as the structure:
+Save to `docs/sprints/[sprint-id]/[sprint-id]-retro.md`:
 
 ```markdown
 # [sprint-id] — Sprint Retrospective
+**Epic:** [title]  |  **Date:** [today]  |  **Duration:** [start] → [end]
 
-**Epic:** [Epic Title]
-**Date:** [today]
-**Duration:** [start date] → [end date]
-**Team:** [team members]
-
----
-
-## Sprint Goals Review
+## Sprint Goals
 | Goal | Result | Status |
 |------|--------|--------|
-| [goal 1] | [what happened] | ✓ achieved / ~ partial / ✗ missed |
+| [goal] | [what happened] | ✓ achieved / ~ partial / ✗ missed |
 
 ## Success Metrics
 | Metric | Target | Actual | Status |
@@ -115,71 +75,71 @@ Save to `docs/sprints/[sprint-id]/[sprint-id]-retro.md` using `docs/templates/RE
 |-|-----------|--------|----------|
 | Total days | X | Y | +/- Z |
 | Tasks completed | N | N | — |
-| Issues encountered | — | X critical / Y major / Z minor | — |
+| Issues | — | X critical / Y major / Z minor | — |
 
-## What went well (across all tasks)
+## What went well
 -
 
-## What could be improved (across all tasks)
+## What could be improved
 -
 
 ## TDD Effectiveness (sprint-wide)
-- Tasks with tests written before code: X / N ([%])
-- Bugs caught by tests before manual QA: [total]
-- Common TDD gaps identified:
+- Tasks with tests before code: X / N ([%])
+- Bugs caught by tests before QA: [total]
+- Common TDD gaps:
 
 ## Knowledge sharing
-<!-- Consolidated from all task retros. Add to CLAUDE.md or team wiki if valuable. -->
+<!-- Consolidated from all task retros. Add to CLAUDE.md if valuable. -->
 -
 
 ## Action items for next sprint
-<!-- Deduplicated and prioritized from all task retros. Assign owner where possible. -->
 | Action | Owner | Priority |
 |--------|-------|----------|
 | - | - | high / med / low |
 
 ## Definition of Done — Sprint Level
-- [ ] All sub-tasks are `done`
-- [ ] All success metrics instrumented and verified
+- [ ] All sub-tasks done
+- [ ] All success metrics verified
 - [ ] Deployed to production
 - [ ] Sprint retro written
 ```
 
-```
-TaskUpdate(t4, status: completed)
-```
+Mark t4 completed, t5 in_progress.
 
 ---
 
-## Step 5 — Update BACKLOG.md
+## Step 5 — Update BACKLOG.md and surface learnings
 
-```
-TaskUpdate(t5, status: in_progress)
-```
-
-Update the sprint section header to show `done`:
+Mark sprint header as done:
 ```markdown
-## SP1 — [Epic Title] ✓ done
+## [sprint-id] — [Epic Title] ✓ done
 ```
 
+Scan all task retros for "Knowledge sharing" items. For any non-obvious finding (naming convention, test pattern, architectural decision, anti-pattern, reusable utility), ask:
+
 ```
-TaskUpdate(t5, status: completed)
+Found [N] knowledge items from this sprint. Add to CLAUDE.md?
+
+  [1] [item] → Architecture / Team Conventions / Key Constraints
+  [2] [item] → Architecture / Team Conventions / Key Constraints
+
+Add all / pick numbers / skip:
 ```
+
+If user confirms → append to relevant CLAUDE.md section.
+
+Mark t5 completed.
 
 ---
 
-## Step 6 — Output
+## Output
 
 ```
-✓ Sprint retro saved: docs/sprints/[sprint-id]/[sprint-id]-retro.md
+✓ docs/sprints/[sprint-id]/[sprint-id]-retro.md
 ✓ BACKLOG.md — [sprint-id] marked done
 
-Sprint summary:
-  Goals achieved   : X / N
-  Velocity         : X estimated → Y actual days
-  Issues           : X critical / Y major / Z minor
-  Action items     : N for next sprint
+Summary: [N/N] goals achieved  |  [X] → [Y] days  |  [N] issues  |  [N] action items
 
-Next step: /discovery [disc-id] [name]  ← start the next epic
-       or: /new-sprint [sprint-id] [description]  ← if already discovered
+Next: /discovery [disc-id] [name]  ← start next epic
+  or: /new-sprint [sprint-id] [description]  ← if already discovered
 ```

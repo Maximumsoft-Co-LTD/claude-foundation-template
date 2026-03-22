@@ -1,115 +1,74 @@
 # /next-task
-Workflow position: **/git-commit → START → /fe-design**
+Workflow position: **/git-commit → START → /requirement**
 
-Load the next todo task and show full context. Run this after finishing a task to pick up the next one.
-Arguments (optional): $ARGUMENTS
-Format: `[task-id]`  — optional. If omitted, auto-selects the next todo.
+Load the next todo task and show full context. Run after finishing a task to pick up the next one.
+Arguments (optional): `[task-id]` — if omitted, auto-selects next todo.
 
 ---
 
-## Step 1 — Reconcile and update all statuses
+## Step 1 — Reconcile statuses
 
-Register all steps with TaskCreate — store the returned IDs:
-
+Register sub-tasks (wire sequentially; mark in_progress/completed at each step):
 ```
-t1 = TaskCreate(subject: "next-task — reconcile statuses",      description: "Audit BACKLOG.md and correct any stale statuses based on existing doc files")
-t2 = TaskCreate(subject: "next-task — show sprint progress",    description: "Print progress summary for every active sprint")
-t3 = TaskCreate(subject: "next-task — determine target task",   description: "Select next todo task based on args or auto-select first unblocked todo")
-t4 = TaskCreate(subject: "next-task — load task context",       description: "Read all doc files for the target task")
-t5 = TaskCreate(subject: "next-task — update status + suggest", description: "Update task to in-progress and output next command suggestion")
+t1 = TaskCreate("next-task — reconcile statuses")
+t2 = TaskCreate("next-task — show sprint progress")
+t3 = TaskCreate("next-task — determine target task")
+t4 = TaskCreate("next-task — load task context")
+t5 = TaskCreate("next-task — update status + suggest")
 ```
+Mark t1 in_progress.
 
-Wire dependencies:
-```
-TaskUpdate(t2, addBlockedBy: [t1])
-TaskUpdate(t3, addBlockedBy: [t2])
-TaskUpdate(t4, addBlockedBy: [t3])
-TaskUpdate(t5, addBlockedBy: [t4])
-```
+Read `docs/BACKLOG.md`. For each task NOT `todo` or `done`, check its doc files:
+- `[task-id]-retro.md` exists → status should be `done`. Update if it isn't.
+- Status is `review` or `testing` but no evidence → revert to `in-progress`.
+- `[task-id]-requirement.md` has all ACs `✓` and no open issues → flag for user to confirm if `done`.
 
-```
-TaskUpdate(t1, status: in_progress)
-```
-
-Before picking the next task, audit the current state:
-
-1. Read `docs/BACKLOG.md` — collect every task and its recorded status.
-2. For each task that is NOT `todo` or `done`, read its latest doc files:
-   - If `[task-id]-retro.md` exists → status should be `done`. Update if it isn't.
-   - If `[task-id]-requirement.md` has all ACs marked `✓` and no open issues → flag for user to confirm if it should be `done`.
-   - If status is `review` or `testing` but no code review / test run has occurred → revert to `in-progress`.
-3. Write all corrections back to `docs/BACKLOG.md` before proceeding.
-
-Output any corrections made:
+Write all corrections back to BACKLOG.md. Print any changes:
 ```
 Status corrections:
   [task-id]: in-progress → done  (retro file found)
-  [task-id]: review → in-progress  (no code review doc found)
+  [task-id]: review → in-progress  (no code review found)
 ```
-
-```
-TaskUpdate(t1, status: completed)
-```
+Mark t1 completed, t2 in_progress.
 
 ---
 
-## Step 2 — Read backlog and show sprint progress
+## Step 2 — Show sprint progress
 
 ```
-TaskUpdate(t2, status: in_progress)
+SP1 — [Epic Title]: 2 done / 1 in-progress / 3 todo / 0 blocked  (6 total)
+SP2 — [Epic Title]: 0 done / 0 in-progress / 5 todo / 0 blocked  (5 total)
 ```
-
-Read `docs/BACKLOG.md` and print a progress summary for every active sprint:
-```
-sprint-01 — [Epic Title]: 2 done / 1 in-progress / 3 todo / 0 blocked  (6 total)
-sprint-02 — [Epic Title]: 0 done / 0 in-progress / 5 todo / 0 blocked  (5 total)
-```
-
-```
-TaskUpdate(t2, status: completed)
-```
+Mark t2 completed, t3 in_progress.
 
 ---
 
 ## Step 3 — Determine target task
 
-```
-TaskUpdate(t3, status: in_progress)
-```
+- **`[task-id]` given** → use it directly.
+- **No args** → pick first `todo` task (scan sprints top-to-bottom, respect `depends_on`).
+- **No todo tasks** → list all `blocked` tasks + issues file. If all tasks in a sprint are `done` → prompt: "Sprint complete — run `/retro-sprint [sprint-id]`." Ask what to do next.
 
-- **`task-id` given** → use it directly (derive sprint from prefix).
-- **No args** → pick first `todo` task scanning sprints top-to-bottom.
-- **No todo tasks** anywhere:
-  - List all `blocked` tasks and which issues file to check.
-  - If every task in a sprint is `done` → check sprint-level Definition of Done in `[sprint-id]-overview.md`. If met, prompt: "Sprint complete — run `/retro-sprint [sprint-id]`."
-  - Ask the user what to do next.
-
-```
-TaskUpdate(t3, status: completed)
-```
+Mark t3 completed, t4 in_progress.
 
 ---
 
 ## Step 4 — Load context
 
-```
-TaskUpdate(t4, status: in_progress)
-```
-
-Read all files for the target task:
-- `docs/sprints/[sprint-id]/[sprint-id]-overview.md` (epic context)
+Read for the target task:
+- `docs/sprints/[sprint-id]/[sprint-id]-overview.md`
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md`
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md`
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-issues.md` (if exists)
 
-```
-TaskUpdate(t4, status: completed)
-```
+Mark t4 completed, t5 in_progress.
 
 ---
 
-## Step 5 — Output task context card
+## Step 5 — Output task context card and suggest next command
+
+If status was `todo` → update to `in-progress` in BACKLOG.md.
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -117,7 +76,7 @@ Sprint : [sprint-id] — [Epic Title]
 Task   : [task-id] — [Task Title]
 Status : [status]  |  Priority: [priority]  |  Estimate: [X days]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Epic goal   : [one line from sprint overview Goals]
+Epic goal   : [one line from sprint Goals]
 This task   : [Problem Statement from requirement]
 Depends on  : [task-id or —]
 Design refs : [Figma link or —]
@@ -127,33 +86,21 @@ Acceptance Criteria:
   ☐ AC-2: ...
 
 Readiness:
-  Requirement  : filled / empty
-  FE design    : filled / empty
-  BE design    : filled / empty
-  Open issues  : [N]
+  Requirement : filled / empty
+  FE design   : filled / empty
+  BE design   : filled / empty
+  Open issues : [N]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
----
-
-## Step 6 — Update status and suggest next command
-
-```
-TaskUpdate(t5, status: in_progress)
-```
-
-If the task status was `todo`, update it to `in-progress` in `docs/BACKLOG.md`.
-
-Based on readiness, output exactly ONE next step:
+Suggest exactly ONE next step:
 
 | Condition | Suggestion |
 |-----------|------------|
-| Requirement is empty | `/requirement [task-id]` |
-| FE design is empty | `/fe-design [task-id]` |
-| BE design is empty | `/be-design [task-id]` |
-| Both designs filled, no tests yet | "Write failing tests first (see TDD Test Plan in design docs), then implement" |
-| Tests written, implementation in progress | "Continue implementing. Run `/issue [task-id] [desc]` if you hit a bug." |
+| Requirement empty | `/requirement [task-id]` |
+| FE design empty | `/fe-design [task-id]` |
+| BE design empty | `/be-design [task-id]` |
+| Both designs filled, no tests yet | "Write failing tests first (see TDD Test Plan), then implement" |
+| Tests written, implementing | "Continue implementing. `/issue [task-id] [desc]` if you hit a bug." |
 
-```
-TaskUpdate(t5, status: completed)
-```
+Mark t5 completed.
