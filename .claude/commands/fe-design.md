@@ -8,14 +8,7 @@ Arguments: `[task-id]`  — e.g. `SP1-T002`
 
 ## Step 1 — Load context
 
-Parse `[task-id]`, extract `[sprint-id]`. Register sub-tasks (wire sequentially; mark in_progress/completed at each step):
-```
-t1 = TaskCreate("[task-id] — fe: load context")
-t2 = TaskCreate("[task-id] — fe: fill design")
-t3 = TaskCreate("[task-id] — fe: coverage check vs ACs")
-t4 = TaskCreate("[task-id] — fe: save + update status")
-```
-Mark t1 in_progress.
+Parse `[task-id]`, extract `[sprint-id]`.
 
 Read in order:
 1. `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — epic goals and constraints
@@ -59,34 +52,18 @@ Read **Points** from requirement doc Metadata. Apply points-based section scope 
 | **8pt** | All sections + ADR entries for non-obvious design choices |
 
 Read existing draft `[task-id]-frontend.md` and `docs/templates/FRONTEND-DESIGN-TEMPLATE.md`.
-Mark t1 completed, t2 in_progress.
 
 ---
 
 ## Step 2 — Fill the complete FE design
 
-Write implementation-ready content for every required section:
+For every section required at this point level (per the table above), write implementation-ready content using `docs/templates/FRONTEND-DESIGN-TEMPLATE.md` as the structure.
 
-- **Design References** — Figma/mockup links from requirement; reference specific frames per screen.
-- **UI/UX Overview** — every screen, modal, or flow this task introduces or changes.
-- **User Journey Map** — step-by-step to-be state: what user does, sees, feels. Entry and exit point.
-- **Behavior Mapping** — (1) Entry paths: every way user can arrive + pre-loaded state per entry. (2) Behavior flow diagram: every interaction including all fail states — every fail branch ends in a labeled node. (3) Fail state summary table: fail state → what user sees → recoverable?
-- **Routing & Navigation** — every new/changed route: path, component, auth required.
-- **Component Breakdown** — every component to create or modify: name, file path, type (new/modify), description.
-- **State & Data Flow** — `[API/Store] → [Container] → [Props] → [UI] → [Action] → [Dispatch]`.
-- **API Contracts Consumed** — every endpoint: method, path, request, response, error handling.
-- **Loading & Skeleton States** — per async op: loading, empty state, error state.
-- **Responsive Behavior** — layout changes at mobile (<768px), tablet (768–1024px), desktop (>1024px).
-- **Analytics Events** — every event mapped to Analytics section in requirement.
-- **Performance Considerations** — lazy loading, memoization, code splitting, image optimization.
-- **Implementation Plan** — ordered steps in dependency order. Each step: `[N]. [actual file path] — [create/modify] — [what] — [design section ref]`. File paths must be **real paths** derived from the Existing Code Context exploration — not hypothetical. If creating a new file, place it following the discovered folder convention. Group by phase: (1) routing, (2) components, (3) state/data, (4) API, (5) loading/errors, (6) analytics, (7) a11y/responsive. Omit irrelevant phases. **`/implement` follows this plan exactly.**
-- **TDD Test Plan** — per AC: min 1 unit test + 1 integration test. Written BEFORE code.
-- **E2E Test Plan** — per AC: min 1 scenario. Format: "Given [state] → When [actions] → Then [outcome]." Written BEFORE code.
-- **Fail Cases & Fail Flows** — per user action that can fail: flow diagram, Fail Case Matrix (presentation pattern, exact error copy, recovery CTA, input preserved?), Optimistic Update Rollback, Partial Success Handling, Multi-step Rollback where applicable.
-- **Edge Cases & Error States** — network timeout, 401, 500, empty list, session expiry, concurrent edits.
-- **Accessibility Notes** — keyboard nav, focus management, ARIA labels, color contrast.
-
-Mark t2 completed, t3 in_progress.
+Key requirements:
+- **Implementation Plan** — file paths must be **real paths** from Existing Code Context, not hypothetical. `/implement` follows this plan exactly.
+- **TDD Test Plan** — min 1 unit + 1 integration per AC. Written BEFORE code.
+- **E2E Test Plan** — min 1 scenario per AC. Format: "Given → When → Then." Written BEFORE code.
+- **Fail Case Matrix** — every user action that can fail must have: presentation pattern + exact error copy + recovery CTA + input preserved flag.
 
 ---
 
@@ -104,7 +81,7 @@ FE Coverage check:
 ⚠️ AC-N: missing TDD → adding to TDD Test Plan
 ⚠️ Constraint [X]: not addressed → adding to [section]
 ```
-Fill every gap immediately. Do NOT leave gaps unresolved. Mark t3 completed, t4 in_progress.
+Fill every gap immediately. Do NOT leave gaps unresolved.
 
 ---
 
@@ -112,8 +89,6 @@ Fill every gap immediately. Do NOT leave gaps unresolved. Mark t3 completed, t4 
 
 1. Save to `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md`.
 2. Update BACKLOG.md status to `in-progress` if was `todo`.
-
-Mark t4 completed.
 
 ---
 

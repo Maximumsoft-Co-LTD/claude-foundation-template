@@ -165,41 +165,19 @@ Reply:
 
 # ━━━ PHASE 2: IMPLEMENT ━━━━━━━━━━━━━━━━━━
 
-## Step 6 — Implement (parallel per tier)
+## Step 6 — Implement + Review + Test (parallel per tier)
 
-For each task, launch `Agent [task-id] — Implement` (run_in_background: true):
-> Read `.claude/commands/implement.md`, follow every step for `[task-id]`.
-> **Read `cross-task-context.md`** — reuse shared components owned by sibling tasks. No duplicate implementations.
-> Return: DONE, ISSUES_FOUND (list), or BLOCKED (reason).
+For each task, launch `Agent [task-id] — Implement+Review+Test` (run_in_background: true):
+> Read `.claude/commands/implement.md`, `.claude/commands/code-review.md`, `.claude/commands/testing.md` — follow every step for `[task-id]` in that order.
+> **Read `cross-task-context.md`** — reuse shared components. No duplicate implementations.
+> For any issues found during review or testing → follow `/issue` process inline.
+> Return: DONE, ISSUES_FIXED (list), or BLOCKED (reason).
 
-On ISSUES_FOUND → run `/issue [task-id] [description]` per issue, then mark completed.
 Print checkpoint.
 
 ---
 
-## Step 7 — Code Review (parallel per tier)
-
-For each task, launch `Agent [task-id] — Code Review` (run_in_background: true):
-> Read `.claude/commands/code-review.md`, follow every step for `[task-id]`.
-> Return: APPROVED or REQUEST_CHANGES (list critical issues).
-
-On REQUEST_CHANGES → file issues + re-run implement agent for that task, then mark completed.
-Print checkpoint.
-
----
-
-## Step 8 — Testing (parallel per tier)
-
-For each task, launch `Agent [task-id] — Testing` (run_in_background: true):
-> Read `.claude/commands/testing.md`, follow every step for `[task-id]`.
-> Return: ALL_PASS, FAILING (list), or MISSING_COVERAGE (list ACs).
-
-On FAILING / MISSING_COVERAGE → fix within same agent; file issue if non-trivial.
-Print checkpoint.
-
----
-
-## Step 9 — Retro Task (parallel per tier)
+## Step 7 — Retro Task (parallel per tier)
 
 For each task, launch `Agent [task-id] — Retro` (run_in_background: true):
 > Read `.claude/commands/retro-task.md`, follow every step for `[task-id]`.
@@ -208,7 +186,7 @@ For each task, launch `Agent [task-id] — Retro` (run_in_background: true):
 
 ---
 
-## Step 10 — Final summary
+## Step 8 — Final summary
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

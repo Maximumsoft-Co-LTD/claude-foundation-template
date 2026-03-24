@@ -8,16 +8,6 @@ Arguments (optional): `[task-id]` — if omitted, auto-selects next todo.
 
 ## Step 1 — Reconcile statuses
 
-Register sub-tasks (wire sequentially; mark in_progress/completed at each step):
-```
-t1 = TaskCreate("next-task — reconcile statuses")
-t2 = TaskCreate("next-task — show sprint progress")
-t3 = TaskCreate("next-task — determine target task")
-t4 = TaskCreate("next-task — load task context")
-t5 = TaskCreate("next-task — update status + suggest")
-```
-Mark t1 in_progress.
-
 Read `docs/BACKLOG.md`. For each task NOT `todo` or `done`, check its doc files:
 - `[task-id]-retro.md` exists → status should be `done`. Update if it isn't.
 - Status is `review` or `testing` but no evidence → revert to `in-progress`.
@@ -29,7 +19,6 @@ Status corrections:
   [task-id]: in-progress → done  (retro file found)
   [task-id]: review → in-progress  (no code review found)
 ```
-Mark t1 completed, t2 in_progress.
 
 ---
 
@@ -39,7 +28,6 @@ Mark t1 completed, t2 in_progress.
 SP1 — [Epic Title]: 2 done / 1 in-progress / 3 todo / 0 blocked  (6 total)
 SP2 — [Epic Title]: 0 done / 0 in-progress / 5 todo / 0 blocked  (5 total)
 ```
-Mark t2 completed, t3 in_progress.
 
 ---
 
@@ -49,7 +37,6 @@ Mark t2 completed, t3 in_progress.
 - **No args** → pick first `todo` task (scan sprints top-to-bottom, respect `depends_on`).
 - **No todo tasks** → list all `blocked` tasks + issues file. If all tasks in a sprint are `done` → prompt: "Sprint complete — run `/retro-sprint [sprint-id]`." Ask what to do next.
 
-Mark t3 completed, t4 in_progress.
 
 ---
 
@@ -62,7 +49,6 @@ Read for the target task:
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md`
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-issues.md` (if exists)
 
-Mark t4 completed, t5 in_progress.
 
 ---
 
@@ -103,4 +89,3 @@ Suggest exactly ONE next step:
 | Both designs filled, no tests yet | "Write failing tests first (see TDD Test Plan), then implement" |
 | Tests written, implementing | "Continue implementing. `/issue [task-id] [desc]` if you hit a bug." |
 
-Mark t5 completed.

@@ -16,16 +16,6 @@ Arguments: `[sprint-id] [epic description]`  — e.g. `SP2 Build user authentica
    - **Not found** → warn: "⚠️ No discovery doc found. Running `/discovery` first is recommended. Continue? (y/n)"
    - **Found** → read it (Problem Statement, chosen approach, scope, constraints). Check for unresolved open questions. If any → warn and list them: "These may affect task scope. Continue? (y/n)"
 
-Register sub-tasks (wire sequentially t1→t2→t3→t4→t5; mark in_progress/completed at each step):
-```
-t1 = TaskCreate("[sprint-id] — validate + resolve task counter")
-t2 = TaskCreate("[sprint-id] — create sprint dir + overview")
-t3 = TaskCreate("[sprint-id] — propose sub-task breakdown")
-t4 = TaskCreate("[sprint-id] — coverage check vs discovery")
-t5 = TaskCreate("[sprint-id] — update docs after confirmation")
-```
-Mark t1 completed. Mark t2 in_progress.
-
 ---
 
 ## Step 2 — Create sprint directory and overview
@@ -33,8 +23,6 @@ Mark t1 completed. Mark t2 in_progress.
 1. Create `docs/sprints/[sprint-id]/`.
 2. Create `docs/sprints/[sprint-id]/[sprint-id]-overview.md` from `docs/templates/SPRINT-OVERVIEW-TEMPLATE.md`.
 3. Pre-fill: Sprint ID, epic title, Start Date (today), Problem Statement (from discovery or description), Status: `planning`.
-
-Mark t2 completed, t3 in_progress.
 
 ---
 
@@ -58,8 +46,6 @@ Proposed sub-tasks for [sprint-id] — [epic title]:
 ```
 Points: 1 trivial · 2 small · 3 medium-small · 5 medium · 8 large · **13 = too big, split first**.
 
-Mark t3 completed, t4 in_progress.
-
 ---
 
 ## Step 3b — Coverage check vs discovery
@@ -78,7 +64,7 @@ Coverage check:
 Do NOT silently drop any in-scope item. Add a task or mark explicitly out-of-scope.
 
 Ask: "Does this breakdown look right? Rename, add/remove rows, or say 'confirm'."
-Wait for confirmation. Mark t4 completed, t5 in_progress.
+Wait for confirmation.
 
 ---
 
@@ -96,8 +82,6 @@ Wait for confirmation. Mark t4 completed, t5 in_progress.
 | SP2-T005 | ... | — | 3 | `todo` | — | — |
 ```
 No per-task files created here. `/requirement` creates them when work begins.
-
-Mark t5 completed.
 
 ---
 

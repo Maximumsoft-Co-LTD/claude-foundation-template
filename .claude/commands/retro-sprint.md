@@ -13,16 +13,6 @@ Parse `[sprint-id]`. Read `docs/BACKLOG.md`:
 
 Read `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — Goals, Success Metrics, Sub-tasks, Definition of Done.
 
-Register sub-tasks (wire sequentially; mark in_progress/completed at each step):
-```
-t1 = TaskCreate("[sprint-id] — sprint-retro: validate complete")
-t2 = TaskCreate("[sprint-id] — sprint-retro: aggregate task retros")
-t3 = TaskCreate("[sprint-id] — sprint-retro: evaluate goals + metrics")
-t4 = TaskCreate("[sprint-id] — sprint-retro: write sprint retro")
-t5 = TaskCreate("[sprint-id] — sprint-retro: update BACKLOG.md")
-```
-Mark t1 completed, t2 in_progress.
-
 ---
 
 ## Step 2 — Aggregate all task retros
@@ -37,7 +27,6 @@ Compute:
 - All knowledge sharing items combined
 - All action items combined (deduplicated)
 
-Mark t2 completed, t3 in_progress.
 
 ---
 
@@ -48,63 +37,13 @@ From `[sprint-id]-overview.md`:
 - Each **Success Metric** → actual result vs target
 - **Definition of Done (Sprint Level)** → check each checkbox, mark passed/failed
 
-Mark t3 completed, t4 in_progress.
 
 ---
 
 ## Step 4 — Write the sprint retrospective
 
-Save to `docs/sprints/[sprint-id]/[sprint-id]-retro.md`:
+Fill `docs/templates/RETRO-SPRINT-TEMPLATE.md` with the data from Steps 2–3. Save to `docs/sprints/[sprint-id]/[sprint-id]-retro.md`.
 
-```markdown
-# [sprint-id] — Sprint Retrospective
-**Epic:** [title]  |  **Date:** [today]  |  **Duration:** [start] → [end]
-
-## Sprint Goals
-| Goal | Result | Status |
-|------|--------|--------|
-| [goal] | [what happened] | ✓ achieved / ~ partial / ✗ missed |
-
-## Success Metrics
-| Metric | Target | Actual | Status |
-|--------|--------|--------|--------|
-| [metric] | [target] | [result] | ✓ / ~ / ✗ |
-
-## Velocity
-| | Estimated | Actual | Variance |
-|-|-----------|--------|----------|
-| Total days | X | Y | +/- Z |
-| Tasks completed | N | N | — |
-| Issues | — | X critical / Y major / Z minor | — |
-
-## What went well
--
-
-## What could be improved
--
-
-## TDD Effectiveness (sprint-wide)
-- Tasks with tests before code: X / N ([%])
-- Bugs caught by tests before QA: [total]
-- Common TDD gaps:
-
-## Knowledge sharing
-<!-- Consolidated from all task retros. Add to CLAUDE.md if valuable. -->
--
-
-## Action items for next sprint
-| Action | Owner | Priority |
-|--------|-------|----------|
-| - | - | high / med / low |
-
-## Definition of Done — Sprint Level
-- [ ] All sub-tasks done
-- [ ] All success metrics verified
-- [ ] Deployed to production
-- [ ] Sprint retro written
-```
-
-Mark t4 completed, t5 in_progress.
 
 ---
 
@@ -127,8 +66,6 @@ Add all / pick numbers / skip:
 ```
 
 If user confirms → append to relevant CLAUDE.md section.
-
-Mark t5 completed.
 
 ---
 

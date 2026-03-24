@@ -8,14 +8,7 @@ Arguments: `[task-id]`  — e.g. `SP1-T002`
 
 ## Step 1 — Load context
 
-Parse `[task-id]`, extract `[sprint-id]`. Register sub-tasks (wire sequentially; mark in_progress/completed at each step):
-```
-t1 = TaskCreate("[task-id] — review: load context")
-t2 = TaskCreate("[task-id] — review: review changed files")
-t3 = TaskCreate("[task-id] — review: write report")
-t4 = TaskCreate("[task-id] — review: update requirement + status")
-```
-Mark t1 in_progress.
+Parse `[task-id]`, extract `[sprint-id]`.
 
 Read:
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — ACs and success metrics
@@ -25,7 +18,6 @@ Read:
 Validate: missing requirement, empty ACs, or missing design docs → stop with specific message.
 
 Run `git diff main...HEAD` to identify all changed files.
-Mark t1 completed, t2 in_progress.
 
 ---
 
@@ -62,7 +54,6 @@ Check every file against:
 - Empty states, null/undefined, boundary values handled?
 - Errors surfaced to the user — not silently swallowed?
 
-Mark t2 completed, t3 in_progress.
 
 ---
 
@@ -84,7 +75,6 @@ Suggestions (non-blocking):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-Mark t3 completed, t4 in_progress.
 
 ---
 
@@ -95,8 +85,6 @@ Update `[task-id]-requirement.md`:
 - Add **Review Summary** section: date, result, one-line note per AC.
 
 Update BACKLOG.md status to `review`.
-
-Mark t4 completed.
 
 ---
 

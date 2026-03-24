@@ -8,14 +8,7 @@ Arguments: `[task-id]`  — e.g. `SP1-T002`
 
 ## Step 1 — Load context
 
-Parse `[task-id]`, extract `[sprint-id]`. Register sub-tasks (wire sequentially; mark in_progress/completed at each step):
-```
-t1 = TaskCreate("[task-id] — be: load context")
-t2 = TaskCreate("[task-id] — be: fill design")
-t3 = TaskCreate("[task-id] — be: coverage check vs ACs")
-t4 = TaskCreate("[task-id] — be: save + update status")
-```
-Mark t1 in_progress.
+Parse `[task-id]`, extract `[sprint-id]`.
 
 Read in order:
 1. `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — epic goals and technical constraints
@@ -63,34 +56,18 @@ Read **Points** from requirement doc Metadata. Apply points-based section scope 
 | **8pt** | All sections + ADR entries, explicit performance benchmarks, rollback plan |
 
 Read existing draft `[task-id]-backend.md` and `docs/templates/BACKEND-DESIGN-TEMPLATE.md`.
-Mark t1 completed, t2 in_progress.
 
 ---
 
 ## Step 2 — Fill the complete BE design
 
-Write implementation-ready content for every required section:
+For every section required at this point level (per the table above), write implementation-ready content using `docs/templates/BACKEND-DESIGN-TEMPLATE.md` as the structure.
 
-- **API Endpoints** — method, path, auth, roles, idempotency, rate limit, request schema, success response, full error table (400/401/403/404/409/429/500). **Must match `[task-id]-frontend.md`.**
-- **Authorization & Roles** — permission matrix per endpoint, ownership rules.
-- **Input Validation Rules** — table per field: type, required, rules, error message. Maps directly to 400 cases and TDD tests.
-- **Data Models** — every new/modified schema: fields, types, constraints, relationships, indexes.
-- **Sequence Diagram** — full request flow: `Client → Middleware → Controller → Service → Repository → DB → response`.
-- **Service / Layer Breakdown** — responsibility of each layer: middleware, controller, service, repository.
-- **Business Logic** — non-obvious rules, calculations, decision flows in numbered steps.
-- **Event Publishing** — domain events: topic, trigger, payload, consumer. Write "None" if not applicable.
-- **Error Handling Strategy** — (1) standard error response envelope shape, (2) error code catalog (HTTP status + code + when), (3) which layer throws each type, (4) how external failures surface to client. Never expose stack traces.
-- **Security Considerations** — input sanitization, rate limiting, sensitive field exposure, PII in logs.
-- **Logging & Observability** — what to log per level, fields, slow query threshold.
-- **Environment Variables** — name, description, required, default for every new var.
-- **Caching Strategy** — data cached, cache key, TTL, invalidation. Write "None" if not applicable.
-- **Database Migrations** — up SQL and down (rollback) SQL for every schema change.
-- **Implementation Plan** — ordered steps in dependency order. Each step: `[N]. [actual file path] — [create/modify] — [what] — [design section ref]`. File paths must be **real paths** derived from the Existing Code Context exploration — not hypothetical. If creating a new file, place it following the discovered folder convention. Group by phase: (1) migrations, (2) models, (3) repository, (4) service, (5) controller/routes, (6) middleware/validation, (7) events, (8) caching, (9) logging. Omit irrelevant phases. **`/implement` follows this plan exactly.**
-- **TDD Test Plan** — per AC: min 1 unit + 1 integration test. Include tests for 401, 403, 429, validation, event publishing. Integration tests use real DB. Written BEFORE code.
-- **External Dependencies** — services called, purpose, failure behavior, timeout.
-- **Performance & Scalability** — data volume, N+1 risks, index strategy, background jobs.
-
-Mark t2 completed, t3 in_progress.
+Key requirements:
+- **API Endpoints** — every endpoint must match `[task-id]-frontend.md` API contracts exactly.
+- **Error Handling Strategy** — standard envelope (`error`, `code`, `fields`). Never expose stack traces.
+- **Implementation Plan** — file paths must be **real paths** from Existing Code Context. `/implement` follows this plan exactly.
+- **TDD Test Plan** — min 1 unit + 1 integration per AC. Include 401, 403, 429, validation tests. Integration tests use real DB. Written BEFORE code.
 
 ---
 
@@ -112,7 +89,7 @@ BE Coverage check:
 ⚠️ AC-N: missing integration test → adding to TDD Test Plan
 ⚠️ FE contract [GET /y]: not in BE → adding endpoint
 ```
-Fill every gap immediately. Do NOT leave gaps unresolved. Mark t3 completed, t4 in_progress.
+Fill every gap immediately. Do NOT leave gaps unresolved.
 
 ---
 
@@ -120,8 +97,6 @@ Fill every gap immediately. Do NOT leave gaps unresolved. Mark t3 completed, t4 
 
 1. Save to `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md`.
 2. Update BACKLOG.md status to `in-progress` if was `todo`.
-
-Mark t4 completed.
 
 ---
 

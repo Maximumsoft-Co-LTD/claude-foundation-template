@@ -8,15 +8,7 @@ Arguments: `[task-id]`  — e.g. `SP1-T002`
 
 ## Step 1 — Load context
 
-Parse `[task-id]`, extract `[sprint-id]`. Register sub-tasks (wire sequentially; mark in_progress/completed at each step):
-```
-t1 = TaskCreate("[task-id] — impl: load context")
-t2 = TaskCreate("[task-id] — impl: pre-implementation check")
-t3 = TaskCreate("[task-id] — impl: write failing tests")
-t4 = TaskCreate("[task-id] — impl: implement")
-t5 = TaskCreate("[task-id] — impl: verify all tests pass")
-```
-Mark t1 in_progress.
+Parse `[task-id]`, extract `[sprint-id]`.
 
 Read **in parallel**:
 - `docs/sprints/[sprint-id]/[sprint-id]-overview.md`
@@ -34,7 +26,6 @@ Assess parallelization flags:
 - `SHARED_TYPES`: FE and BE share type/interface definitions
 - `HAS_MIGRATION`: BE includes DB migrations
 
-Mark t1 completed, t2 in_progress.
 
 ---
 
@@ -42,7 +33,6 @@ Mark t1 completed, t2 in_progress.
 
 For each AC in requirement: is there at least one test row in FE or BE TDD Test Plan? Flag any AC with no test → **stop**, fix design doc first.
 
-Mark t2 completed, t3 in_progress.
 
 ---
 
@@ -64,7 +54,6 @@ Wait for both agents. Collect red-test confirmation.
 
 **If only `HAS_FE` or only `HAS_BE`:** write all test files sequentially. Confirm all **fail** (red).
 
-Mark t3 completed, t4 in_progress.
 
 ---
 
@@ -90,7 +79,6 @@ Wait for both agents. If either reported bugs → run `/issue [task-id] [descrip
 
 **If only `HAS_FE` or only `HAS_BE`:** implement sequentially in main context.
 
-Mark t4 completed, t5 in_progress.
 
 ---
 
@@ -100,8 +88,6 @@ Run full test suite (FE and BE in parallel if separate commands):
 1. All new tests must **pass** (green).
 2. No existing tests broken.
 3. Each AC in requirement has at least one passing test.
-
-Mark t5 completed.
 
 ---
 

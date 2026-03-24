@@ -10,15 +10,6 @@ Arguments: `[disc-id] [name]`  — e.g. `disc-001 user-authentication`
 
 Create `docs/discovery/[disc-id]-[name].md` from `docs/templates/DISCOVERY-TEMPLATE.md` with all sections set to `TBD`.
 
-Register sub-tasks (wire sequentially t1→t2→t3→t4; mark in_progress/completed at each step):
-```
-t1 = TaskCreate("[disc-id] — create discovery doc")
-t2 = TaskCreate("[disc-id] — ask gap questions")
-t3 = TaskCreate("[disc-id] — fill doc with answers")
-t4 = TaskCreate("[disc-id] — update BACKLOG.md")
-```
-Mark t1 completed (file already created). Mark t2 in_progress.
-
 ---
 
 ## Step 2 — Ask only about the gaps
@@ -40,7 +31,7 @@ Say: *"Created `docs/discovery/[disc-id]-[name].md`. Here's what I understood �
 Show what's inferred, then ask only unanswered questions in **one message**.
 If everything is already clear → skip to Step 3.
 
-Wait for user's answers. Mark t2 completed, t3 in_progress.
+Wait for user's answers.
 
 ---
 
@@ -51,16 +42,12 @@ Wait for user's answers. Mark t2 completed, t3 in_progress.
 3. Section 10 (Unknowns): mark each as `- [ ]` checkbox.
 4. Section 13 (Next Steps): always include "When ready → `/new-sprint [sprint-id] \"[epic description]\"`".
 
-Mark t3 completed, t4 in_progress.
-
 ---
 
 ## Step 4 — Update BACKLOG.md
 
 Add to the **Discovery Backlog** section:
 - Status: `discovery` if open questions remain · `backlog` if all resolved.
-
-Mark t4 completed.
 
 ---
 

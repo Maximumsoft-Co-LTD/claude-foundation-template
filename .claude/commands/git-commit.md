@@ -8,22 +8,10 @@ Arguments: `[task-id]`  — e.g. `SP1-T002`
 
 ## Step 1 — Inspect state
 
-Parse `[task-id]`, extract `[sprint-id]`. Register sub-tasks (wire sequentially; mark in_progress/completed at each step):
-```
-t1 = TaskCreate("[task-id] — commit: inspect state")
-t2 = TaskCreate("[task-id] — commit: check branch name")
-t3 = TaskCreate("[task-id] — commit: pre-commit sanity")
-t4 = TaskCreate("[task-id] — commit: stage files")
-t5 = TaskCreate("[task-id] — commit: draft + confirm message")
-t6 = TaskCreate("[task-id] — commit: create commit")
-t7 = TaskCreate("[task-id] — commit: push + PR")
-t8 = TaskCreate("[task-id] — commit: check sprint complete")
-```
-Mark t1 in_progress.
+Parse `[task-id]`, extract `[sprint-id]`.
 
 Run in parallel: `git status` · `git branch --show-current` · `git diff` · `git diff --staged`
 
-Mark t1 completed, t2 in_progress.
 
 ---
 
@@ -33,7 +21,6 @@ Expected: `[sprint-id]/[task-id]-[short-description]` — e.g. `SP1/SP1-T002-use
 
 If branch doesn't match → warn: "Branch `[current]` doesn't follow the expected pattern. Continue? (yes/no)"
 
-Mark t2 completed, t3 in_progress.
 
 ---
 
@@ -46,7 +33,6 @@ Scan changed files for:
 
 Report any findings and ask the user to resolve before staging.
 
-Mark t3 completed, t4 in_progress.
 
 ---
 
@@ -60,7 +46,6 @@ Stage by specific file path — **NEVER `git add -A` or `git add .`**:
 
 Show the exact list of files and ask: "Stage these files? (yes/no/edit)"
 
-Mark t4 completed, t5 in_progress.
 
 ---
 
@@ -71,13 +56,13 @@ Types: `feat` `fix` `test` `docs` `refactor` `chore`
 
 Body (add if non-trivial): explain WHY, not what — the diff shows what changed.
 
-Show proposed message and wait for confirmation. Mark t5 completed, t6 in_progress.
+Show proposed message and wait for confirmation.
 
 ---
 
 ## Step 6 — Commit
 
-After user confirms → create the commit. Mark t6 completed, t7 in_progress.
+After user confirms → create the commit.
 
 ---
 
@@ -89,15 +74,11 @@ If yes:
 1. `git push -u origin [branch]`
 2. Suggest `gh pr create` with: Title `[task-id] [Task Title]`, Body linking to requirement, listing ACs, linking to retro.
 
-Mark t7 completed, t8 in_progress.
-
 ---
 
 ## Step 8 — Check sprint completion and output
 
 Read `docs/BACKLOG.md` — are all tasks in `[sprint-id]` now `done`?
-
-Mark t8 completed.
 
 ```
 ✓ Committed: [commit message]

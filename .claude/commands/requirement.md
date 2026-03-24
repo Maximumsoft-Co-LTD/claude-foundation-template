@@ -8,15 +8,7 @@ Arguments: `[task-id]`  — e.g. `SP1-T001`
 
 ## Step 1 — Load context
 
-Parse `[task-id]`, extract `[sprint-id]`. Register sub-tasks (wire sequentially; mark in_progress/completed at each step):
-```
-t1 = TaskCreate("[task-id] — load context")
-t2 = TaskCreate("[task-id] — draft requirement doc")
-t3 = TaskCreate("[task-id] — coverage check vs discovery")
-t4 = TaskCreate("[task-id] — present for confirmation")
-t5 = TaskCreate("[task-id] — save + update status")
-```
-Mark t1 in_progress.
+Parse `[task-id]`, extract `[sprint-id]`.
 
 Read in order:
 1. `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — epic goals, sub-task table, E2E scenarios, dependencies
@@ -37,7 +29,6 @@ From the sprint overview sub-task table, extract: task title, E2E scenario, depe
 Read existing draft if present: `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`
 Read `docs/templates/REQUIREMENT-TEMPLATE.md` to ensure all sections are covered.
 
-Mark t1 completed, t2 in_progress.
 
 ---
 
@@ -56,7 +47,6 @@ Mark t1 completed, t2 in_progress.
 - **Out of Scope** — explicitly list anything in discovery/overview NOT part of this task.
 - **Dependencies** — task IDs from sprint overview + external services/decisions.
 
-Mark t2 completed, t3 in_progress.
 
 ---
 
@@ -75,7 +65,6 @@ Coverage check:
 ```
 Add an AC or mark out-of-scope for every uncovered item. Do NOT silently drop in-scope items.
 
-Mark t3 completed, t4 in_progress.
 
 ---
 
@@ -86,7 +75,7 @@ Print the full drafted requirement doc, then ask:
 Does this requirement look right?
 Add/remove ACs, adjust stories/metrics, or say 'confirm' to save as-is.
 ```
-Wait for response. Apply any edits. Mark t4 completed, t5 in_progress.
+Wait for response. Apply any edits.
 
 ---
 
@@ -95,8 +84,6 @@ Wait for response. Apply any edits. Mark t4 completed, t5 in_progress.
 1. Create `docs/sprints/[sprint-id]/[task-id]/` if not exists.
 2. Save to `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`.
 3. Update task status in `docs/BACKLOG.md` to `in-progress` if it was `todo`.
-
-Mark t5 completed.
 
 ---
 

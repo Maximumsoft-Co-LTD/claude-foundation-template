@@ -4,46 +4,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-<!-- TODO: Describe what this project does and its primary purpose. -->
+A workflow template for Claude Code. Provides structured sprint management, TDD conventions, document templates, and slash commands that guide development from discovery through retrospective. Clone this repo, fill in the project-specific sections below, and use the commands to run the full development lifecycle.
 
 ## Development Commands
 
-<!-- TODO: Fill in once tooling is set up. -->
-
 ```bash
-# Install dependencies
-# npm install / yarn / pnpm install
-
-# Start dev server
-# npm run dev
-
-# Build
-# npm run build
-
-# Run all tests
-# npm test
-
-# Run a single test file
-# npm test -- path/to/test.file
-
-# Lint
-# npm run lint
-
-# Type check
-# npm run typecheck
+# No build step — this is a template/docs-only repo.
+# Copy this template into your project and replace the sections below.
 ```
 
 ## Architecture
 
-<!-- TODO: Main entry points, data flow, key abstractions, non-obvious design decisions. -->
+- `.claude/commands/` — slash command definitions invoked by Claude Code
+- `.claude/agents/` — sub-agent configs for parallel frontend/backend workflows
+- `docs/templates/` — Markdown templates for each workflow stage
+- `docs/sprints/` — sprint and task output docs, one folder per sprint/task
+- `docs/BACKLOG.md` — auto-updated task registry with status and story points
+- `CLAUDE.md` — loaded by Claude Code on every session; drives all workflow behavior
 
 ## Team Conventions
 
-<!-- TODO: Branching strategy, PR process, commit format, migration workflow, env setup. -->
+- Branch format: `SP[N]/SP[N]-T[NNN]-short-description`
+- Commit format: `SP[N]-T[NNN] type: description` (max 72 chars)
+- Commit types: `feat` `fix` `test` `docs` `refactor` `chore`
+- No direct commits to `main`; branch per task
 
 ## Key Constraints
 
-<!-- TODO: Runtime version, browser support, performance budgets, compliance requirements. -->
+- Task IDs are global and never reset across sprints
+- Tasks sized at 13 story points must be broken down before any work begins
+- Tests must be written before implementation code — never mocks at the integration layer
 
 ---
 
@@ -51,137 +41,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Two levels: **Sprint (Epic)** → **Tasks (Sub-tasks)**
 
-**Single task (sequential):**
-```
-/discovery → /new-sprint → /requirement → /fe-design → /be-design → /implement
-    → /issue (loop) → /code-review → /testing
-    → /retro-task → /git-commit → /next-task (→ repeat per task)
-    → /retro-sprint (once ALL tasks in sprint are done)
-```
+Single task: `/discovery → /new-sprint → /requirement → /fe-design → /be-design → /implement → /issue → /code-review → /testing → /retro-task → /git-commit → /retro-sprint`
 
-**Multiple tasks in parallel (2-phase):**
-```
-/discovery → /new-sprint → /run-tasks [task-id] [task-id] ...
-    Phase 1: requirement + fe-design + be-design (parallel) → ⏸ user reviews all plans
-    Phase 2: implement + code-review + testing + retro-task (parallel, after approval)
-    → /git-commit (per task) → /retro-sprint
-```
+Multiple tasks in parallel: `/run-tasks [task-id] [task-id] ...`
 
-### Commands
-
-| Command | Args | When to use |
-|---------|------|-------------|
-| `/discovery` | `[disc-id] [name]` | Before planning anything — understand the problem first |
-| `/new-sprint` | `[sprint-id] [epic description]` | Turn a discovered epic into a sprint with scaffolded sub-tasks |
-| `/requirement` | `[task-id]` | Draft ACs + requirement doc for a task before design begins |
-| `/run-tasks` | `[task-id] [task-id] ...` | Run multiple tasks in parallel through the full flow (requirement → fe-design → retro-task) |
-| `/fe-design` | `[task-id]` | Write FE design + implementation plan + TDD test plan before touching any code |
-| `/be-design` | `[task-id]` | Write BE design + implementation plan + TDD test plan before touching any code |
-| `/implement` | `[task-id]` | Write failing tests then implement following FE + BE design docs |
-| `/issue` | `[task-id] [description]` | Write failing test → fix → log during implementation |
-| `/code-review` | `[task-id]` | Review code against design docs and all ACs |
-| `/testing` | `[task-id]` | Run full suite, cross-check every AC has a test |
-| `/retro-task` | `[task-id]` | Write retrospective for one task, mark it done |
-| `/retro-sprint` | `[sprint-id]` | Aggregate all task retros → sprint retro, evaluate goals |
-| `/git-commit` | `[task-id]` | Stage selectively + commit with conventional message |
-| `/next-task` | `[task-id]` _(optional)_ | Load next todo task after finishing current one |
-
-### Status Lifecycle
-
-```
-discovery → backlog → todo → in-progress → review → testing → done
-                                  ↕
-                               blocked
-```
-
-| Status | Set by |
-|--------|--------|
-| `discovery` | `/discovery` |
-| `backlog` | `/discovery` (when open questions resolved) |
-| `todo` | `/new-sprint` |
-| `in-progress` | `/requirement`, `/next-task`, `/fe-design`, `/be-design`, `/implement` |
-| `blocked` | `/issue` (when impact blocks other tasks) |
-| `review` | `/code-review` |
-| `testing` | `/testing` |
-| `done` | `/retro-task` |
-
-### Story Points Scale
-
-Tasks are estimated in Fibonacci points at `/new-sprint` time. Points determine documentation depth — every task gets docs, but required sections scale with complexity.
-
-| Points | Size | Rule |
-|--------|------|------|
-| **1** | Trivial | Minimal docs — what changes + ACs + brief approach |
-| **2** | Small | Core docs — ACs + user stories + approach + basic tests |
-| **3** | Medium-small | Standard docs — full requirement + core design sections |
-| **5** | Medium | Extended docs — most sections, system-level design |
-| **8** | Large | All sections + full rigor (ADRs, perf benchmarks, analytics, a11y) |
-| **13** | Too big | ⛔ Block — break into smaller tasks before proceeding |
-
-**Required sections by points:**
-
-| Doc | 1pt | 2pt | 3pt | 5pt | 8pt |
-|-----|-----|-----|-----|-----|-----|
-| **Requirement** | Problem + ACs + Out of Scope | + User Stories + Dependencies + Test Data + Rollout Strategy | + Feature Flow + System Behavior + Business Rules + Metrics | + Design References + Analytics + UI Copy + DO/DON'T | + NFR + Open Questions |
-| **FE Design** | Approach + Existing Code Context + Component list + TDD (min. 1 test/AC) | + Env/Config Deps + Component Breakdown + API Contracts + State & Data Flow + Fail State table | + UI/UX Overview + Loading States + Impl Plan + E2E Tests + Fail Case Matrix + Async Sequence | + User Journey + Behavior Mapping + Routing + Responsive + State Inventory + Edge Cases | + Analytics Events + Performance + full Fail Flows + A11y + Design Decisions |
-| **BE Design** | Endpoint spec + Existing Code Context + TDD (min. 1 test/AC) | + API Versioning + Input Validation + full TDD Test Plan | + Data Models + Service Layer + Business Logic + Error Handling + Impl Plan | + Auth Matrix + Sequence Diagram + Data Contracts + Events + Security + Logging + Env Vars + Migrations + Ext Deps | + Class Diagram + Caching + Performance + Design Decisions |
-
-### TDD Rules
-- Tests are written **before** implementation code — always.
-- Integration tests use **real dependencies** (real DB, real services) — never mocks at the integration layer.
-- A bug fix always starts with a **failing test** that reproduces the bug.
-- Never skip, `.only`, or comment out a failing test — fix the code instead.
-
-### ID Format
-- Sprint: `SP[N]` — e.g. `SP1`, `SP2`, `SP3`
-- Task: `SP[N]-T[NNN]` — e.g. `SP1-T001`, `SP2-T003`
-  - Task number is **global and never resets** across sprints
-  - Sprint 1 might use T001–T004, Sprint 2 continues from T005
-
-### Commit Format
-```
-[task-id] type: short description (max 72 chars)
-```
-Types: `feat` `fix` `test` `docs` `refactor` `chore`
-Example: `SP2-T003 feat: add user authentication endpoint`
-
-### Branch Format
-```
-[sprint-id]/[task-id]-[short-description]
-```
-Example: `SP2/SP2-T003-user-auth`
-
----
-
-## Docs Structure
-
-```
-docs/
-├── discovery/
-│   └── disc-001-[name].md              ← /discovery output
-├── sprints/
-│   └── SP1/
-│       ├── SP1-overview.md             ← /new-sprint output (epic doc)
-│       ├── SP1-retro.md                ← /retro-sprint output
-│       ├── SP1-T001/
-│       │   ├── SP1-T001-requirement.md ← /requirement output
-│       │   ├── SP1-T001-frontend.md    ← /fe-design output
-│       │   ├── SP1-T001-backend.md     ← /be-design output
-│       │   ├── SP1-T001-issues.md      ← /issue output (auto-created)
-│       │   └── SP1-T001-retro.md       ← /retro-task output
-│       └── SP1-T002/
-│           └── ...
-│   └── SP2/
-│       ├── SP2-T003/                   ← task number continues from SP1
-│       └── ...
-├── templates/
-│   ├── DISCOVERY-TEMPLATE.md
-│   ├── SPRINT-OVERVIEW-TEMPLATE.md
-│   ├── REQUIREMENT-TEMPLATE.md
-│   ├── FRONTEND-DESIGN-TEMPLATE.md
-│   ├── BACKEND-DESIGN-TEMPLATE.md
-│   ├── ISSUE-TEMPLATE.md
-│   ├── RETRO-TASK-TEMPLATE.md
-│   └── RETRO-SPRINT-TEMPLATE.md
-└── BACKLOG.md
-```
+Full workflow reference: `.claude/commands/_WORKFLOW-REF.md`
