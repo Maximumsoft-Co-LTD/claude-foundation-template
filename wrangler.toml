@@ -1,0 +1,13 @@
+name = "strava-leaderboard"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat_v2"]
+pages_build_output_dir = ".vercel/output/static"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "leaderboard-db"
+database_id = "1db37969-25c9-4c57-b765-e0dbd22e35a2"
+
+
+# Cron trigger — configured in Cloudflare Pages dashboard (not supported in wrangler.toml for Pages)
+# crons = ["0 * * * *"]
