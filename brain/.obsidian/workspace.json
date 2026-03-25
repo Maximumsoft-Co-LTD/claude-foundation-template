@@ -4,17 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "d90a8c5b5077e441",
+        "id": "5caed786efa6c8f9",
         "type": "tabs",
         "children": [
           {
-            "id": "ce9ceb2e2f629db0",
+            "id": "d55e009ef6a8a8b0",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "type": "markdown",
+              "state": {
+                "file": "BRAIN-INDEX.md",
+                "mode": "preview",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "BRAIN-INDEX"
             }
           }
         ]
@@ -70,8 +74,7 @@
               "title": "Bookmarks"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -91,6 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "BRAIN-INDEX.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -100,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks"
+              "title": "Backlinks for BRAIN-INDEX"
             }
           },
           {
@@ -109,11 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "BRAIN-INDEX.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links"
+              "title": "Outgoing links from BRAIN-INDEX"
             }
           },
           {
@@ -151,12 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "BRAIN-INDEX.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of BRAIN-INDEX"
             }
           }
         ]
@@ -177,8 +183,11 @@
       "bases:Create new base": false
     }
   },
-  "active": "ce9ceb2e2f629db0",
+  "active": "d55e009ef6a8a8b0",
   "lastOpenFiles": [
+    "Untitled.canvas",
+    "Untitled.base",
+    "01-concepts/CON-task-id-format.md",
     "00-MOC/MOC-AI.md",
     "00-MOC/MOC-Team.md",
     "01-concepts/ai/CON-llm-integration.md",
@@ -207,14 +216,10 @@
     "06-glossary/GLO-sprint.md",
     "06-glossary/GLO-posttooluse.md",
     "06-glossary/GLO-moc.md",
-    "06-glossary/GLO-discovery.md",
-    "06-glossary/GLO-atomic-note.md",
     "06-glossary",
     "05-sprints",
     "03-patterns",
     "02-decisions",
-    "01-concepts/solution-engineer",
-    "01-concepts/sdlc",
-    "Untitled.canvas"
+    "01-concepts/solution-engineer"
   ]
 }

@@ -18,58 +18,136 @@ A structured workflow template for software development with Claude Code. Provid
 | `docs/BACKLOG.md` | Living backlog, auto-updated by workflow commands |
 | `docs/_WORKFLOW.md` | Mermaid flow diagram + quick reference |
 
-## Getting Started
+## Adopting in Your Project
 
-### 1. Clone and configure
+There are two ways to use this template depending on whether you're starting fresh or adding it to an existing project.
+
+---
+
+### Option A — New project (clone as base)
 
 ```bash
 git clone <this-repo> my-project
 cd my-project
+git remote set-url origin <your-new-repo-url>
 ```
 
-Open `CLAUDE.md` and fill in the four sections:
+Then follow the configuration steps below.
 
-- **Project Overview** — what the project does
-- **Architecture** — main entry points, key abstractions
-- **Team Conventions** — branching, PR process, env setup
-- **Key Constraints** — runtime versions, compliance requirements
+---
 
-### 2. Start a discovery
+### Option B — Existing project (copy in)
 
+Copy the workflow files into your existing repo without touching your source code:
+
+```bash
+# From inside your existing project root
+git clone <this-repo> /tmp/claude-template
+
+cp -r /tmp/claude-template/.claude .
+cp -r /tmp/claude-template/brain .
+cp -r /tmp/claude-template/docs .
+cp    /tmp/claude-template/CLAUDE.md .
+
+rm -rf /tmp/claude-template
 ```
+
+If you already have a `.claude/` folder, merge selectively — don't overwrite existing `settings.json` or custom commands.
+
+---
+
+### Step 1 — Fill in `CLAUDE.md`
+
+Open `CLAUDE.md` and replace the four placeholder sections with your project's specifics:
+
+| Section | What to write |
+|---------|--------------|
+| **Project Overview** | What the project does, who uses it, key product goals |
+| **Architecture** | Main entry points, service boundaries, key abstractions |
+| **Team Conventions** | Branching model, PR process, env var setup, deploy process |
+| **Key Constraints** | Runtime versions, compliance rules, performance budgets |
+
+Keep it concise — CLAUDE.md is loaded on every session. Deep knowledge belongs in `brain/`.
+
+---
+
+### Step 2 — Adapt path-scoped rules
+
+Edit `.claude/rules/frontend.md` and `.claude/rules/backend.md` to match your directory structure:
+
+```yaml
+# .claude/rules/frontend.md
+---
+paths:
+  - "src/**/*.{ts,tsx}"   # change to match your FE files
+  - "app/**/*.tsx"
+---
+```
+
+Replace the placeholder conventions in each file with your team's actual standards (naming, imports, component patterns, etc.).
+
+---
+
+### Step 3 — Configure hooks for your stack
+
+The included hooks cover TypeScript, Go, and JavaScript. Enable only what applies:
+
+```json
+// .claude/settings.json — remove hooks for languages you don't use
+{
+  "hooks": {
+    "PostToolUse": [
+      { "matcher": "Write|Edit", "hooks": [{ "type": "command", "command": "python3 .claude/hooks/lint_ts.py" }] },
+      { "matcher": "Write|Edit", "hooks": [{ "type": "command", "command": "python3 .claude/hooks/run_tests.py" }] }
+    ]
+  }
+}
+```
+
+If your stack isn't covered, copy an existing hook file and adjust the linter command and file extension patterns at the top.
+
+---
+
+### Step 4 — Initialize the brain
+
+The `brain/` directory ships with the template's own knowledge. Clear it and start fresh for your project:
+
+```bash
+# Keep the structure, wipe the content
+find brain/01-concepts brain/02-decisions brain/03-patterns brain/04-lessons brain/05-sprints brain/06-glossary -type f -name "*.md" -delete
+# Then clear the MOC index links (or leave as examples to follow)
+```
+
+The brain fills up naturally as you run `/retro-sprint` → `/brain-update` after each sprint.
+
+---
+
+### Step 5 — Run your first workflow
+
+```bash
+# Understand the problem first
 /discovery disc-001 my-feature
-```
 
-Creates `docs/discovery/disc-001-my-feature.md` and asks clarifying questions to define scope before any planning begins.
+# Plan the sprint
+/new-sprint SP1 "My first sprint"
 
-### 3. Create a sprint
-
-```
-/new-sprint SP1 "Build user authentication"
-```
-
-Scaffolds tasks in `docs/sprints/SP1/`, assigns story points, and populates `docs/BACKLOG.md`.
-
-### 4. Run tasks
-
-**Single task (sequential):**
-```
+# Work a single task
 /requirement SP1-T001
-/fe-design SP1-T001
-/be-design SP1-T001
+/fe-design SP1-T001    # skip if backend-only
+/be-design SP1-T001    # skip if frontend-only
 /implement SP1-T001
 /code-review SP1-T001
 /testing SP1-T001
 /retro-task SP1-T001
 /git-commit SP1-T001
-```
 
-**Multiple tasks in parallel:**
-```
+# Or run multiple tasks in parallel
 /run-tasks SP1-T001 SP1-T002 SP1-T003
-```
 
-Phase 1 (requirement + design) runs in parallel, pauses for your review, then Phase 2 (implement + review + test + retro) runs in parallel.
+# Close the sprint
+/retro-sprint SP1
+/brain-update SP1
+```
 
 ## Workflow
 
