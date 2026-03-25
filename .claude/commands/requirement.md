@@ -43,6 +43,28 @@ Read `docs/templates/REQUIREMENT-TEMPLATE.md` to ensure all sections are covered
 
 ---
 
+## Step 1b — Clarify ambiguities before drafting
+
+After loading all context, scan for gaps that would block writing correct ACs:
+- Unclear **scope** — which users/roles, which platforms, which edge cases are in/out?
+- Missing **business rules** — conditions, limits, or calculations not stated anywhere?
+- Ambiguous **success criteria** — no way to write a measurable AC?
+
+**Rules:**
+- If everything is clear → skip this step entirely. Do NOT ask unnecessary questions.
+- If gaps exist → collect ALL unclear points into **one message**, ask them together, wait for answers before proceeding to Step 2.
+- Never ask one-by-one. Never ask about things already answered in the discovery doc or sprint overview.
+
+**After receiving answers** — append a `## Clarifications` section to the requirement doc before the main content:
+```
+## Clarifications
+| # | Question | Answer |
+|---|----------|--------|
+| 1 | [question asked] | [answer received] |
+```
+
+---
+
 ## Step 2 — Draft the requirement doc
 
 - **Problem Statement** — from discovery doc if available; otherwise from epic Problem Statement scoped to this task.

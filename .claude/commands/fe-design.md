@@ -68,6 +68,28 @@ Read existing draft `[task-id]-frontend.md` and `docs/templates/FRONTEND-DESIGN-
 
 ---
 
+## Step 1b — Clarify ambiguities before designing
+
+After loading all context (requirement doc, existing codebase), scan for gaps that would block writing a correct FE design:
+- Unclear **UI behavior** — interactions, states, or flows not described in ACs?
+- Missing **API shape** — endpoint, request/response format not specified anywhere?
+- Ambiguous **UX decisions** — error presentation, empty states, loading patterns not established?
+
+**Rules:**
+- If everything is clear → skip this step entirely. Do NOT ask unnecessary questions.
+- If gaps exist → collect ALL unclear points into **one message**, ask them together, wait for answers before proceeding to Step 2.
+- Never ask one-by-one. Never ask about things already answered in the requirement doc or codebase exploration.
+
+**After receiving answers** — append a `## Clarifications` section to the frontend doc before the main content:
+```
+## Clarifications
+| # | Question | Answer |
+|---|----------|--------|
+| 1 | [question asked] | [answer received] |
+```
+
+---
+
 ## Step 2 — Fill the complete FE design
 
 For every section required at this point level (per the table above), write implementation-ready content using `docs/templates/FRONTEND-DESIGN-TEMPLATE.md` as the structure.
