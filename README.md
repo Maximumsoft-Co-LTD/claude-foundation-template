@@ -12,6 +12,8 @@ A structured workflow template for software development with Claude Code. Provid
 | `.claude/rules/` | Path-scoped convention files loaded automatically when Claude edits matching files |
 | `.claude/hooks/` | Python scripts for PostToolUse automation (lint + TDD test enforcement) |
 | `.claude/settings.json` | Hook wiring — connects lifecycle events to hook scripts |
+| `.claude/skills/` | Optional skill commands that extend the core workflow |
+| `brain/` | Living knowledge vault — decisions, patterns, lessons, sprint summaries |
 | `docs/templates/` | Skeleton document templates for every workflow stage |
 | `docs/BACKLOG.md` | Living backlog, auto-updated by workflow commands |
 | `docs/_WORKFLOW.md` | Mermaid flow diagram + quick reference |
@@ -94,6 +96,7 @@ Phase 1 (requirement + design) runs in parallel, pauses for your review, then Ph
 | `/testing` | `[task-id]` | Full suite + AC coverage check |
 | `/retro-task` | `[task-id]` | Write retro, mark task done |
 | `/retro-sprint` | `[sprint-id]` | Sprint retro (after all tasks done) |
+| `/brain-update` | `[sprint-id]` | Extract sprint learnings into brain vault |
 | `/git-commit` | `[task-id]` | Stage selectively + commit |
 | `/next-task` | `[task-id]?` | Load next todo task |
 
@@ -242,6 +245,28 @@ Hooks run shell commands automatically at Claude Code lifecycle events — makin
 This makes the TDD rule mechanical: Claude cannot finish an edit and move on without seeing test results. No reminder needed.
 
 > **Note:** The test hook skips test files, docs, and config — it only fires on implementation code changes. Adjust `SKIP_PATTERNS` and `SOURCE_EXTS` in `run_tests.py` if needed.
+
+---
+
+## Brain / Knowledge Vault (`brain/`)
+
+The brain is a living knowledge base that accumulates project intelligence across sprints — decisions made, patterns proven, lessons learned. It follows an Obsidian-style atomic note structure navigated via Maps of Content (MOCs).
+
+```
+brain/
+├── BRAIN-INDEX.md          # Master entry point — start here
+├── 00-MOC/                 # Topic indexes (Frontend, Backend, Workflow, QA, Decisions, Lessons)
+├── 01-concepts/            # Core concepts (CON-xxx)
+├── 02-decisions/           # Architectural decisions with rationale (DEC-xxx)
+├── 03-patterns/            # Reusable implementation patterns (PAT-xxx)
+├── 04-lessons/             # Retrospective learnings (LES-xxx)
+├── 05-sprints/             # Per-sprint knowledge summaries
+└── 06-glossary/            # Project vocabulary (GLO-xxx)
+```
+
+**How it grows:** `/retro-sprint` extracts learnings from completed sprints → `/brain-update` writes them as atomic notes into the vault. Over time the brain becomes the authoritative source of non-obvious project knowledge that can't be derived from the code alone.
+
+**How it's read:** Claude reads `BRAIN-INDEX.md` before key workflow commands, then navigates to only the relevant MOC and targeted notes — never the whole vault.
 
 ---
 
