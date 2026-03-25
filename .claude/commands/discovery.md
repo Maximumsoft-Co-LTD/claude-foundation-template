@@ -6,6 +6,17 @@ Arguments: `[disc-id] [name]`  — e.g. `disc-001 user-authentication`
 
 ---
 
+## Step 0 — Check brain for past lessons
+
+If `brain/BRAIN-INDEX.md` exists:
+- Read `brain/00-MOC/MOC-Lessons.md` — any lesson tagged with keywords from `[name]`? Note it.
+- Read `brain/00-MOC/MOC-Decisions.md` — any decision already made in this problem domain? Note it.
+- These inform Step 2 questions: don't re-ask what's already decided; do surface past failure modes.
+
+Skip if brain doesn't exist yet.
+
+---
+
 ## Step 1 — Create doc immediately
 
 Create `docs/discovery/[disc-id]-[name].md` from `docs/templates/DISCOVERY-TEMPLATE.md` with all sections set to `TBD`.

@@ -16,7 +16,8 @@ A workflow template for Claude Code. Provides structured sprint management, TDD 
 ## Architecture
 
 - `.claude/commands/` — slash command definitions invoked by Claude Code
-- `.claude/agents/` — sub-agent configs for parallel frontend/backend workflows
+- `.claude/rules/` — path-scoped conventions loaded automatically when Claude edits matching files
+- `.claude/hooks/` — shell scripts executed at lifecycle events (PostToolUse: lint, test)
 - `docs/templates/` — Markdown templates for each workflow stage
 - `docs/sprints/` — sprint and task output docs, one folder per sprint/task
 - `docs/BACKLOG.md` — auto-updated task registry with status and story points
@@ -37,11 +38,33 @@ A workflow template for Claude Code. Provides structured sprint management, TDD 
 
 ---
 
+## 🧠 Claude Brain (Knowledge Vault)
+
+This project has a **living knowledge base** in `brain/` — an Obsidian-style vault of atomic notes, decisions, patterns, and lessons learned across all sprints.
+
+**At the start of every session, orient yourself:**
+1. Read `brain/BRAIN-INDEX.md` — the master entry point
+2. Open the relevant MOC for your task (Workflow / Architecture / Patterns / Decisions)
+3. Never rely solely on this CLAUDE.md — the brain has the deep knowledge
+
+**Brain structure:**
+- `brain/00-MOC/` — Maps of Content (topic indexes for fast orientation)
+- `brain/01-concepts/` — Core concepts (CON-xxx)
+- `brain/02-decisions/` — Architectural decisions with rationale (DEC-xxx)
+- `brain/03-patterns/` — Reusable implementation patterns (PAT-xxx)
+- `brain/04-lessons/` — Retrospective learnings (LES-xxx)
+- `brain/05-sprints/` — Per-sprint knowledge summaries
+- `brain/06-glossary/` — Project vocabulary (GLO-xxx)
+
+**The brain grows after every sprint:** `/retro-sprint` extracts learnings → `/brain-update` writes them as atomic notes.
+
+---
+
 ## Workflow
 
 Two levels: **Sprint (Epic)** → **Tasks (Sub-tasks)**
 
-Single task: `/discovery → /new-sprint → /requirement → /fe-design → /be-design → /implement → /issue → /code-review → /testing → /retro-task → /git-commit → /retro-sprint`
+Single task: `/discovery → /new-sprint → /requirement → /fe-design → /be-design → /implement → /issue → /code-review → /testing → /retro-task → /git-commit → /retro-sprint → /brain-update`
 
 Multiple tasks in parallel: `/run-tasks [task-id] [task-id] ...`
 

@@ -6,6 +6,19 @@ Arguments: `[task-id]`  — e.g. `SP1-T002`
 
 ---
 
+## Step 0 — Check brain for FE patterns and decisions
+
+If `brain/BRAIN-INDEX.md` exists:
+- Read `brain/00-MOC/MOC-Frontend.md` — note any PAT or DEC entries relevant to this task's domain (components, state, routing, API calls).
+- Read those specific PAT notes (1–3 max). Extract: "When to use", "Example from sprint".
+- Read any DEC notes that affect FE architecture (component library choice, state management, styling system).
+- **Reuse patterns found here** — do not redesign what the team has already decided.
+
+Print one-line summary: `Brain: [N] FE patterns found — [PAT-NNN: title], [DEC-NNN: title]`
+Skip if brain doesn't exist yet.
+
+---
+
 ## Step 1 — Load context
 
 Parse `[task-id]`, extract `[sprint-id]`.

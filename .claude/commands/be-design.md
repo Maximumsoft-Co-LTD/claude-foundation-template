@@ -6,6 +6,20 @@ Arguments: `[task-id]`  — e.g. `SP1-T002`
 
 ---
 
+## Step 0 — Check brain for BE patterns and decisions
+
+If `brain/BRAIN-INDEX.md` exists:
+- Read `brain/00-MOC/MOC-Backend.md` — note any PAT or DEC entries relevant to this task's domain (auth, DB schema, service layer, error handling, events).
+- Read those specific PAT notes (1–3 max). Extract: "When to use", "Example from sprint".
+- Read any DEC notes that affect BE architecture (ORM choice, auth strategy, error envelope, DB migration pattern).
+- Read `brain/00-MOC/MOC-Decisions.md` — any DEC flagged as "rules out" that affects this task?
+- **Align with decisions found here** — do not reopen settled decisions without a new `/adr`.
+
+Print one-line summary: `Brain: [N] BE patterns found — [PAT-NNN: title], [DEC-NNN: title]`
+Skip if brain doesn't exist yet.
+
+---
+
 ## Step 1 — Load context
 
 Parse `[task-id]`, extract `[sprint-id]`.

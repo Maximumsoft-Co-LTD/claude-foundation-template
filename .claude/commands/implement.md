@@ -6,6 +6,19 @@ Arguments: `[task-id]`  — e.g. `SP1-T002`
 
 ---
 
+## Step 0 — Check brain for reusable patterns
+
+If `brain/BRAIN-INDEX.md` exists:
+- Read `brain/00-MOC/MOC-Patterns.md` — scan for PAT notes matching this task's domain.
+- For each matching PAT: read "Solution" and "Example from sprint" sections only.
+- Read `brain/00-MOC/MOC-Lessons.md` — any LES note with "early warning signs" for this domain? These are bugs to actively avoid during implementation.
+- **Apply patterns found here** — cite the PAT-NNN in code comments where used.
+
+Print: `Brain: reusing [PAT-NNN], avoiding [LES-NNN warning]`
+Skip if brain doesn't exist yet.
+
+---
+
 ## Step 1 — Load context
 
 Parse `[task-id]`, extract `[sprint-id]`.

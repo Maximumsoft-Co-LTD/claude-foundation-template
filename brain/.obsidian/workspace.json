@@ -1,0 +1,219 @@
+{
+  "main": {
+    "id": "257e5a36739fa00d",
+    "type": "split",
+    "children": [
+      {
+        "id": "58cb46a382d0803b",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b49b49bcc0e21466",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "b56b0832ca5e8517",
+    "type": "split",
+    "children": [
+      {
+        "id": "6c934c626dc710e2",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b0da636ca7f615bf",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "e71fcd69cf2fc465",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "tag:#RBAC",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "fe8167a43db13bbc",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "198fe5d003a4afbf",
+    "type": "split",
+    "children": [
+      {
+        "id": "389f0de7c7abc44d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2fdc1d194470bdf0",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "9015b446124bc321",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "071b8089a4ee6256",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "f6ad060932d6f9c4",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "67c6b3b8897150e4",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "b49b49bcc0e21466",
+  "lastOpenFiles": [
+    "01-concepts/solution-engineer/CON-rfp-rfi-response.md",
+    "01-concepts/solution-engineer/CON-architecture-diagrams.md",
+    "01-concepts/solution-engineer/CON-technical-requirements.md",
+    "06-glossary/GLO-tdd.md",
+    "01-concepts/solution-engineer/CON-solution-design-process.md",
+    "06-glossary/GLO-story-points.md",
+    "01-concepts/product-manager/CON-metrics-product.md",
+    "06-glossary/GLO-sprint.md",
+    "01-concepts/product-manager/CON-roadmap-types.md",
+    "06-glossary/GLO-posttooluse.md",
+    "06-glossary/GLO-discovery.md",
+    "01-concepts/product-manager/CON-product-discovery.md",
+    "06-glossary/GLO-acceptance-criteria.md",
+    "01-concepts/product-manager/CON-product-vision-strategy.md",
+    "01-concepts/devops/CON-gitops.md",
+    "01-concepts/product-owner/CON-stakeholder-management.md",
+    "01-concepts/devops/CON-container-orchestration.md",
+    "01-concepts/product-owner/CON-sprint-planning-po.md",
+    "01-concepts/agile/CON-user-story-format.md",
+    "01-concepts/product-owner/CON-product-backlog-management.md",
+    "01-concepts/product-owner/CON-acceptance-criteria.md",
+    "01-concepts/infra/CON-disaster-recovery.md",
+    "01-concepts/infra/CON-networking-basics.md",
+    "01-concepts/infra/CON-cloud-fundamentals.md",
+    "01-concepts/qa/CON-qa-process.md",
+    "01-concepts/qa/CON-test-types.md",
+    "01-concepts/developer",
+    "01-concepts/solution-engineer",
+    "01-concepts/infra",
+    "01-concepts/product-manager",
+    "01-concepts/product-owner",
+    "01-concepts/qa",
+    "01-concepts/devops",
+    "01-concepts/frontend",
+    "01-concepts/backend",
+    "01-concepts/agile"
+  ]
+}

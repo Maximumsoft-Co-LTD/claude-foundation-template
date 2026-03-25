@@ -6,6 +6,17 @@ Arguments: `[task-id]`  — e.g. `SP1-T001`
 
 ---
 
+## Step 0 — Check brain for relevant lessons
+
+If `brain/BRAIN-INDEX.md` exists:
+- Read `brain/00-MOC/MOC-Lessons.md` — scan for lessons related to the task title or domain.
+- Read any LES notes flagged as `severity: high` — these are mandatory reads before writing ACs.
+- Note any "early warning signs" that apply to this task; factor into AC edge cases.
+
+Skip if brain doesn't exist yet.
+
+---
+
 ## Step 1 — Load context
 
 Parse `[task-id]`, extract `[sprint-id]`.

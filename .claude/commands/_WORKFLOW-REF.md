@@ -8,6 +8,7 @@
     → /issue (loop) → /code-review → /testing
     → /retro-task → /git-commit → /next-task (→ repeat per task)
     → /retro-sprint (once ALL tasks in sprint are done)
+    → /brain-update [sprint-id] (recommended — extract learnings to brain/)
 ```
 
 **Multiple tasks in parallel (2-phase):**
@@ -15,7 +16,7 @@
 /discovery → /new-sprint → /run-tasks [task-id] [task-id] ...
     Phase 1: requirement + fe-design + be-design (parallel) → ⏸ user reviews all plans
     Phase 2: implement + code-review + testing + retro-task (parallel, after approval)
-    → /git-commit (per task) → /retro-sprint
+    → /git-commit (per task) → /retro-sprint → /brain-update [sprint-id]
 ```
 
 ## Commands
@@ -36,6 +37,41 @@
 | `/retro-sprint` | `[sprint-id]` | Aggregate all task retros → sprint retro, evaluate goals |
 | `/git-commit` | `[task-id]` | Stage selectively + commit with conventional message |
 | `/next-task` | `[task-id]` _(optional)_ | Load next todo task after finishing current one |
+| `/brain-update` | `[sprint-id]` | Extract retro learnings → write atomic notes into `brain/` |
+
+## Skills (optional, insert where needed)
+
+### Quality & Review
+| Skill | Args | Insert after |
+|-------|------|--------------|
+| `/db-schema-review` | `[task-id]` | `/be-design` — review schema design before writing any code |
+| `/security-review` | `[task-id]` | `/implement` — secrets, injection, insecure defaults, dep risk |
+| `/accessibility-review` | `[task-id]` | `/testing` — WCAG 2.1 AA audit for FE tasks |
+| `/test-coverage` | `[task-id]` | `/testing` — coverage gaps mapped to ACs, missing test list |
+| `/adr` | `[task-id] [title]` | during `/fe-design` or `/be-design` — record a non-trivial decision |
+
+### Development Workflow
+| Skill | Args | Insert after |
+|-------|------|--------------|
+| `/debug` | `[task-id] [symptom]` | during `/implement` or `/testing` — reproduce → isolate → fix |
+| `/refactor` | `[task-id] [type] [target]` | after `/retro-task` (tech debt) — safe, test-first restructuring |
+
+### Maintenance
+| Skill | Args | Insert after |
+|-------|------|--------------|
+| `/dependency-update` | `[scope]` | pre-sprint — audit + safe upgrade plan for all deps |
+| `/env-setup` | `[component?]` | project clone — bootstrap dev environment from scratch |
+
+### Delivery
+| Skill | Args | Insert after |
+|-------|------|--------------|
+| `/pr-create` | `[task-id]` | `/git-commit` — push branch + open PR with pre-filled body |
+| `/changelog` | `[sprint-id] [version]` | `/retro-sprint` — user-facing release notes from commits + retros |
+
+### Session Management
+| Skill | Args | Insert after |
+|-------|------|--------------|
+| `/session-handoff` | `[task-id]` | end of any mid-task session — serialize context for resumption |
 
 ## Status Lifecycle
 

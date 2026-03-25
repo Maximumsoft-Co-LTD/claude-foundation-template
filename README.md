@@ -9,6 +9,9 @@ A structured workflow template for software development with Claude Code. Provid
 | `CLAUDE.md` | Project instructions loaded by Claude Code on every session (lean — ~50 lines) |
 | `.claude/commands/` | Slash command definitions (`/discovery`, `/implement`, etc.) |
 | `.claude/commands/_WORKFLOW-REF.md` | Full workflow reference: commands, status lifecycle, story points, TDD rules |
+| `.claude/rules/` | Path-scoped convention files loaded automatically when Claude edits matching files |
+| `.claude/hooks/` | Python scripts for PostToolUse automation (lint + TDD test enforcement) |
+| `.claude/settings.json` | Hook wiring — connects lifecycle events to hook scripts |
 | `docs/templates/` | Skeleton document templates for every workflow stage |
 | `docs/BACKLOG.md` | Living backlog, auto-updated by workflow commands |
 | `docs/_WORKFLOW.md` | Mermaid flow diagram + quick reference |
@@ -119,6 +122,128 @@ Points follow Fibonacci scale (1–8). They control documentation depth — not 
 | 13 | Too big | Block — break it down first |
 
 Full section requirements per point level: `.claude/commands/_WORKFLOW-REF.md`
+
+## Skills (`.claude/skills/`)
+
+Skills extend the core workflow with optional steps — insert them where they add value for your project type.
+
+**Quality & Review**
+
+| Skill | Insert after | What it does |
+|-------|-------------|--------------|
+| `/db-schema-review [task-id]` | `/be-design` | Review schema before coding — naming, indexes, migration safety, API contract alignment |
+| `/security-review [task-id]` | `/implement` | Secrets scan, injection checks, insecure defaults, new dependency risk |
+| `/accessibility-review [task-id]` | `/testing` | WCAG 2.1 AA audit — ARIA, keyboard nav, color contrast, screen reader |
+| `/test-coverage [task-id]` | `/testing` | Coverage gaps mapped to ACs, prioritised list of missing tests |
+| `/adr [task-id] [title]` | during design | Record a non-trivial architectural decision with options + rationale |
+
+**Development Workflow**
+
+| Skill | Insert after | What it does |
+|-------|-------------|--------------|
+| `/debug [task-id] [symptom]` | during implement/testing | Reproduce → isolate → hypothesize → confirm root cause → fix |
+| `/refactor [task-id] [type] [target]` | after retro (tech debt) | Safe, test-first restructuring — rename, extract, decompose, move |
+
+**Maintenance**
+
+| Skill | Insert after | What it does |
+|-------|-------------|--------------|
+| `/dependency-update [scope]` | pre-sprint | Audit all deps for CVEs + outdated versions, generate safe upgrade plan |
+| `/env-setup` | project clone | Bootstrap dev environment — runtimes, deps, env vars, DB migrations |
+
+**Delivery**
+
+| Skill | Insert after | What it does |
+|-------|-------------|--------------|
+| `/pr-create [task-id]` | `/git-commit` | Push branch + open PR with pre-filled title, AC checklist, doc links |
+| `/changelog [sprint-id] [version]` | `/retro-sprint` | Convert sprint commits + retros into user-facing release notes |
+
+**Session Management**
+
+| Skill | Insert after | What it does |
+|-------|-------------|--------------|
+| `/session-handoff [task-id]` | end of mid-task session | Serialize context (stopping point, next action, git state) for seamless resumption |
+
+Skills live in `.claude/skills/<name>/SKILL.md`. They use the same frontmatter as commands (`allowed-tools`, `disable-model-invocation`, `context: fork`) and can be invoked as slash commands or triggered automatically by Claude when context matches.
+
+---
+
+## Path-Scoped Rules (`.claude/rules/`)
+
+Rules in `.claude/rules/` extend CLAUDE.md with **path-specific conventions** loaded automatically when Claude edits matching files — so FE agents only load frontend rules and BE agents only load backend rules.
+
+```
+.claude/rules/
+├── testing.md       # no frontmatter → always loaded (TDD rules)
+├── frontend.md      # loaded only when editing src/**/*.{ts,tsx}, pages/**, etc.
+└── backend.md       # loaded only when editing src/api/**, internal/**, etc.
+```
+
+Files **without** frontmatter load on every session alongside CLAUDE.md.
+Files **with** `paths:` frontmatter load only when Claude reads or edits a matching file:
+
+```yaml
+---
+paths:
+  - "src/**/*.{ts,tsx}"
+  - "src/api/**/*.ts"
+---
+# These rules apply only to TypeScript files
+```
+
+**To adapt for your project:** update the `paths:` globs in `frontend.md` and `backend.md` to match your directory structure, then replace the placeholder conventions with your team's actual standards.
+
+Common glob patterns:
+
+| Pattern | Matches |
+|---------|---------|
+| `src/**/*.{ts,tsx}` | All TypeScript + React files |
+| `src/api/**/*.ts` | API layer only |
+| `internal/**/*` | Go internal packages |
+| `**/{test,__tests__,spec}/**/*` | Test directories |
+| `app/**/*.{ts,tsx}` | Next.js app router |
+
+---
+
+## Hooks (`.claude/hooks/`)
+
+Hooks run shell commands automatically at Claude Code lifecycle events — making conventions enforced rather than advisory. Configured in `.claude/settings.json`.
+
+### Included hooks
+
+| Hook file | Trigger | What it does |
+|-----------|---------|--------------|
+| `lint_ts.py` | `PostToolUse(Write\|Edit)` on `.ts/.tsx` | Runs `tsc --noEmit`, reports type errors to Claude |
+| `lint_go.py` | `PostToolUse(Write\|Edit)` on `.go` | Runs `golangci-lint`, reports lint errors to Claude |
+| `lint_js.py` | `PostToolUse(Write\|Edit)` on `.js/.jsx` | Runs ESLint, reports errors to Claude |
+| `run_tests.py` | `PostToolUse(Write\|Edit)` on source files | Runs test suite after implementation edits; reports failures immediately |
+
+### TDD enforcement hook
+
+`run_tests.py` auto-detects the project's test runner (Jest/Vitest, Go test, pytest, RSpec) and runs the full suite every time Claude edits a non-test source file. If tests fail, the output is injected back into Claude's context so it sees failures immediately — without being asked to check.
+
+```json
+// .claude/settings.json
+{
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Write|Edit",
+      "hooks": [{
+        "type": "command",
+        "command": "python3 .claude/hooks/run_tests.py",
+        "timeout": 120,
+        "statusMessage": "Running tests..."
+      }]
+    }]
+  }
+}
+```
+
+This makes the TDD rule mechanical: Claude cannot finish an edit and move on without seeing test results. No reminder needed.
+
+> **Note:** The test hook skips test files, docs, and config — it only fires on implementation code changes. Adjust `SKIP_PATTERNS` and `SOURCE_EXTS` in `run_tests.py` if needed.
+
+---
 
 ## TDD Rules
 

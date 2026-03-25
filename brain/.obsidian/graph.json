@@ -1,0 +1,65 @@
+{
+  "collapse-filter": false,
+  "search": "",
+  "showTags": true,
+  "showAttachments": false,
+  "hideUnresolved": false,
+  "showOrphans": true,
+  "collapse-color-groups": false,
+  "colorGroups": [
+    {
+      "query": "path:00-MOC",
+      "color": {
+        "a": 1,
+        "rgb": 4719455
+      }
+    },
+    {
+      "query": "path:01-concepts",
+      "color": {
+        "a": 1,
+        "rgb": 14364988
+      }
+    },
+    {
+      "query": "path:02-decisions",
+      "color": {
+        "a": 1,
+        "rgb": 16729344
+      }
+    },
+    {
+      "query": "path:03-patterns",
+      "color": {
+        "a": 1,
+        "rgb": 5025616
+      }
+    },
+    {
+      "query": "path:04-lessons",
+      "color": {
+        "a": 1,
+        "rgb": 16776960
+      }
+    },
+    {
+      "query": "path:05-sprints",
+      "color": {
+        "a": 1,
+        "rgb": 9699539
+      }
+    }
+  ],
+  "collapse-display": false,
+  "showArrow": true,
+  "textFadeMultiplier": 0,
+  "nodeSizeMultiplier": 1.2,
+  "lineSizeMultiplier": 1,
+  "collapse-forces": false,
+  "centerStrength": 0.518713248970312,
+  "repelStrength": 10,
+  "linkStrength": 1,
+  "linkDistance": 250,
+  "scale": 0.5053353897742635,
+  "close": true
+}
