@@ -6,6 +6,28 @@ Arguments: `[task-id]`  — e.g. `SP1-T002`
 
 ---
 
+## Step 0 — Verify it builds and runs
+
+**Run before doing any static review. If this step fails, stop — do not proceed to Step 1.**
+
+1. Run the project's build command (e.g. `npm run build`, `go build ./...`, `python -m py_compile`).
+   - Build fails → stop. Log the error and tell the user to run `/issue [task-id] [build error description]` before continuing.
+
+2. Run the fast unit test suite (not full suite — just for quick signal).
+   - Any test fails → stop. Tell the user to fix failing tests via `/issue [task-id]` before review.
+
+3. If the task includes a server/app, verify it starts cleanly (no crash on startup, no missing env var errors).
+
+Output on pass:
+```
+✓ Build: passed
+✓ Unit tests: X passed, 0 failed
+✓ Startup: clean
+Proceeding to static review...
+```
+
+---
+
 ## Step 1 — Load context
 
 Parse `[task-id]`, extract `[sprint-id]`.

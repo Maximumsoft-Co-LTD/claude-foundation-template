@@ -53,19 +53,36 @@ Integration tests must not leave data in shared environments. Confirm teardown/r
 
 ---
 
-## Step 6 — Run E2E tests
+## Step 6 — Production readiness gate (E2E + User Journey)
 
-E2E tests are **mandatory** for every non-infra task — not optional.
+**This is the final gate. E2E tests are mandatory for every non-infra task.**
 
-1. Verify every row in the E2E Test Plan table has a corresponding test in the codebase.
+For each AC in `[task-id]-requirement.md`:
+
+1. Find the corresponding E2E test(s) — if none exist, **block**: write the test first.
 2. Run E2E suite against test/staging (real browser, real API, real DB).
 3. Failing test → do NOT skip. Fix code, re-run. Non-trivial fix → `/issue`.
-4. AC with no E2E scenario at all → **block task**, write the missing test first.
+4. Trace each passing test against the User Journey / Feature Flow in the requirement doc:
+   - Test passes but skips key journey steps → **not production-ready**. Rewrite the test.
+   - Test passes with mocked data or stubbed API → **not production-ready**. Fix to use real deps.
 
+Output format:
+```
+Production Readiness: PASS / FAIL
+
+  AC-1: [description]
+    E2E: ✓ passes  |  Journey: ✓ matches  →  READY
+  AC-2: [description]
+    E2E: ✓ passes  |  Journey: ✗ skips payment step  →  BLOCKED
+  AC-3: [description]
+    E2E: ✗ no test  →  BLOCKED
+```
+
+All ACs must show `READY` before proceeding to `/retro-task`.
 
 ---
 
-## Step 7 — Update status and report
+## Step 8 — Update status and report
 
 Update BACKLOG.md status to `testing`.
 
