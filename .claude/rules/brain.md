@@ -1,21 +1,27 @@
 # Brain (Knowledge Vault) Rules
 
-If `brain/BRAIN-INDEX.md` exists in this project:
+**Do NOT read the brain at the start of every session.** Read it only when the task requires it.
 
-**At the start of every session** — read `brain/BRAIN-INDEX.md` before doing anything else.
-Then open only the MOC relevant to your task. Do not read the entire vault.
+## When to read the brain
 
-**MOC selection guide:**
-- Working on FE design or React/UI → `brain/00-MOC/MOC-Frontend.md`
-- Working on BE design or API/DB → `brain/00-MOC/MOC-Backend.md`
-- Running any workflow command → `brain/00-MOC/MOC-Workflow.md`
+Read `brain/BRAIN-INDEX.md` only when:
+- Running a workflow command (`/discovery`, `/implement`, `/fe-design`, `/be-design`, `/retro-task`, `/brain-update`)
+- About to finalize an architectural decision
+- Explicitly asked to check past patterns or lessons
+
+## MOC selection guide (after reading BRAIN-INDEX)
+
+Open only the MOC relevant to your task — never multiple at once:
+- FE design or React/UI → `brain/00-MOC/MOC-Frontend.md`
+- BE design or API/DB → `brain/00-MOC/MOC-Backend.md`
+- Workflow command → `brain/00-MOC/MOC-Workflow.md`
 - Writing tests → `brain/00-MOC/MOC-QA.md`
-- Making an architectural decision → `brain/00-MOC/MOC-Decisions.md`
-- Encountered a past lesson warning → `brain/00-MOC/MOC-Lessons.md`
+- Architectural decision → `brain/00-MOC/MOC-Decisions.md`
+- Past lesson warning → `brain/00-MOC/MOC-Lessons.md`
 
-**When to re-check brain mid-task:**
-- Before finalizing a design decision (check `02-decisions/` for existing DEC notes)
-- Before implementing a pattern you've seen before (check `03-patterns/` for PAT notes)
-- When an AC matches a past lesson warning (check `04-lessons/`)
+## Mid-task checks (targeted only)
+- Before a design decision → check `02-decisions/` for matching DEC note
+- Before implementing a known pattern → check `03-patterns/` for PAT note
+- When an AC matches a past lesson → check `04-lessons/`
 
 **Never:** read the entire brain vault. Always navigate MOC → targeted notes only.
