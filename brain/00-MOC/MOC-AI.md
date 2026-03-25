@@ -1,0 +1,126 @@
+---
+type: moc
+tags: [MOC, AI, LLM]
+updated: 2026-03-25
+---
+
+# 🗺️ MOC — AI & LLM Integration
+
+> **When to open this MOC:**
+> - Building features that use LLMs (Claude, GPT-4, etc.)
+> - Designing AI/ML systems and pipelines
+> - Evaluating LLM performance and cost
+> - Implementing RAG, tool use, or agentic workflows
+> - Debugging LLM behavior and hallucination
+
+---
+
+## Concept Map
+
+### Core LLM Concepts
+
+- [[CON-llm-integration]] — Tokens, temperature, prompt engineering, RAG, tool use, cost optimization, error handling, evaluation
+- [[CON-prompt-engineering]] — System vs user prompts, zero/few-shot, chain-of-thought, structured output, prompt injection
+- [[CON-rag-patterns]] — Retrieval-augmented generation, chunking, embedding, vector stores, common pitfalls
+- [[CON-llm-evaluation]] — Manual evaluation, RAGAS metrics, LLM-as-judge, quality assessment
+
+### Integration Patterns
+
+- [[CON-api-design-principles]] — Designing APIs that work well with LLM tool use (idempotency, clear contracts)
+- [[CON-async-patterns]] — Handling long-running LLM jobs, streaming responses, batch processing
+- [[CON-caching-strategies]] — Prompt caching (ephemeral and session), response caching, token optimization
+- [[CON-error-handling]] — Rate limits, context length, retry strategies, graceful degradation
+
+### AI Infrastructure
+
+- [[CON-vector-databases]] — Pinecone, Weaviate, Supabase pgvector; trade-offs and selection
+- [[CON-embedding-models]] — OpenAI, Anthropic, open-source; cost vs quality
+- [[CON-cost-analysis-llm]] — Token counting, cost modeling, budget tracking, optimization
+
+### Safety & Governance
+
+- [[CON-prompt-injection-defense]] — User input validation, tool boundaries, attack patterns
+- [[CON-llm-bias-mitigation]] — Dataset bias, evaluation on diverse inputs, fairness testing
+- [[CON-data-privacy-ai]] — PII handling, retention policies, customer data in prompts
+
+---
+
+## Quick Navigation by Scenario
+
+### "I need to add AI to my app (first time)"
+1. Read: [[CON-llm-integration]] — Sections on API basics, prompt engineering, simple completion
+2. Choose: OpenAI GPT-4o mini vs Anthropic Claude 3 Haiku (cost vs reasoning tradeoff)
+3. Implement: [[CON-api-design-principles]] + [[CON-error-handling]]
+
+### "I need to ground LLM responses in real data"
+Start: [[CON-rag-patterns]]
+Then: Choose a vector DB ([[CON-vector-databases]])
+Cost estimate: [[CON-cost-analysis-llm]]
+
+### "I want the model to call my APIs"
+Start: [[CON-llm-integration]] — section on Tool Use
+Read: [[CON-api-design-principles]] to ensure your APIs are tool-use friendly
+Reference: [[CON-error-handling]] for tool call timeouts and retries
+
+### "How do I know if my LLM output is good?"
+Start: [[CON-llm-evaluation]]
+Simple: Manual sampling (rate 50 responses yourself)
+Automated: RAGAS metrics + LLM-as-judge
+
+### "My LLM costs are too high"
+Read: [[CON-cost-analysis-llm]]
+Optimize: [[CON-llm-integration]] — Sections on caching, batching, model selection
+Profile: Which features consume the most tokens?
+
+### "Users are tricking my LLM with weird input"
+Start: [[CON-prompt-injection-defense]]
+Protect: Use tool use + input validation
+Monitor: [[CON-llm-bias-mitigation]] for consistent behavior
+
+### "I'm building a chatbot"
+Start: [[CON-llm-integration]] — Multi-turn conversation section
+Add: [[CON-caching-strategies]] for system prompt reuse
+Monitor: [[CON-llm-evaluation]] — Manual + LLM-as-judge feedback loop
+
+### "I want to use open-source models"
+Start: [[CON-embedding-models]] and [[CON-cost-analysis-llm]]
+Trade-off: Speed + cost vs inference quality
+Deploy: [[CON-async-patterns]] (local inference is slower)
+
+---
+
+## Key Principles from This MOC
+
+1. **Tokens cost money** — Profile your usage; cheaper models often work fine
+2. **RAG is not magic** — Good chunks + relevant retrieval > more context
+3. **Tool use > raw generation** — For data lookups and state changes, always use tool use
+4. **Prompt engineering matters, but has limits** — If a prompt hack is required, change the system
+5. **Evaluate early and often** — Don't wait for production to discover the model hallucinates
+6. **Streaming and caching are worth it** — Perceived speed matters, token reuse saves cost
+7. **Errors will happen** — Rate limits, context overflow, hallucination. Plan for degradation
+
+---
+
+## Related MOCs
+
+- [[MOC-Backend]] — System design, API contracts, database patterns for LLM integration
+- [[MOC-Frontend]] — Streaming responses to UI, handling LLM state, user feedback loops
+- [[MOC-QA]] — Testing LLM outputs, evaluation frameworks
+- [[MOC-Decisions]] — When to use LLMs vs traditional approaches
+
+---
+
+## Workflow: Shipping LLM Features
+
+1. **Discover & Design** — What problem does the LLM solve? Could a simpler approach work?
+2. **Prompt Engineering** — Zero-shot baseline, then iterate with examples
+3. **Evaluation** — Manual samples (50-100). Is quality good enough?
+4. **Optimize Cost** — Switch to cheaper model? Use caching or batching?
+5. **Implement Tool Use** — If you need to fetch data or take actions
+6. **Error Handling** — Rate limits, retries, graceful fallback
+7. **Monitor & Iterate** — Track quality, cost, latency in production
+
+---
+
+**Last updated:** 2026-03-25
+**Review frequency:** Every 2 weeks (LLM landscape changes fast; new models, pricing changes)

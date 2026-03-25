@@ -31,10 +31,12 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 
 | MOC | Domain |
 |-----|--------|
-| [[00-MOC/MOC-Developer-Fundamentals]] | SOLID, clean code, design patterns, code review |
+| [[00-MOC/MOC-Developer-Fundamentals]] | SOLID, clean code, design patterns, algorithms, code review |
 | [[00-MOC/MOC-SDLC]] | Software lifecycle phases, models, DoD, DoR |
 | [[00-MOC/MOC-Agile-Scrum]] | Agile values, Scrum roles, ceremonies, artifacts |
-| [[00-MOC/MOC-Backend]] | API design, layered architecture, DB, auth, caching |
+| [[00-MOC/MOC-Architecture-Patterns]] | Clean Arch, DDD, Event-Driven, Microservices patterns |
+| [[00-MOC/MOC-Backend]] | API design, layered architecture, DB, auth, security, real-time |
+| [[00-MOC/MOC-Data]] | SQL, data modeling, schema design, NoSQL patterns |
 | [[00-MOC/MOC-Frontend]] | Components, state, performance, accessibility |
 | [[00-MOC/MOC-DevOps]] | CI/CD, containers, deployment strategies, monitoring |
 | [[00-MOC/MOC-QA]] | Testing pyramid, bug lifecycle, test types |
@@ -42,6 +44,8 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 | [[00-MOC/MOC-Product-Manager]] | Vision, strategy, OKRs, roadmap, metrics |
 | [[00-MOC/MOC-Infrastructure]] | Cloud, networking, security, scalability, SRE |
 | [[00-MOC/MOC-Solution-Engineer]] | Solution design, integration patterns, NFRs, C4 |
+| [[00-MOC/MOC-Team]] | Team topologies, Conway's Law, technical writing |
+| [[00-MOC/MOC-AI]] | LLM integration, prompt engineering, RAG |
 
 ---
 
@@ -77,6 +81,13 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 - [[01-concepts/developer/CON-design-patterns]] — Creational, Structural, Behavioral (GoF)
 - [[01-concepts/developer/CON-version-control-git]] — Branching, merging, rebase, workflows
 - [[01-concepts/developer/CON-refactoring]] — Code smells, safe refactoring, when/how
+- [[01-concepts/developer/CON-algorithms-data-structures]] — Big O, DS cheat sheet, sorting, searching
+
+### Architecture Patterns
+- [[01-concepts/architecture/CON-clean-architecture]] — Clean/Hexagonal/Onion, Dependency Rule, folder structure
+- [[01-concepts/architecture/CON-domain-driven-design]] — Strategic DDD (BC, Context Map) + Tactical (Aggregate, Entity, VO)
+- [[01-concepts/architecture/CON-event-driven-architecture]] — EDA, CQRS, Event Sourcing, Saga, broker comparison
+- [[01-concepts/architecture/CON-microservices-patterns]] — API Gateway, Circuit Breaker, Service Mesh, Strangler Fig
 
 ### Backend
 - [[01-concepts/backend/CON-api-design-principles]] — REST, HTTP codes, pagination, versioning
@@ -86,6 +97,13 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 - [[01-concepts/backend/CON-caching-strategies]] — Cache-aside, write-through, TTL, Redis
 - [[01-concepts/backend/CON-async-patterns]] — Message queues, async/await, event-driven
 - [[01-concepts/backend/CON-error-handling]] — Error types, HTTP codes, logging patterns
+- [[01-concepts/backend/CON-rate-limiting]] — Token Bucket, Sliding Window, Redis, 429 headers
+- [[01-concepts/backend/CON-api-security]] — OAuth flows, CORS, CSRF, JWT security, API keys
+- [[01-concepts/backend/CON-websockets-realtime]] — WS vs SSE vs Polling, Socket.IO, horizontal scaling
+
+### Data
+- [[01-concepts/data/CON-sql-fundamentals]] — JOINs, CTEs, Window functions, indexes, ACID, anti-patterns
+- [[01-concepts/data/CON-data-modeling]] — ER diagrams, normalization 1NF→3NF, NoSQL patterns, Star schema
 
 ### Frontend
 - [[01-concepts/frontend/CON-component-architecture]] — Atomic design, composability
@@ -138,6 +156,13 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 - [[01-concepts/solution-engineer/CON-technical-requirements]] — Functional vs NFR, FURPS+, traceability
 - [[01-concepts/solution-engineer/CON-architecture-diagrams]] — C4 Model, UML, Mermaid, diagram-as-code
 - [[01-concepts/solution-engineer/CON-rfp-rfi-response]] — RFP/RFI/RFQ, win themes, response structure
+
+### Team & Organization
+- [[01-concepts/team/CON-team-topologies]] — Conway's Law, Stream-aligned, Platform, Enabling, Complicated Subsystem
+- [[01-concepts/team/CON-technical-writing]] — README, ADR, Runbook, API docs, doc-as-code principles
+
+### AI & LLM Integration
+- [[01-concepts/ai/CON-llm-integration]] — Tokens, prompting, RAG, tool use, cost optimization, evaluation
 
 ---
 
@@ -221,8 +246,16 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 | [[CON-system-integration-patterns]] | [[CON-api-design-principles]], [[CON-async-patterns]] | Integration design |
 | [[CON-solution-design-process]] | [[CON-technical-requirements]], [[CON-architecture-diagrams]] | SE workflow |
 | [[CON-okr-framework]] | [[CON-metrics-product]], [[CON-product-vision-strategy]] | PM north star |
-| [[CON-authentication-authorization]] | [[CON-security-fundamentals]], [[CON-api-design-principles]] | Auth chain |
+| [[CON-authentication-authorization]] | [[CON-security-fundamentals]], [[CON-api-security]] | Auth chain |
 | [[CON-infrastructure-as-code]] | [[CON-gitops]], [[CON-cloud-fundamentals]] | Infra-as-code |
+| [[CON-domain-driven-design]] | [[CON-microservices-patterns]], [[CON-clean-architecture]] | DDD → Architecture |
+| [[CON-event-driven-architecture]] | [[CON-async-patterns]], [[CON-microservices-patterns]] | EDA → Messaging |
+| [[CON-sql-fundamentals]] | [[CON-data-modeling]], [[CON-database-patterns]] | Data layer |
+| [[CON-rate-limiting]] | [[CON-api-security]], [[CON-scalability-patterns]] | API protection |
+| [[CON-websockets-realtime]] | [[CON-async-patterns]], [[CON-scalability-patterns]] | Real-time arch |
+| [[CON-team-topologies]] | [[CON-domain-driven-design]], [[CON-microservices-patterns]] | Org → Architecture |
+| [[CON-llm-integration]] | [[CON-api-design-principles]], [[CON-async-patterns]] | AI feature design |
+| [[CON-algorithms-data-structures]] | [[CON-clean-code]], [[CON-database-patterns]] | CS fundamentals |
 
 ---
 
@@ -237,5 +270,5 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 ---
 
 *Brain initialized: 2026-03-25 · Framework: Obsidian-style atomic notes + MOC*
-*Domains covered: Workflow · SDLC · Agile/Scrum · Developer · Backend · Frontend · DevOps · QA · Product Owner · Product Manager · Infrastructure · Solution Engineer*
-*Total notes: 12 MOCs · 57 concept notes · 3 decisions · 3 patterns · 10 glossary entries*
+*Domains covered: Workflow · SDLC · Agile/Scrum · Developer · Architecture · Backend · Data · Frontend · DevOps · QA · Product Owner · Product Manager · Infrastructure · Solution Engineer · Team · AI*
+*Total notes: 17 MOCs · 74 concept notes · 3 decisions · 3 patterns · 10 glossary entries*
