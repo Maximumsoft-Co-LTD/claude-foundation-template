@@ -62,6 +62,18 @@ Add to the **Discovery Backlog** section:
 
 ---
 
+## Self-check
+
+Before reporting output, re-read `docs/discovery/[disc-id]-[name].md` in full and verify:
+- [ ] All 10 topic sections are filled — no section left as `TBD` unless explicitly unanswerable.
+- [ ] At least 2 options exist in Approaches section.
+- [ ] All open questions are formatted as `- [ ]` checkboxes.
+- [ ] Next Steps section includes the `/new-sprint` instruction.
+
+Fix any issue found. Re-read the affected section to confirm the fix before proceeding.
+
+---
+
 ## Output
 
 ```

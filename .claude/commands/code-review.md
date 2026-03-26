@@ -100,6 +100,19 @@ Suggestions (non-blocking):
 
 ---
 
+## Step 3b — Self-check before updating docs
+
+Re-read the review report just written and verify:
+- [ ] Every AC from the requirement doc is addressed — none silently skipped.
+- [ ] Critical / Minor / Suggestions sections are present; none left empty if issues were found.
+- [ ] Result (`APPROVED` / `REQUEST CHANGES`) is consistent with the issues listed.
+- [ ] No changed file from `git diff` was omitted from the review.
+- [ ] Security and TDD Compliance sections were explicitly checked — not just assumed OK.
+
+Fix any gap found before updating docs.
+
+---
+
 ## Step 4 — Update requirement doc and status
 
 Update `[task-id]-requirement.md`:

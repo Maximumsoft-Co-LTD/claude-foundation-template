@@ -101,6 +101,19 @@ Add an AC or mark out-of-scope for every uncovered item. Do NOT silently drop in
 
 ---
 
+## Step 2c — Self-check before presenting
+
+Re-read the drafted requirement doc in full and verify:
+- [ ] No section required at this point level is empty or placeholder.
+- [ ] Every AC uses GIVEN/WHEN/THEN format and is specific and testable.
+- [ ] At least one failure-path AC exists.
+- [ ] Every in-scope discovery item is either covered by an AC or explicitly marked Out of Scope.
+- [ ] Success Metrics are measurable (not vague like "works correctly").
+
+Fix any issue found before presenting to the user.
+
+---
+
 ## Step 3 — Present for confirmation
 
 Print the full drafted requirement doc, then ask:

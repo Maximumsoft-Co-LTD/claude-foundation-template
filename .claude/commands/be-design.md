@@ -129,6 +129,20 @@ Fill every gap immediately. Do NOT leave gaps unresolved.
 
 ---
 
+## Step 2c — Self-check before saving
+
+Re-read the full backend design doc and verify:
+- [ ] Every AC has at least one unit test AND one integration test row in the TDD Test Plan.
+- [ ] Every endpoint in the TDD Test Plan includes 401/403/validation error test cases.
+- [ ] Every file path in the Implementation Plan is a real path from Existing Code Context — not hypothetical.
+- [ ] Every FE API contract from `[task-id]-frontend.md` has a matching endpoint (method, path, response shape) in this doc.
+- [ ] No required section (per point level) is empty, `TBD`, or missing.
+- [ ] Coverage check (Step 2b) shows no unresolved `⚠️` items.
+
+Fix any issue found. Re-read affected sections to confirm fixes before saving.
+
+---
+
 ## Step 3 — Save and update status
 
 1. Save to `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md`.

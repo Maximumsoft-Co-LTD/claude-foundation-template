@@ -120,6 +120,20 @@ Fill every gap immediately. Do NOT leave gaps unresolved.
 
 ---
 
+## Step 2c — Self-check before saving
+
+Re-read the full frontend design doc and verify:
+- [ ] Every AC has at least one TDD test row (unit + integration) in the TDD Test Plan.
+- [ ] Every AC has at least one E2E scenario row in the E2E Test Plan.
+- [ ] Every file path in the Implementation Plan is a real path from Existing Code Context — not hypothetical.
+- [ ] Fail Case Matrix covers every user action that can fail.
+- [ ] No required section (per point level) is empty, `TBD`, or missing.
+- [ ] Coverage check (Step 2b) shows no unresolved `⚠️` items.
+
+Fix any issue found. Re-read affected sections to confirm fixes before saving.
+
+---
+
 ## Step 3 — Save and update status
 
 1. Save to `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md`.
