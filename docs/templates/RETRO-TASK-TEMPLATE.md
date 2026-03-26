@@ -10,6 +10,7 @@
 - **Estimated:** X days
 - **Actual:** Y days
 - **Variance:** +/- Z days — [reason if >50% off]
+- **Velocity trend:** [faster / same / slower than previous task — one line note]
 
 ## What went well
 -

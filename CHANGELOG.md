@@ -4,6 +4,31 @@ All notable changes to claude-foundation-template are documented here.
 
 ---
 
+## [Unreleased] — 2026-03-27 (post-audit fixes)
+
+### Added
+- `docs/discovery/.gitkeep` — creates `docs/discovery/` directory so `/discovery` output path exists on first run
+- `**Estimate** | ___ days` field to `REQUIREMENT-TEMPLATE.md` — `/retro-task` reads this field; it was missing from the template
+- Point-level scope comments (`<!-- 1pt+ -->`, `<!-- 3pt+ -->`, etc.) added to every section in `REQUIREMENT-TEMPLATE.md`, `FRONTEND-DESIGN-TEMPLATE.md`, and `BACKEND-DESIGN-TEMPLATE.md` — makes section gating visible in the doc itself
+- `<!-- Optional: include for 5pt+ or complex domain projects -->` markers on Discovery sections that are enterprise-workshop artifacts: Personas (§3), Event Storming (§9), SIPOC (§10), Glossary (§16)
+- `<!-- Example: intentionally simplified ... -->` comment to all four SP1 example files — clarifies they are simplified illustrations, not broken templates
+- Smart related-test detection in `run_tests.py` — on source file edit, hook now finds and runs the companion test file first (e.g. `bar.test.ts` for `bar.ts`) before falling back to the full suite; test files edited directly run themselves; Cargo.toml / Rust support added
+
+### Changed
+- **`git-commit.md` Step 2** — status gate now requires `done` only (was `testing` or `done`); accepting `testing` allowed skipping `/retro-task`; error message updated to point to `/retro-task`
+- **`retro-sprint.md` Step 5** — removed duplicate CLAUDE.md update prompt; CLAUDE.md additions are now handled once in Step 6 (brain knowledge extraction), eliminating two overlapping prompts about the same action
+- **`FRONTEND-DESIGN-TEMPLATE.md`** — `## Design References` simplified to a one-line pointer to the requirement doc (was duplicating links already in the requirement)
+- **`SPRINT-OVERVIEW-TEMPLATE.md`** — `Sprint ID` field renamed to `Sprint` for consistency with other templates
+- **`REQUIREMENT-TEMPLATE.md`** and all templates — sprint ID placeholder updated from `sprint-XX` to `SP[N]` to match the actual convention used everywhere else
+- **`docs/_WORKFLOW.md`** — `/fe-design` and `/be-design` corrected to `/design fe` and `/design be` in the status lifecycle table and command reference table
+- **`run-tasks.md`** — command names updated to `design fe` / `design be` throughout; Phase 1 header and agent instructions updated to match
+- **`README.md`** — parallel workflow string updated (`fe-design → be-design` → `design fe → design be`), skills table `/be-design` → `/design be`, `run_tests.py` description updated to reflect smart related-test detection
+
+### Fixed
+- `_WORKFLOW-REF.md` path reference in `WORKFLOW-QUICKREF.md` now uses full path `.claude/commands/_WORKFLOW-REF.md`
+
+---
+
 ## [Unreleased] — 2026-03-27
 
 ### Added

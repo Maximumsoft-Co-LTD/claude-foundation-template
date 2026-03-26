@@ -128,7 +128,7 @@ find brain/01-concepts brain/02-decisions brain/03-patterns brain/04-lessons bra
 # Then clear the MOC index links (or leave as examples to follow)
 ```
 
-The brain fills up naturally as you run `/retro-sprint` → `/brain-update` after each sprint.
+The brain fills up naturally as you run `/retro-sprint` after each sprint (brain update is built into Step 6).
 
 ---
 
@@ -143,8 +143,8 @@ The brain fills up naturally as you run `/retro-sprint` → `/brain-update` afte
 
 # Work a single task
 /requirement SP1-T001
-/fe-design SP1-T001    # skip if BE-only task
-/be-design SP1-T001    # skip if FE-only task
+/design fe SP1-T001    # skip if BE-only task
+/design be SP1-T001    # skip if FE-only task
 /implement SP1-T001
 /code-review SP1-T001
 /testing SP1-T001
@@ -157,25 +157,24 @@ The brain fills up naturally as you run `/retro-sprint` → `/brain-update` afte
 
 # Close the sprint (after ALL tasks committed)
 /retro-sprint SP1
-/brain-update SP1
 ```
 
 ## Workflow
 
 **Single task (sequential):**
 ```
-/discovery → /new-sprint → /requirement → /fe-design → /be-design → /implement
+/discovery → /new-sprint → /requirement → /design fe → /design be → /implement
     → /issue (loop) → /code-review → /testing
     → /retro-task → /git-commit → /next-task (repeat per task)
-    → /retro-sprint (once ALL tasks done) → /brain-update
+    → /retro-sprint (once ALL tasks done)
 ```
 
 **Multiple tasks in parallel:**
 ```
 /new-sprint → /run-tasks [task-id] [task-id] ...
-    Phase 1: requirement → fe-design → be-design (parallel) → ⏸ user reviews
+    Phase 1: requirement → design fe → design be (parallel) → ⏸ user reviews
     Phase 2: implement → spec review → quality review → retro-task (parallel)
-    → /git-commit per task → /retro-sprint → /brain-update
+    → /git-commit per task → /retro-sprint
 ```
 
 Full quick reference (flow diagram, hard gates, escape hatches): `docs/WORKFLOW-QUICKREF.md`
@@ -188,8 +187,7 @@ Full quick reference (flow diagram, hard gates, escape hatches): `docs/WORKFLOW-
 | `/new-sprint` | `[SP[N]] [epic description]` | Create sprint, scaffold tasks |
 | `/requirement` | `[task-id]` | Draft ACs + requirement doc |
 | `/run-tasks` | `[task-id] [task-id] ...` | Run multiple tasks in parallel (2-phase pipeline) |
-| `/fe-design` | `[task-id]` | Frontend design + TDD test plan |
-| `/be-design` | `[task-id]` | Backend design + TDD test plan |
+| `/design` | `[fe|be] [task-id]` | Frontend or backend design + TDD test plan |
 | `/implement` | `[task-id]` | Write failing tests → implement → verify |
 | `/issue` | `[task-id] [desc]` | TDD bug fix + log (known root cause during active sprint task) |
 | `/debug` | `[task-id?] [desc]` | 4-phase root cause investigation (unknown cause, flaky test, regression) |
@@ -197,7 +195,6 @@ Full quick reference (flow diagram, hard gates, escape hatches): `docs/WORKFLOW-
 | `/testing` | `[task-id]` | Full suite + E2E production readiness gate |
 | `/retro-task` | `[task-id]` | Write retro, mark task done |
 | `/retro-sprint` | `[sprint-id]` | Sprint retro (after ALL tasks done) |
-| `/brain-update` | `[sprint-id]` | Extract sprint learnings into brain vault |
 | `/git-commit` | `[task-id]` | Stage selectively + commit + choose merge/PR/keep/discard |
 | `/next-task` | `[task-id]?` | Load next task; auto-reconcile stale BACKLOG statuses |
 
@@ -244,7 +241,7 @@ Skills extend the core workflow with optional steps — insert them where they a
 
 | Skill | Insert after | What it does |
 |-------|-------------|--------------|
-| `/db-schema-review [task-id]` | `/be-design` | Review schema before coding — naming, indexes, migration safety, API contract alignment |
+| `/db-schema-review [task-id]` | `/design be` | Review schema before coding — naming, indexes, migration safety, API contract alignment |
 | `/security-review [task-id]` | `/implement` | Secrets scan, injection checks, insecure defaults, new dependency risk |
 | `/accessibility-review [task-id]` | `/testing` | WCAG 2.1 AA audit — ARIA, keyboard nav, color contrast, screen reader |
 | `/test-coverage [task-id]` | `/testing` | Coverage gaps mapped to ACs, prioritised list of missing tests |
@@ -278,6 +275,8 @@ Skills extend the core workflow with optional steps — insert them where they a
 | `/session-handoff [task-id]` | end of mid-task session | Serialize context (stopping point, next action, git state) for seamless resumption |
 
 Skills live in `.claude/skills/<name>/SKILL.md`. They use the same frontmatter as commands (`allowed-tools`, `disable-model-invocation`, `context: fork`) and can be invoked as slash commands or triggered automatically by Claude when context matches.
+
+**Plugin distribution format:** The root `skills/` directory (if present) contains the same skills in distributable form for the plugin marketplace. `.claude/skills/` is the active installed location — this is what Claude Code reads. When adopting this template manually, only `.claude/skills/` matters.
 
 ---
 
@@ -333,7 +332,7 @@ Hooks run shell commands automatically at Claude Code lifecycle events — makin
 
 ### TDD enforcement hook
 
-`run_tests.py` auto-detects the project's test runner (Jest/Vitest, Go test, pytest, RSpec) and runs the full suite every time Claude edits a non-test source file. If tests fail, the output is injected back into Claude's context so it sees failures immediately — without being asked to check.
+`run_tests.py` auto-detects the project's test runner (Jest/Vitest, Go test, pytest, RSpec). When Claude edits a source file it first tries to run only the related test file (e.g. `bar.test.ts` for `bar.ts`) for fast feedback, falling back to the full suite when no related test is found. If tests fail, the output is injected back into Claude's context immediately — without being asked to check.
 
 ```json
 // .claude/settings.json
@@ -354,7 +353,7 @@ Hooks run shell commands automatically at Claude Code lifecycle events — makin
 
 This makes the TDD rule mechanical: Claude cannot finish an edit and move on without seeing test results. No reminder needed.
 
-> **Note:** The test hook skips test files, docs, and config — it only fires on implementation code changes. Adjust `SKIP_PATTERNS` and `SOURCE_EXTS` in `run_tests.py` if needed.
+> **Note:** The test hook skips docs and config files. When a test file itself is edited, it runs that test file directly. Adjust `SKIP_PATTERNS` and `SOURCE_EXTS` in `run_tests.py` for your stack.
 
 ---
 
@@ -374,9 +373,9 @@ brain/
 └── 06-glossary/            # Project vocabulary (GLO-xxx)
 ```
 
-**How it grows:** `/retro-sprint` extracts learnings from completed sprints → `/brain-update` writes them as atomic notes into the vault. Over time the brain becomes the authoritative source of non-obvious project knowledge that can't be derived from the code alone.
+**How it grows:** `/retro-sprint` extracts learnings from completed sprints → `/retro-sprint` (Step 6) writes them as atomic notes into the vault — no separate command needed. Over time the brain becomes the authoritative source of non-obvious project knowledge that can't be derived from the code alone.
 
-**How it's read:** Claude reads `BRAIN-INDEX.md` only when the task requires it — before workflow commands like `/discovery`, `/implement`, `/fe-design`, or `/brain-update`. It does not read the brain at the start of every session. Navigation is always MOC → targeted notes — never the whole vault. Full access protocol: `.claude/rules/brain.md`.
+**How it's read:** Claude reads `BRAIN-INDEX.md` only when the task requires it — before workflow commands like `/discovery`, `/implement`, `/design fe`, or `/design be`. It does not read the brain at the start of every session. Navigation is always MOC → targeted notes — never the whole vault. Full access protocol: `.claude/rules/brain.md`.
 
 ---
 
@@ -432,6 +431,27 @@ discovery → backlog → todo → in-progress → review → testing → done
                                    ↕
                                 blocked
 ```
+
+## Troubleshooting
+
+### Hooks not firing
+- Check that `.claude/settings.json` exists and the `hooks` block is valid JSON.
+- Hooks only fire when Claude Code runs in a project with `.claude/settings.json` — not globally.
+- Each lint hook self-filters by file extension (e.g. `lint_ts.py` skips non-`.ts` files), so it is safe to include all hooks regardless of your stack.
+
+### `/design fe` or `/design be` not found
+- Confirm `.claude/commands/design.md` exists in your project.
+- If you adopted from an older version of this template, you may have the old `fe-design.md` / `be-design.md` files. Delete them and copy `design.md` from the latest template.
+
+### Brain vault feels stale
+- The brain is updated automatically at Step 6 of `/retro-sprint`. If you ran retros before the brain step was added, run `/retro-sprint` again — it is idempotent.
+- Never read the entire brain/ directory. Navigate via `BRAIN-INDEX.md` → MOC → targeted notes only.
+
+### BACKLOG.md out of sync
+- Run `/next-task` — it auto-reconciles stale statuses before picking up the next task.
+
+### Task ID confusion across sprints
+- Task IDs are **global and never reset**. SP2 tasks start from (highest SP1 task number + 1), not T001.
 
 ## License
 

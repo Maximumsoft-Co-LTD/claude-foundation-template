@@ -3,8 +3,9 @@
 ## Metadata
 | Field | Value |
 |-------|-------|
-| **Sprint** | sprint-XX |
+| **Sprint** | SP[N] |
 | **Points** | 1 / 2 / 3 / 5 / 8 |
+| **Estimate** | ___ days |
 | **Priority** | critical / high / medium / low |
 | **Assignee** | - |
 | **Requester** | - |
@@ -13,24 +14,29 @@
 <!-- Section scope by points: see /requirement command -->
 
 ## Problem Statement
+<!-- 1pt+ -->
 
 ## Overview
-<!-- 1pt+ required. One paragraph. -->
+<!-- 1pt+ — One paragraph. -->
 
 ## Feature Flow
+<!-- 3pt+ -->
 <!-- mermaid flowchart of main user flow -->
 
 ## User Stories
+<!-- 2pt+ -->
 | # | Story | Maps to AC |
 |---|-------|-----------|
 | US-1 | As a __, I want __, so that __. | |
 
 ## System Behavior
+<!-- 3pt+ -->
 | Trigger | System Response | Side Effects | Timing |
 |---------|----------------|-------------|--------|
 |         |                |             | sync / async |
 
 ## Acceptance Criteria
+<!-- 1pt+ -->
 <!-- Format: GIVEN / WHEN / THEN / AND. Every AC maps to at least one E2E test. -->
 
 - [ ] **AC-1: [scenario title]**
@@ -49,26 +55,32 @@
   THEN [outcome]
 
 ## Data & Business Rules
+<!-- 3pt+ -->
 | Rule ID | Rule | Example | Applies to AC |
 |---------|------|---------|--------------|
 | R-1     |      |         |              |
 
 ## Success Metrics
+<!-- 2pt+ -->
 - [ ] Metric-1:
 - [ ] Metric-2:
 
 ## Design References
+<!-- 2pt+ -->
 - Figma: [link]
 
 ## Analytics & Tracking
+<!-- 5pt+ -->
 - [ ] Event: `event_name` — fired when AC-X completes
 
 ## Open Questions
+<!-- 5pt+ -->
 | # | Question | Owner | Deadline | Decision |
 |---|----------|-------|----------|----------|
 |   |          |       |          |          |
 
 ## UI Copy
+<!-- 5pt+ -->
 | Location | Copy |
 |----------|------|
 | Page heading | |
@@ -77,6 +89,7 @@
 | Success message | |
 
 ## DO / DON'T
+<!-- 5pt+ -->
 | DO | DON'T |
 |----|-------|
 |    |       |

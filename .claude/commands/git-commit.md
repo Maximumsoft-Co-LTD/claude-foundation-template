@@ -23,7 +23,7 @@ Read `docs/sprints/[sprint-id]/[task-id]/[task-id]-retro.md`.
 
 Read `docs/BACKLOG.md` — check status for `[task-id]`.
 
-- Status is not `testing` or `done` → **stop**. Testing has not been completed. Run `/testing [task-id]` first.
+- Status is not `done` → **stop**. Task retro has not been completed. Run `/retro-task [task-id]` first.
 
 ---
 
@@ -85,16 +85,9 @@ After user confirms → create the commit.
 
 ## Step 8 — Finishing the development branch
 
-**Verify tests pass one final time before presenting options:**
+Run full test suite. If tests fail → stop. Fix before proceeding.
 
-```bash
-# Run full test suite
-[project test command]
-```
-
-If tests fail → stop. Fix before proceeding.
-
-**Present exactly these 4 options:**
+Present exactly these 4 options and wait for user choice:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -103,80 +96,66 @@ Commit: [task-id] [type]: [description]
 Tests: [N] passing, 0 failing
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-What would you like to do?
-
 1. Merge back to [base-branch] locally
 2. Push and create a Pull Request
 3. Keep the branch as-is (I'll handle it later)
 4. Discard this work
-
-Which option?
 ```
 
-### Option 1: Merge locally
+**Option 1 — Merge locally:** If `[base-branch]` is `main` or `master` → warn "Team convention is no direct commits to main. Consider Option 2 instead. Continue? (yes/no)". Only proceed if confirmed. Checkout base, pull, merge, run tests, delete feature branch.
 
-**Warning:** if `[base-branch]` is `main` or `master`, warn the user:
-> "Team convention is 'no direct commits to main.' Consider Option 2 (PR) instead. Continue merge to main? (yes/no)"
+**Option 2 — Push and create PR:** `git push -u origin [branch]` then `gh pr create` with title `[task-id] [Task Title]` and body summarising ACs and linking to retro. Use `/pr-create [task-id]` skill for the full PR template.
 
-Only proceed if user explicitly confirms.
+**Option 3 — Keep as-is:** No action. Report: `Keeping branch [name].`
 
-```bash
-git checkout [base-branch]
-git pull
-git merge [feature-branch]
-# Verify tests on merged result
-[project test command]
-git branch -d [feature-branch]
-```
+**Option 4 — Discard:** Require user to type `discard` to confirm. Then checkout base and `git branch -D [feature-branch]`.
 
-### Option 2: Push and create PR
-```bash
-git push -u origin [feature-branch]
-gh pr create --title "[task-id] [Task Title]" --body "$(cat <<'EOF'
-## Summary
-[link to requirement doc, list ACs, link to retro]
-
-## Test Plan
-- [ ] All tests passing
-- [ ] Code review approved
-EOF
-)"
-```
-
-### Option 3: Keep as-is
-Report: `Keeping branch [name]. No cleanup.`
-
-### Option 4: Discard
-**Require typed confirmation:**
-```
-This will permanently delete:
-- Branch [name]
-- All commits since [base-branch]
-
-Type 'discard' to confirm.
-```
-If confirmed: `git checkout [base-branch] && git branch -D [feature-branch]`
+If working in a git worktree (`git worktree list`): Options 1/2/4 → `git worktree remove [path]`. Option 3 → keep worktree.
 
 ---
 
-## Step 8b — Worktree cleanup
+## Step 9 — Load next task (auto next-task)
 
-If working in a git worktree (check `git worktree list`):
-- **Options 1, 2, 4:** `git worktree remove [worktree-path]`
-- **Option 3:** keep worktree
+Read `docs/BACKLOG.md`.
 
----
-
-## Step 9 — Check sprint completion and output
-
-Read `docs/BACKLOG.md` — are all tasks in `[sprint-id]` now `done`?
-
+**If all tasks in `[sprint-id]` are `done`:**
 ```
-✓ Committed: [commit message]
-  Branch: [branch-name]
-  Action: [merge/PR/keep/discard]
+✓ Committed: [commit message]  |  Branch: [branch-name]  |  Action: [merge/PR/keep/discard]
 
-Next:
-  Sprint has open tasks → /next-task
-  All sprint tasks done → /retro-sprint [sprint-id]
+Sprint [sprint-id] complete — run /retro-sprint [sprint-id]
 ```
+
+**If tasks remain:** Run the full next-task flow inline:
+
+1. **Reconcile statuses** — for each task NOT `todo` or `done`, check its doc files:
+   - `[task-id]-retro.md` exists → mark `done`
+   - Status is `review`/`testing` but no evidence → revert to `in-progress`
+   - Print any corrections made.
+
+2. **Show sprint progress:**
+   ```
+   SP1 — [Epic Title]: 2 done / 1 in-progress / 3 todo / 0 blocked  (6 total)
+   ```
+
+3. **Pick next task** — first `todo` task respecting `depends_on`. If none → list blocked tasks.
+
+4. **Load context** — read the target task's requirement, frontend, backend, issues docs.
+
+5. **Output context card** — update status to `in-progress`, then print:
+   ```
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ✓ Committed: [commit message]
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Next  : [task-id] — [Task Title]
+   Status: [status]  |  Priority: [priority]  |  Estimate: [X days]
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   [Problem Statement one line]
+
+   Acceptance Criteria:
+     ☐ AC-1: ...
+     ☐ AC-2: ...
+
+   Readiness: Requirement [filled/empty] | FE design [filled/empty] | BE design [filled/empty]
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ```
+   Suggest ONE next step (same table as `/next-task`): requirement empty → `/requirement`, FE empty → `/design fe`, etc.

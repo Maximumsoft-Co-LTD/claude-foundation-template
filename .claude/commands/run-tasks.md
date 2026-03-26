@@ -4,7 +4,7 @@ Workflow position: **/new-sprint → START → /git-commit (per task)**
 Arguments: `[task-id] [task-id] ...`  — e.g. `SP1-T001 SP1-T002 SP1-T003`
 
 Two gated phases:
-- **Phase 1 — Plan**: requirement → fe-design → be-design (all tasks in parallel, with cross-task alignment between steps) → consistency check → **user review gate**
+- **Phase 1 — Plan**: requirement → design fe → design be (all tasks in parallel, with cross-task alignment between steps) → consistency check → **user review gate**
 - **Phase 2 — Implement**: implement → code-review → testing → retro-task (only after user approves all plans)
 
 **Execution rules that apply to every phase:**
@@ -25,8 +25,8 @@ Two gated phases:
 ```
 For each [task-id]:
   p_req   = TaskCreate("[task-id] — requirement")
-  p_fe    = TaskCreate("[task-id] — fe-design")
-  p_be    = TaskCreate("[task-id] — be-design")
+  p_fe    = TaskCreate("[task-id] — design-fe")
+  p_be    = TaskCreate("[task-id] — design-be")
   p_impl  = TaskCreate("[task-id] — implement")
   p_rev   = TaskCreate("[task-id] — code-review")
   p_test  = TaskCreate("[task-id] — testing")
@@ -46,7 +46,7 @@ For each Tier 2 [task-id] depending on Tier 1 [dep-id]:
 **Print plan:**
 ```
 Tasks: [N] | Tier 1 (parallel): T001, T002 | Tier 2: T003 (depends: T001)
-Phase 1 — Plan:      requirement → fe-design → be-design → ⏸ review gate
+Phase 1 — Plan:      requirement → design fe → design be → ⏸ review gate
 Phase 2 — Implement: implement → code-review → testing → retro-task
 ```
 
@@ -88,7 +88,7 @@ Rules: be specific (vague notes are useless to sub-agents). If tasks are fully i
 ## Step 3 — FE Design (parallel per tier)
 
 For each task, launch `Agent [task-id] — FE Design` (run_in_background: true):
-> Read `.claude/commands/fe-design.md`, follow every step for `[task-id]`.
+> Read `.claude/commands/design.md`, follow every step for `fe [task-id]`.
 > **Read `docs/sprints/[sprint-id]/cross-task-context.md` first** — use exact names/structure for any shared component listed there.
 > Save to `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md`.
 > Return: DONE or BLOCKED (reason).
@@ -111,7 +111,7 @@ If two tasks define conflicting shapes for the same endpoint → resolve now. Pr
 ## Step 4 — BE Design (parallel per tier)
 
 For each task, launch `Agent [task-id] — BE Design` (run_in_background: true):
-> Read `.claude/commands/be-design.md`, follow every step for `[task-id]`.
+> Read `.claude/commands/design.md`, follow every step for `be [task-id]`.
 > **Read `docs/sprints/[sprint-id]/cross-task-context.md` first** — implement API contracts exactly as FE expects. If an endpoint is owned by another task, reference it instead of re-implementing.
 > Save to `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md`.
 > Return: DONE or BLOCKED (reason).

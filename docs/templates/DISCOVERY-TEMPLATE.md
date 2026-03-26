@@ -30,6 +30,7 @@
 ---
 
 ## 3. Personas
+<!-- Optional: include for 5pt+ or complex domain projects with multiple distinct user types -->
 | Persona | Role / Description | Goal | Key Pain Point | Frequency of Use |
 |---------|--------------------|------|----------------|------------------|
 |         |                    |      |                | daily / weekly / rarely |
@@ -74,6 +75,7 @@
 ---
 
 ## 9. Event Storming
+<!-- Optional: include for 5pt+ or complex domain projects requiring DDD modeling -->
 
 ### Domain Events (orange)
 | Event | Trigger | Aggregate | Data Produced |
@@ -93,6 +95,7 @@
 ---
 
 ## 10. SIPOC — Process Boundaries
+<!-- Optional: include for 5pt+ or projects with complex multi-system process flows -->
 | Suppliers | Inputs | Process Step | Outputs | Customers |
 |-----------|--------|-------------|---------|-----------|
 |           |        |             |         |           |
@@ -149,6 +152,7 @@
 ---
 
 ## 16. Glossary / Ubiquitous Language
+<!-- Optional: include for 5pt+ or projects with domain-specific vocabulary that needs shared definition -->
 | Term | Definition | Also Known As | NOT the Same As |
 |------|-----------|---------------|-----------------|
 |      |           |               |                 |

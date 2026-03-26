@@ -1,7 +1,7 @@
 # /requirement
-Workflow position: **/new-sprint → START → /fe-design**
+Workflow position: **/new-sprint → START → /design fe**
 
-Write the requirement doc for a task. Run BEFORE `/fe-design` or `/be-design`.
+Write the requirement doc for a task. Run BEFORE `/design fe` or `/design be`.
 Arguments: `[task-id]`  — e.g. `SP1-T001`
 
 ---
@@ -144,5 +144,5 @@ Wait for response. Apply any edits.
 
 ACs: AC-1: [summary]  |  AC-2: [summary]  |  ...
 
-Next: /fe-design [task-id]
+Next: /design fe [task-id]
 ```

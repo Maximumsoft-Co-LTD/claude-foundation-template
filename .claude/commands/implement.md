@@ -1,5 +1,5 @@
 # /implement
-Workflow position: **/be-design → START → /issue (loop) → /code-review**
+Workflow position: **/design be → START → /issue (loop) → /code-review**
 
 Implement the task following FE and BE design docs. Write failing tests first, then implement until all pass.
 Arguments: `[task-id]`  — e.g. `SP1-T002`
@@ -68,7 +68,7 @@ Read **in parallel**:
 
 Validate:
 - Missing requirement or empty ACs → stop: "Run `/requirement [task-id]` first."
-- BOTH FE and BE design docs missing → stop: "Run `/fe-design` and `/be-design` first."
+- BOTH FE and BE design docs missing → stop: "Run `/design fe [task-id]` and `/design be [task-id]` first."
 - ONE design doc missing → warn: "No `[task-id]-[frontend/backend].md` found. That layer will be skipped (HAS_FE/HAS_BE=false). Continue? (yes/no)"
 
 Assess parallelization flags:

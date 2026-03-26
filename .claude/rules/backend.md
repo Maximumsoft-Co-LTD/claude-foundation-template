@@ -11,7 +11,7 @@ paths:
 
 # Backend Rules
 
-<!-- Replace with your project's BE conventions. Examples below. -->
+<!-- Customize for your project. Defaults below are sensible starting points. -->
 
 ## Input Validation
 - Validate all external input at the boundary — never trust raw request data downstream
@@ -31,13 +31,3 @@ paths:
 - REST: use correct HTTP verbs and status codes
 - Return 422 for validation errors (not 400), 404 for not-found, 409 for conflicts
 - Paginate list endpoints — never return unbounded arrays
-
-## Glob patterns for this project (customize these)
-<!-- Common patterns to adapt:
-  internal/**/*               — Go internal packages
-  pkg/**/*                    — Go shared packages
-  src/api/**/*.ts             — TypeScript API layer
-  src/services/**/*.ts        — TypeScript service layer
-  app/routes/**/*.py          — Python route handlers
-  src/**/*.go                 — all Go source
--->

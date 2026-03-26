@@ -15,19 +15,20 @@
 <!-- 1pt+ required -->
 
 ## Design References
-
-- Figma: [link]
-- Storybook: [link]
+<!-- See requirement doc for Figma / Storybook / external design links -->
 
 ## UI/UX Overview
+<!-- 3pt+ -->
 
 ## User Journey Map
+<!-- 5pt+ -->
 <!-- Entry point → main flow → exit point. Use mermaid journey diagram. -->
 
 **Entry point:**
 **Exit point:**
 
 ## Behavior Mapping
+<!-- 5pt+ -->
 
 ### Entry Paths
 
@@ -45,6 +46,7 @@
 |            |                |         |              |
 
 ## State Inventory
+<!-- 5pt+ -->
 <!-- mermaid stateDiagram-v2 + table -->
 
 | Component | States | Notes |
@@ -59,6 +61,7 @@
 |          |     |                       |
 
 ## Routing & Navigation
+<!-- 5pt+ -->
 
 | Route | Component | Auth required | Notes |
 | ----- | --------- | ------------- | ----- |
@@ -88,6 +91,7 @@
 |          |         |          |         |
 
 ## Component Breakdown
+<!-- 2pt+ -->
 
 | Component | File path | Type | Description |
 | --------- | --------- | ---- | ----------- |
@@ -97,15 +101,18 @@
 <!-- 3pt+ — mermaid sequenceDiagram showing user actions, API calls, state updates -->
 
 ## State & Data Flow
+<!-- 2pt+ -->
 <!-- mermaid flowchart: [API/Store] → [Container] → [Props] → [UI] → [Action] → [Dispatch] -->
 
 ## API Contracts Consumed
+<!-- 2pt+ -->
 
 | Method | Endpoint | Request | Response | Error handling |
 | ------ | -------- | ------- | -------- | -------------- |
 |        |          |         |          |                |
 
 ## Loading & Skeleton States
+<!-- 3pt+ -->
 
 | State | Behavior |
 | ----- | -------- |
@@ -115,6 +122,7 @@
 | Empty | |
 
 ## Responsive Behavior
+<!-- 5pt+ -->
 
 | Breakpoint | Behavior |
 | ---------- | -------- |
@@ -123,16 +131,19 @@
 | Desktop (> 1024px) | |
 
 ## Analytics Events
+<!-- 5pt+ -->
 
 | Event name | Trigger | Payload |
 | ---------- | ------- | ------- |
 |            |         |         |
 
 ## Performance Considerations
+<!-- 5pt+ -->
 
 -
 
 ## Implementation Plan
+<!-- 3pt+ -->
 <!-- Ordered steps. Each step: [N]. [file path] — create/modify — [what] — [design ref]. /implement follows this exactly. -->
 
 | # | Phase | File path | Action | What to implement | References |
@@ -144,6 +155,7 @@
 | 5 | Loading/Error | | | | |
 
 ## TDD Test Plan
+<!-- 2pt+ -->
 <!-- Write BEFORE implementing. Min 1 unit + 1 integration per AC. -->
 
 | Test Case | AC | Type | Description |
@@ -151,12 +163,14 @@
 |           |    | unit / integration | |
 
 ## E2E Test Plan
+<!-- 3pt+ -->
 
 | Scenario | AC | Steps | Expected Outcome |
 | -------- | -- | ----- | ---------------- |
 |          |    |       |                  |
 
 ## Fail Cases & Fail Flows
+<!-- 3pt+ -->
 
 ### Fail Flow Diagram
 <!-- mermaid flowchart showing every error path -->
@@ -188,5 +202,6 @@
 - Session expired mid-flow:
 
 ## Accessibility Notes
+<!-- 5pt+ -->
 
 -

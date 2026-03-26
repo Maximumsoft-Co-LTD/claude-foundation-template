@@ -3,7 +3,7 @@
 ## Metadata
 | Field | Value |
 |-------|-------|
-| **Sprint ID** | sprint-XX |
+| **Sprint** | SP[N] |
 | **Status** | planning / active / done |
 | **Start Date** | YYYY-MM-DD |
 | **End Date** | YYYY-MM-DD |
@@ -51,6 +51,7 @@
 ## Architecture Overview
 <!-- mermaid graph showing how sprint components fit together -->
 
+<!-- Lightweight planning ADRs only. For full ADRs use the /adr skill after /design. -->
 ## Architecture Decision Records
 ### ADR-1: [Title]
 - **Status:** proposed / accepted

@@ -4,22 +4,21 @@
 
 **Single task (sequential):**
 ```
-/discovery → /new-sprint → /requirement → /fe-design → /be-design → /implement
+/discovery → /new-sprint → /requirement → /design fe → /design be → /implement
     → /issue (loop) → /code-review → /testing
     → /retro-task → /git-commit → /next-task (→ repeat per task)
-    → /retro-sprint (once ALL tasks in sprint are done)
-    → /brain-update [sprint-id] (recommended — extract learnings to brain/)
+    → /retro-sprint (once ALL tasks in sprint are done — includes brain update)
 ```
 
 **Multiple tasks in parallel (subagent-driven):**
 ```
 /discovery → /new-sprint → /run-tasks [task-id] [task-id] ...
-    Phase 1: requirement + fe-design + be-design (parallel) → ⏸ user reviews all plans
+    Phase 1: requirement + design fe + design be (parallel) → ⏸ user reviews all plans
     Phase 2: per task 3-agent pipeline:
         Implementer agent → Spec Reviewer agent → Quality Reviewer agent
         (loops back on failure, proceeds on pass)
     → /git-commit (per task, with branch finish options)
-    → /retro-sprint → /brain-update [sprint-id]
+    → /retro-sprint (includes brain update)
 ```
 
 ## Commands
@@ -29,19 +28,17 @@
 | `/discovery` | `[disc-id] [name]` | Before planning anything — understand the problem first |
 | `/new-sprint` | `[sprint-id] [epic description]` | Turn a discovered epic into a sprint with scaffolded sub-tasks |
 | `/requirement` | `[task-id]` | Draft ACs + requirement doc for a task before design begins |
-| `/run-tasks` | `[task-id] [task-id] ...` | Run multiple tasks in parallel through the full flow |
-| `/fe-design` | `[task-id]` | Write FE design + implementation plan + TDD test plan before touching any code |
-| `/be-design` | `[task-id]` | Write BE design + implementation plan + TDD test plan before touching any code |
+| `/design` | `[fe\|be] [task-id]` | Write FE or BE design + implementation plan + TDD test plan before touching any code |
 | `/implement` | `[task-id]` | Write failing tests then implement following FE + BE design docs |
 | `/issue` | `[task-id] [description]` | Write failing test → fix → log during implementation |
 | `/code-review` | `[task-id]` | Two-stage review: spec compliance → code quality |
 | `/testing` | `[task-id]` | Run full suite, cross-check every AC has a test |
 | `/retro-task` | `[task-id]` | Write retrospective for one task, mark it done |
-| `/retro-sprint` | `[sprint-id]` | Aggregate all task retros → sprint retro, evaluate goals |
 | `/git-commit` | `[task-id]` | Stage, commit, then choose: merge / PR / keep / discard |
-| `/debug` | `[description]` | 4-phase systematic debugging — root cause before fixes |
 | `/next-task` | `[task-id]` _(optional)_ | Load next todo task; auto-reconcile stale BACKLOG statuses; show task context card |
-| `/brain-update` | `[sprint-id]` | Extract retro learnings → write atomic notes into `brain/` |
+| `/retro-sprint` | `[sprint-id]` | Aggregate all task retros → sprint retro, evaluate goals + extract brain knowledge |
+| `/debug` | `[description]` | 4-phase systematic debugging — for standalone incidents outside sprint context |
+| `/run-tasks` | `[task-id] [task-id] ...` | Run multiple tasks in parallel through the full flow |
 
 ## /issue vs /debug — Which to use?
 
@@ -62,16 +59,15 @@
 ### Quality & Review
 | Skill | Args | Insert after |
 |-------|------|--------------|
-| `/db-schema-review` | `[task-id]` | `/be-design` — review schema design before writing any code |
+| `/db-schema-review` | `[task-id]` | `/design be` — review schema design before writing any code |
 | `/security-review` | `[task-id]` | `/implement` — secrets, injection, insecure defaults, dep risk |
 | `/accessibility-review` | `[task-id]` | `/testing` — WCAG 2.1 AA audit for FE tasks |
 | `/test-coverage` | `[task-id]` | `/testing` — coverage gaps mapped to ACs, missing test list |
-| `/adr` | `[task-id] [title]` | during `/fe-design` or `/be-design` — record a non-trivial decision |
+| `/adr` | `[task-id] [title]` | during `/design fe` or `/design be` — record a non-trivial decision |
 
 ### Development Workflow
 | Skill | Args | Insert after |
 |-------|------|--------------|
-| `/debug` | `[task-id] [symptom]` | during `/implement` or `/testing` — reproduce → isolate → fix |
 | `/refactor` | `[task-id] [type] [target]` | after `/retro-task` (tech debt) — safe, test-first restructuring |
 
 ### Maintenance
@@ -104,7 +100,7 @@ discovery → backlog → todo → in-progress → review → testing → done
 | `discovery` | `/discovery` |
 | `backlog` | `/discovery` (when open questions resolved) |
 | `todo` | `/new-sprint` |
-| `in-progress` | `/requirement`, `/next-task`, `/fe-design`, `/be-design`, `/implement` |
+| `in-progress` | `/requirement`, `/next-task`, `/design`, `/implement` |
 | `blocked` | `/issue` (when impact blocks other tasks) |
 | `review` | `/code-review` |
 | `testing` | `/testing` |
@@ -126,8 +122,8 @@ discovery → backlog → todo → in-progress → review → testing → done
 | Doc | 1pt | 2pt | 3pt | 5pt | 8pt |
 |-----|-----|-----|-----|-----|-----|
 | **Requirement** | Problem + ACs + Out of Scope | + User Stories + Dependencies + Test Data + Rollout Strategy | + Feature Flow + System Behavior + Business Rules + Metrics | + Design References + Analytics + UI Copy + DO/DON'T | + NFR + Open Questions |
-| **FE Design** | Approach + Existing Code Context + Component list + TDD (min. 1 test/AC) | + Env/Config Deps + Component Breakdown + API Contracts + State & Data Flow + Fail State table | + UI/UX Overview + Loading States + Impl Plan + E2E Tests + Fail Case Matrix + Async Sequence | + User Journey + Behavior Mapping + Routing + Responsive + State Inventory + Edge Cases | + Analytics Events + Performance + full Fail Flows + A11y + Design Decisions |
-| **BE Design** | Endpoint spec + Existing Code Context + TDD (min. 1 test/AC) | + API Versioning + Input Validation + full TDD Test Plan | + Data Models + Service Layer + Business Logic + Error Handling + Impl Plan | + Auth Matrix + Sequence Diagram + Data Contracts + Events + Security + Logging + Env Vars + Migrations + Ext Deps | + Class Diagram + Caching + Performance + Design Decisions |
+| **Design (fe)** | Approach + Existing Code Context + Component list + TDD (min. 1 test/AC) | + Env/Config Deps + Component Breakdown + API Contracts + State & Data Flow + Fail State table | + UI/UX Overview + Loading States + Impl Plan + E2E Tests + Fail Case Matrix + Async Sequence | + User Journey + Behavior Mapping + Routing + Responsive + State Inventory + Edge Cases | + Analytics Events + Performance + full Fail Flows + A11y + Design Decisions |
+| **Design (be)** | Endpoint spec + Existing Code Context + TDD (min. 1 test/AC) | + API Versioning + Input Validation + full TDD Test Plan | + Data Models + Service Layer + Business Logic + Error Handling + Impl Plan | + Auth Matrix + Sequence Diagram + Data Contracts + Events + Security + Logging + Env Vars + Migrations + Ext Deps | + Class Diagram + Caching + Performance + Design Decisions |
 
 ## Superpowers-Inspired Principles
 
@@ -145,9 +141,9 @@ These principles are adopted from [obra/superpowers](https://github.com/obra/sup
 | **HARD-GATE: approach approval** | `/discovery` Step 3b | No `/new-sprint` until user explicitly picks an approach |
 | **HARD-GATE: task breakdown** | `/new-sprint` Step 3 | Wait for user to confirm sub-task table before writing docs |
 | **HARD-GATE: AC confirmation** | `/requirement` Step 3 | Wait for "confirm" before saving requirement doc |
-| **HARD-GATE: design clarification** | `/fe-design` Step 1b, `/be-design` Step 1b | If ambiguities exist, collect all into one message and wait |
+| **HARD-GATE: design clarification** | `/design` Step 1b | If ambiguities exist, collect all into one message and wait |
 | **HARD-GATE: staging confirmation** | `/git-commit` Step 5 | Show file list, wait for yes/no/edit — never `git add -A` silently |
-| **Bite-sized task granularity** | `/fe-design` + `/be-design` Step 2 | Every Implementation Plan step = single action, 2-5 min |
+| **Bite-sized task granularity** | `/design` Step 2 | Every Implementation Plan step = single action, 2-5 min |
 | **Worktree isolation** | `/implement` Step 0b | Create isolated git worktree per task before any code |
 
 ## Discovery Coverage Check — Two Levels (Both Required)
@@ -195,8 +191,8 @@ docs/
 │       ├── SP1-retro.md                ← /retro-sprint output
 │       ├── SP1-T001/
 │       │   ├── SP1-T001-requirement.md ← /requirement output
-│       │   ├── SP1-T001-frontend.md    ← /fe-design output
-│       │   ├── SP1-T001-backend.md     ← /be-design output
+│       │   ├── SP1-T001-frontend.md    ← /design fe output
+│       │   ├── SP1-T001-backend.md     ← /design be output
 │       │   ├── SP1-T001-issues.md      ← /issue output (auto-created)
 │       │   └── SP1-T001-retro.md       ← /retro-task output
 │       └── SP1-T002/

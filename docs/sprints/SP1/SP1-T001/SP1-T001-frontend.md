@@ -1,3 +1,4 @@
+<!-- Example: intentionally simplified for illustration. See docs/templates/FRONTEND-DESIGN-TEMPLATE.md for full structure. -->
 # SP1-T001 — Example Task — Frontend Design
 
 ## Metadata

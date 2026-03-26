@@ -1,3 +1,4 @@
+<!-- Example: intentionally simplified for illustration. See docs/templates/REQUIREMENT-TEMPLATE.md for full structure. -->
 # SP1-T001 — Example Task
 
 ## Metadata

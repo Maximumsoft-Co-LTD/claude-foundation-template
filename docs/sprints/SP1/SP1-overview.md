@@ -1,3 +1,4 @@
+<!-- Example: intentionally simplified for illustration. See docs/templates/SPRINT-OVERVIEW-TEMPLATE.md for full structure. -->
 # SP1 — Example Epic
 
 ## Metadata

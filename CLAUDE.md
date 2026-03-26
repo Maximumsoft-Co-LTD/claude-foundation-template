@@ -53,7 +53,7 @@ This project has a **living knowledge base** in `brain/` — an Obsidian-style v
 - `brain/05-sprints/` — Per-sprint knowledge summaries
 - `brain/06-glossary/` — Project vocabulary (GLO-xxx)
 
-**The brain grows after every sprint:** `/retro-sprint` extracts learnings → `/brain-update` writes them as atomic notes.
+**The brain grows after every sprint:** `/retro-sprint` includes a brain update step (Step 6) — no separate command needed.
 
 ---
 
@@ -61,7 +61,7 @@ This project has a **living knowledge base** in `brain/` — an Obsidian-style v
 
 Two levels: **Sprint (Epic)** → **Tasks (Sub-tasks)**
 
-Single task: `/discovery → /new-sprint → /requirement → /fe-design → /be-design → /implement → /issue (loop) → /code-review → /testing → /retro-task → /git-commit → /next-task (repeat per task) → /retro-sprint (once ALL tasks done) → /brain-update`
+Single task: `/discovery → /new-sprint → /requirement → /design fe → /design be → /implement → /issue (loop) → /code-review → /testing → /retro-task → /git-commit → /next-task (repeat per task) → /retro-sprint (once ALL tasks done, includes brain update)`
 
 Multiple tasks in parallel: `/run-tasks [task-id] [task-id] ...`
 

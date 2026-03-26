@@ -8,3 +8,7 @@ When running `/new-sprint`:
   2. Add tasks to `docs/BACKLOG.md`
 
 Per-task files are created when that task actually begins (`/requirement`, `/fe-design`, `/be-design`).
+
+## Why
+
+Per-task docs require real task context — acceptance criteria, design decisions, test plans — that does not exist at sprint-planning time. Scaffolding them early produces empty or speculative files that mislead rather than guide. Create them at the moment the task starts, when the context is concrete.

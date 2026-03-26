@@ -14,6 +14,7 @@
 ---
 
 ## API Endpoints
+<!-- 1pt+ -->
 <!-- Repeat block for each endpoint. -->
 
 ### `METHOD /api/v1/path`
@@ -66,6 +67,7 @@
 ---
 
 ## Authorization & Roles
+<!-- 5pt+ -->
 
 | Endpoint | public | user | admin | notes |
 |----------|--------|------|-------|-------|
@@ -74,6 +76,7 @@
 ---
 
 ## Input Validation Rules
+<!-- 2pt+ -->
 
 | Field | Type | Required | Rules | Error message |
 |-------|------|----------|-------|---------------|
@@ -82,6 +85,7 @@
 ---
 
 ## Data Models
+<!-- 3pt+ -->
 <!-- mermaid erDiagram + state lifecycle if applicable -->
 
 **Indexes:**
@@ -90,6 +94,7 @@
 ---
 
 ## Sequence Diagram
+<!-- 5pt+ -->
 <!-- mermaid sequenceDiagram: Client → Middleware → Controller → Service → Repository → DB → response -->
 
 ---
@@ -108,6 +113,7 @@
 ---
 
 ## Service / Layer Breakdown
+<!-- 3pt+ -->
 <!-- mermaid flowchart if helpful -->
 
 | Layer | Responsibility |
@@ -134,6 +140,7 @@
 ---
 
 ## Business Logic
+<!-- 3pt+ -->
 <!-- Pseudocode rules, not prose -->
 
 1.
@@ -141,6 +148,7 @@
 ---
 
 ## Event Publishing
+<!-- 5pt+ -->
 
 | Event | Topic / Queue | Trigger | Payload | Consumer |
 |-------|--------------|---------|---------|----------|
@@ -149,6 +157,7 @@
 ---
 
 ## Error Handling Strategy
+<!-- 3pt+ -->
 
 ### Error Response Envelope
 ```json
@@ -183,6 +192,7 @@
 ---
 
 ## Security Considerations
+<!-- 5pt+ -->
 
 - [ ] All user input sanitized
 - [ ] Rate limiting on write endpoints
@@ -192,6 +202,7 @@
 ---
 
 ## Logging & Observability
+<!-- 5pt+ -->
 
 | Event | Level | Fields logged |
 |-------|-------|--------------|
@@ -202,6 +213,7 @@
 ---
 
 ## Environment Variables
+<!-- 5pt+ -->
 
 | Variable | Description | Required | Default |
 |----------|-------------|----------|---------|
@@ -210,6 +222,7 @@
 ---
 
 ## Caching Strategy
+<!-- 5pt+ -->
 
 | Data | Cache key | TTL | Invalidated when |
 |------|-----------|-----|-----------------|
@@ -218,6 +231,7 @@
 ---
 
 ## Database Migrations
+<!-- 5pt+ -->
 
 **Up:**
 ```sql
@@ -232,6 +246,7 @@
 ---
 
 ## Implementation Plan
+<!-- 3pt+ -->
 <!-- Ordered steps. /implement follows this exactly. -->
 
 | # | Phase | File path | Action | What to implement | References |
@@ -246,6 +261,7 @@
 ---
 
 ## TDD Test Plan
+<!-- 2pt+ -->
 <!-- Write BEFORE implementing. Integration tests use real DB — no mocks. -->
 
 | Test Case | AC | Type | Description |
@@ -255,6 +271,7 @@
 ---
 
 ## External Dependencies
+<!-- 5pt+ -->
 
 | Service | Purpose | Failure behavior | Timeout |
 |---------|---------|-----------------|---------|
@@ -263,6 +280,7 @@
 ---
 
 ## Performance & Scalability Notes
+<!-- 5pt+ -->
 
 | Concern | Detail |
 |---------|--------|

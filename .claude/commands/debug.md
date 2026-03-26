@@ -118,4 +118,4 @@ Attempts: [N] | Resolved: yes/no
 
 If unresolvable after 3 attempts → report architectural concern and ask user for direction.
 
-After a successful fix: run `/issue [task-id] [description]` to log the bug if this occurred during a sprint task.
+**Note:** `/debug` is for standalone incidents. If debugging a bug found during a sprint task, use `/issue [task-id] [description]` instead — it handles investigation (using these same phases), TDD fix, and logging in one command.

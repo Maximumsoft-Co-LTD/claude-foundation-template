@@ -22,10 +22,10 @@ START
 /requirement [task-id]
   │  Step 3 ── presents drafted ACs ──▶ wait for user confirm
   ▼
-/fe-design [task-id]          ← skip if BE-only task (no UI changes)
+/design fe [task-id]          ← skip if BE-only task (no UI changes)
   │  Step 1b ── clarify gaps ──▶ wait if ambiguities found
   ▼
-/be-design [task-id]          ← skip if FE-only task (no API changes)
+/design be [task-id]          ← skip if FE-only task (no API changes)
   │  Step 1b ── clarify gaps ──▶ wait if ambiguities found
   ▼
 /implement [task-id]
@@ -57,8 +57,7 @@ START
   │
   ▼  all tasks done
 /retro-sprint [sprint-id]
-  ▼
-/brain-update [sprint-id]
+  │  (brain update runs as Step 6 — no separate command)
   ▼
 END → /discovery [next-disc-id] (next epic)
 ```
@@ -91,8 +90,8 @@ END → /discovery [next-disc-id] (next epic)
 | `/discovery` | Before any sprint planning | `[disc-id] [name]` | None | User picks approach → `/new-sprint` |
 | `/new-sprint` | After approach approved | `[sprint-id] "epic"` | Discovery doc exists (or explicit override) | User confirms tasks → `/requirement` or `/run-tasks` |
 | `/requirement` | Before designing any task | `[task-id]` | Task exists in BACKLOG.md | User confirms ACs → `/fe-design` |
-| `/fe-design` | After requirement confirmed | `[task-id]` | `[task-id]-requirement.md` has non-empty ACs | Clarifications answered (if any) → `/be-design` |
-| `/be-design` | After FE design saved | `[task-id]` | `[task-id]-requirement.md` has non-empty ACs | Clarifications answered (if any) → `/implement` |
+| `/design fe` | After requirement confirmed | `[task-id]` | `[task-id]-requirement.md` has non-empty ACs | Clarifications answered (if any) → `/be-design` |
+| `/design be` | After FE design saved | `[task-id]` | `[task-id]-requirement.md` has non-empty ACs | Clarifications answered (if any) → `/implement` |
 | `/implement` | After design docs complete | `[task-id]` | Design docs exist with TDD test plans | All tests green → `/code-review` |
 | `/issue` | Bug with known cause, during impl or review | `[task-id] [desc]` | Inside an active sprint task | Returns to calling command (implement or code-review) |
 | `/debug` | Unknown root cause, flaky test, regression | `[task-id?] [desc]` | None — standalone | After fix: `/issue [task-id]` if sprint task |
@@ -101,8 +100,7 @@ END → /discovery [next-disc-id] (next epic)
 | `/retro-task` | After all tests pass | `[task-id]` | Status is `testing` | `/git-commit` |
 | `/git-commit` | After retro written | `[task-id]` | `[task-id]-retro.md` exists | Merge/PR/keep/discard → `/next-task` or `/retro-sprint` |
 | `/next-task` | After committing, to pick up next task | `[task-id?]` | Previous task committed | → `/requirement [next-id]` |
-| `/retro-sprint` | After ALL tasks in sprint are `done` | `[sprint-id]` | Every task in sprint is `done` | `/brain-update` |
-| `/brain-update` | After sprint retro written | `[sprint-id]` | `[sprint-id]-retro.md` exists | `/discovery` (next epic) |
+| `/retro-sprint` | After ALL tasks in sprint are `done` | `[sprint-id]` | Every task in sprint is `done` | Brain update runs as Step 6 → `/discovery` (next epic) |
 | `/run-tasks` | To run multiple tasks in parallel | `[task-id] [task-id]...` | Tasks exist in BACKLOG.md as `todo` | Phase 1 → user "go" → Phase 2 → `/git-commit` per task |
 
 ### When to use `/issue` vs `/debug`
@@ -147,7 +145,7 @@ Every gate below is a mandatory stop. Do not proceed until the condition is met.
 
 ┌──────────────────────────────────────────────────────────────────┐
 │ GATE 4 — Design Clarification (FE and BE)                        │
-│ Command: /fe-design Step 1b, /be-design Step 1b                  │
+│ Command: /design fe Step 1b, /design be Step 1b                  │
 │ Stop: if ambiguities exist, collect ALL into one message, wait   │
 │ for answers before writing any design. Never ask one-by-one.     │
 └──────────────────────────────────────────────────────────────────┘
@@ -195,7 +193,7 @@ Standard flow deviations — documented patterns for common real-world scenarios
 
 ```
 1. /requirement [task-id]               ← scope ACs to UI only
-2. /fe-design [task-id]                 ← full FE design
+2. /design fe [task-id]                 ← full FE design
 3. SKIP /be-design                      ← no [task-id]-backend.md needed
 4. /implement [task-id]                 ← HAS_BE=false; BE agents not launched
 5. /code-review → /testing → /retro-task → /git-commit  ← as normal
@@ -213,7 +211,7 @@ Notes:
 ```
 1. /requirement [task-id]               ← scope ACs to API behavior only
 2. SKIP /fe-design                      ← no [task-id]-frontend.md needed
-3. /be-design [task-id]                 ← full BE design
+3. /design be [task-id]                 ← full BE design
 4. /implement [task-id]                 ← HAS_FE=false; FE agents not launched
 5. /code-review → /testing → /retro-task → /git-commit  ← as normal
 
@@ -267,7 +265,7 @@ Throwaway prototype code is NOT committed.
 1. /discovery [disc-id] [name]             ← covers full epic
 2. /new-sprint SP1                         ← scope to first deliverable
    vertical slice only ("User can do X end-to-end")
-3. Complete SP1 fully: /retro-sprint + /brain-update
+3. Complete SP1 fully: /retro-sprint (includes brain update)
 4. /new-sprint SP2                         ← next slice
    Read SP1 brain decisions before designing SP2 tasks.
 
