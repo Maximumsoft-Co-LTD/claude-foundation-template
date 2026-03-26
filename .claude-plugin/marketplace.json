@@ -1,0 +1,20 @@
+{
+  "name": "claude-foundation-marketplace",
+  "description": "Marketplace for Claude Foundation — full-lifecycle development workflow plugin",
+  "owner": {
+    "name": "hashtagf",
+    "email": "flamezaxaou1@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "claude-foundation",
+      "description": "Full-lifecycle development workflow for Claude Code: sprint management, TDD-first conventions, design docs, brain vault, and slash commands from discovery to retrospective",
+      "version": "1.0.0",
+      "source": "./",
+      "author": {
+        "name": "hashtagf",
+        "email": "flamezaxaou1@gmail.com"
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "claude-foundation",
+  "description": "Full-lifecycle development workflow for Claude Code: sprint management, TDD-first conventions, design docs, brain vault, and slash commands from discovery to retrospective",
+  "version": "1.0.0",
+  "author": {
+    "name": "hashtagf",
+    "email": "flamezaxaou1@gmail.com"
+  },
+  "homepage": "https://github.com/Maximumsoft-Co-LTD/claude-foundation-template",
+  "repository": "https://github.com/Maximumsoft-Co-LTD/claude-foundation-template",
+  "license": "MIT",
+  "keywords": [
+    "workflow",
+    "sprint",
+    "tdd",
+    "design-docs",
+    "brain-vault",
+    "slash-commands",
+    "retrospective",
+    "task-management"
+  ]
+}
