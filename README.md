@@ -1,12 +1,22 @@
-# Claude Foundation Template
+# Claude Foundation
 
-A structured workflow template for software development with Claude Code. Provides sprint management, TDD-first conventions, design documentation standards, and parallel task execution — all driven through Claude slash commands.
+A full-lifecycle development workflow plugin for Claude Code. Provides sprint management, TDD-first conventions, design documentation standards, brain vault, and parallel task execution — all driven through Claude slash commands.
+
+## Install as Plugin
+
+```
+/plugin marketplace add Maximumsoft-Co-LTD/claude-foundation-template
+/plugin install claude-foundation@claude-foundation-marketplace
+```
+
+Or manually adopt into an existing project — see [Manual Adoption](#manual-adoption) below.
 
 ## What's Included
 
 | Path | Description |
 |------|-------------|
-| `CLAUDE.md` | Project instructions loaded by Claude Code on every session (lean — ~50 lines) |
+| `.claude-plugin/` | Plugin manifest and marketplace listing |
+| `CLAUDE.md` | Project instructions loaded by Claude Code on every session |
 | `.claude/commands/` | Slash command definitions (`/discovery`, `/implement`, etc.) |
 | `.claude/commands/_WORKFLOW-REF.md` | Full workflow reference: commands, status lifecycle, story points, TDD rules |
 | `.claude/rules/` | Path-scoped convention files loaded automatically when Claude edits matching files |
@@ -16,18 +26,18 @@ A structured workflow template for software development with Claude Code. Provid
 | `brain/` | Living knowledge vault — decisions, patterns, lessons, sprint summaries |
 | `docs/templates/` | Skeleton document templates for every workflow stage |
 | `docs/BACKLOG.md` | Living backlog, auto-updated by workflow commands |
-| `docs/_WORKFLOW.md` | Mermaid flow diagram + quick reference |
+| `docs/WORKFLOW-QUICKREF.md` | One-page manual: flow diagram, command cheat sheet, hard gates, escape hatches, TDD law |
 
-## Adopting in Your Project
+## Manual Adoption
 
-There are two ways to use this template depending on whether you're starting fresh or adding it to an existing project.
+Two ways to adopt without the plugin system, depending on whether you're starting fresh or adding to an existing project.
 
 ---
 
 ### Option A — New project (clone as base)
 
 ```bash
-git clone <this-repo> my-project
+git clone https://github.com/Maximumsoft-Co-LTD/claude-foundation-template my-project
 cd my-project
 git remote set-url origin <your-new-repo-url>
 ```
@@ -42,7 +52,7 @@ Copy the workflow files into your existing repo without touching your source cod
 
 ```bash
 # From inside your existing project root
-git clone <this-repo> /tmp/claude-template
+git clone https://github.com/Maximumsoft-Co-LTD/claude-foundation-template /tmp/claude-template
 
 cp -r /tmp/claude-template/.claude .
 cp -r /tmp/claude-template/brain .
@@ -133,30 +143,42 @@ The brain fills up naturally as you run `/retro-sprint` → `/brain-update` afte
 
 # Work a single task
 /requirement SP1-T001
-/fe-design SP1-T001    # skip if backend-only
-/be-design SP1-T001    # skip if frontend-only
+/fe-design SP1-T001    # skip if BE-only task
+/be-design SP1-T001    # skip if FE-only task
 /implement SP1-T001
 /code-review SP1-T001
 /testing SP1-T001
 /retro-task SP1-T001
 /git-commit SP1-T001
+/next-task             # pick up next task, or proceed to retro-sprint if all done
 
 # Or run multiple tasks in parallel
 /run-tasks SP1-T001 SP1-T002 SP1-T003
 
-# Close the sprint
+# Close the sprint (after ALL tasks committed)
 /retro-sprint SP1
 /brain-update SP1
 ```
 
 ## Workflow
 
+**Single task (sequential):**
 ```
 /discovery → /new-sprint → /requirement → /fe-design → /be-design → /implement
     → /issue (loop) → /code-review → /testing
-    → /retro-task → /git-commit → /next-task
-    → /retro-sprint (once all tasks done)
+    → /retro-task → /git-commit → /next-task (repeat per task)
+    → /retro-sprint (once ALL tasks done) → /brain-update
 ```
+
+**Multiple tasks in parallel:**
+```
+/new-sprint → /run-tasks [task-id] [task-id] ...
+    Phase 1: requirement → fe-design → be-design (parallel) → ⏸ user reviews
+    Phase 2: implement → spec review → quality review → retro-task (parallel)
+    → /git-commit per task → /retro-sprint → /brain-update
+```
+
+Full quick reference (flow diagram, hard gates, escape hatches): `docs/WORKFLOW-QUICKREF.md`
 
 ### All Commands
 
@@ -165,18 +187,28 @@ The brain fills up naturally as you run `/retro-sprint` → `/brain-update` afte
 | `/discovery` | `[disc-id] [name]` | Understand problem before planning |
 | `/new-sprint` | `[SP[N]] [epic description]` | Create sprint, scaffold tasks |
 | `/requirement` | `[task-id]` | Draft ACs + requirement doc |
-| `/run-tasks` | `[task-id] [task-id] ...` | Run multiple tasks in parallel |
+| `/run-tasks` | `[task-id] [task-id] ...` | Run multiple tasks in parallel (2-phase pipeline) |
 | `/fe-design` | `[task-id]` | Frontend design + TDD test plan |
 | `/be-design` | `[task-id]` | Backend design + TDD test plan |
-| `/implement` | `[task-id]` | Write failing tests → implement |
-| `/issue` | `[task-id] [desc]` | TDD bug fix + log |
-| `/code-review` | `[task-id]` | Review code against design + ACs |
-| `/testing` | `[task-id]` | Full suite + AC coverage check |
+| `/implement` | `[task-id]` | Write failing tests → implement → verify |
+| `/issue` | `[task-id] [desc]` | TDD bug fix + log (known root cause during active sprint task) |
+| `/debug` | `[task-id?] [desc]` | 4-phase root cause investigation (unknown cause, flaky test, regression) |
+| `/code-review` | `[task-id]` | Two-stage review: spec compliance → code quality |
+| `/testing` | `[task-id]` | Full suite + E2E production readiness gate |
 | `/retro-task` | `[task-id]` | Write retro, mark task done |
-| `/retro-sprint` | `[sprint-id]` | Sprint retro (after all tasks done) |
+| `/retro-sprint` | `[sprint-id]` | Sprint retro (after ALL tasks done) |
 | `/brain-update` | `[sprint-id]` | Extract sprint learnings into brain vault |
-| `/git-commit` | `[task-id]` | Stage selectively + commit |
-| `/next-task` | `[task-id]?` | Load next todo task |
+| `/git-commit` | `[task-id]` | Stage selectively + commit + choose merge/PR/keep/discard |
+| `/next-task` | `[task-id]?` | Load next task; auto-reconcile stale BACKLOG statuses |
+
+### /issue vs /debug — Which to use?
+
+| Situation | Command |
+|-----------|---------|
+| Bug found during active implementation — you know what broke | `/issue` |
+| Critical issue found after code-review | `/issue` |
+| Unknown root cause, flaky test, unexpected regression | `/debug` |
+| Production incident — no sprint context | `/debug` (no task-id) |
 
 ## ID & Commit Conventions
 
@@ -344,16 +376,34 @@ brain/
 
 **How it grows:** `/retro-sprint` extracts learnings from completed sprints → `/brain-update` writes them as atomic notes into the vault. Over time the brain becomes the authoritative source of non-obvious project knowledge that can't be derived from the code alone.
 
-**How it's read:** Claude reads `BRAIN-INDEX.md` before key workflow commands, then navigates to only the relevant MOC and targeted notes — never the whole vault.
+**How it's read:** Claude reads `BRAIN-INDEX.md` only when the task requires it — before workflow commands like `/discovery`, `/implement`, `/fe-design`, or `/brain-update`. It does not read the brain at the start of every session. Navigation is always MOC → targeted notes — never the whole vault. Full access protocol: `.claude/rules/brain.md`.
 
 ---
 
-## TDD Rules
+## TDD Rules (Iron Law)
 
-- Tests are written **before** implementation — always.
-- Integration tests use **real dependencies** — never mocks at the integration layer.
-- A bug fix always starts with a **failing test** that reproduces the bug.
-- Never skip, `.only`, or comment out a failing test.
+1. Write the failing test **first** — before any implementation code.
+2. Run it. Confirm it **fails** with an expected message (not a crash).
+3. Implement the **minimum** code to make it pass.
+4. Run the **full suite**. Confirm green with zero regressions.
+5. Code written before its test? **Delete it.** Rewrite from tests.
+
+Integration tests use **real dependencies** — never mocks at the integration layer.
+A bug fix always starts with a **failing test** that reproduces the bug.
+Full rationalization red-flags table: `docs/WORKFLOW-QUICKREF.md` → Section E.
+
+## Escape Hatches
+
+Common real-world deviations from the standard flow — see `docs/WORKFLOW-QUICKREF.md` Section D for full recipes:
+
+| Scenario | Short path |
+|----------|-----------|
+| **Hotfix** | `/debug` → TDD fix → `/git-commit` → PR (skip sprint flow) |
+| **FE-only task** | Skip `/be-design`; `/implement` sets `HAS_BE=false` automatically |
+| **BE-only task** | Skip `/fe-design`; `/implement` sets `HAS_FE=false` automatically |
+| **Exploratory spike** | `/requirement` (questions as ACs) → research → write discovery/brain doc → `/retro-task` |
+| **Blocked task** | `/issue` → mark `blocked` → `/next-task` → resume when unblocked |
+| **Multi-sprint epic** | One `/discovery` → one `/new-sprint` per deployable slice; task IDs never reset |
 
 ## Docs Structure
 

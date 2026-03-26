@@ -88,4 +88,7 @@ Suggest exactly ONE next step:
 | BE design empty | `/be-design [task-id]` |
 | Both designs filled, no tests yet | "Write failing tests first (see TDD Test Plan), then implement" |
 | Tests written, implementing | "Continue implementing. `/issue [task-id] [desc]` if you hit a bug." |
+| Tests failing unexpectedly | `/debug [task-id] [symptom]` |
+
+Note: `/implement` handles worktree setup automatically (Step 0b). No manual worktree transition needed between tasks.
 

@@ -19,6 +19,43 @@ Skip if brain doesn't exist yet.
 
 ---
 
+## Step 0b — Set up isolated worktree
+
+Check if already in a worktree:
+```bash
+git rev-parse --show-toplevel
+git worktree list
+```
+
+**If already in a dedicated worktree for this task** → skip this step, print current path.
+
+**If in the main working tree** → create an isolated workspace:
+
+1. Verify `.worktrees` is gitignored:
+   ```bash
+   git check-ignore -q .worktrees || echo ".worktrees" >> .gitignore
+   ```
+
+2. Create the worktree on the task branch:
+   ```bash
+   git worktree add .worktrees/[task-id] -b [sprint-id]/[task-id]-[short-desc]
+   ```
+   Branch format: `SP1/SP1-T002-user-auth` (per team conventions in CLAUDE.md)
+
+3. Enter the worktree and verify clean baseline:
+   ```bash
+   cd .worktrees/[task-id]
+   # Install deps if needed (npm install / go mod tidy / etc.)
+   # Run test suite — must be GREEN before any new code
+   ```
+   If baseline tests are RED → stop. Investigate before proceeding.
+
+Print: `Worktree ready: .worktrees/[task-id] on branch [branch-name]`
+
+**Note:** All sub-agents in Step 2 and Step 3 work inside this worktree. When launching parallel agents, pass the worktree absolute path so they operate on the same isolated workspace — not the main working tree.
+
+---
+
 ## Step 1 — Load context
 
 Parse `[task-id]`, extract `[sprint-id]`.
@@ -31,11 +68,12 @@ Read **in parallel**:
 
 Validate:
 - Missing requirement or empty ACs → stop: "Run `/requirement [task-id]` first."
-- Missing or incomplete design docs → stop: "Run `/fe-design` and `/be-design` first."
+- BOTH FE and BE design docs missing → stop: "Run `/fe-design` and `/be-design` first."
+- ONE design doc missing → warn: "No `[task-id]-[frontend/backend].md` found. That layer will be skipped (HAS_FE/HAS_BE=false). Continue? (yes/no)"
 
 Assess parallelization flags:
-- `HAS_FE`: FE design has test plan items
-- `HAS_BE`: BE design has test plan items
+- `HAS_FE`: FE design doc exists and has test plan items
+- `HAS_BE`: BE design doc exists and has test plan items
 - `SHARED_TYPES`: FE and BE share type/interface definitions
 - `HAS_MIGRATION`: BE includes DB migrations
 
@@ -43,6 +81,8 @@ Assess parallelization flags:
 ---
 
 ## Step 1b — Pre-implementation readiness check
+
+**Iron Law:** if any implementation code for this task already exists that was written before its tests — **delete it now**. Do not keep it as reference. Rewrite from tests. See `rules/testing.md`.
 
 For each AC in requirement: is there at least one test row in FE or BE TDD Test Plan? Flag any AC with no test → **stop**, fix design doc first.
 
@@ -66,6 +106,7 @@ For each AC in requirement: is there at least one test row in FE or BE TDD Test 
 Wait for both agents. Collect red-test confirmation.
 
 **If only `HAS_FE` or only `HAS_BE`:** write all test files sequentially. Confirm all **fail** (red).
+This is the normal path for FE-only and BE-only tasks — no error, no missing-doc warning needed.
 
 
 ---
@@ -95,12 +136,30 @@ Wait for both agents. If either reported bugs → run `/issue [task-id] [descrip
 
 ---
 
-## Step 4 — Verify
+## Step 4 — Verification before completion (Iron Law)
 
-Run full test suite (FE and BE in parallel if separate commands):
-1. All new tests must **pass** (green).
-2. No existing tests broken.
-3. Each AC in requirement has at least one passing test.
+**No completion claims without fresh verification evidence.** Run everything in this step — do not rely on output from Step 3 sub-agents.
+
+Run full test suite + build (FE and BE in parallel if separate commands):
+
+| Claim | Required evidence | NOT sufficient |
+|-------|------------------|----------------|
+| Tests pass | Fresh test output: 0 failures, exit 0 | Sub-agent report, previous run |
+| Build succeeds | Build command: exit 0 | Linter passing, tests passing |
+| ACs met | Re-read each AC → trace to passing test | "Tests pass" alone |
+| No regressions | Full suite output with 0 failures | Partial suite or assumption |
+
+**Process:**
+1. **Run** — execute test/build commands now.
+2. **Read** — full output, check exit code, count failures.
+3. **Trace** — for each AC in requirement, name the specific test that covers it.
+4. **Only then** — print the output below.
+
+**Red flags — STOP if you catch yourself:**
+- Using "should pass", "probably works", "seems correct"
+- About to claim done without a fresh test run in this step
+- Expressing satisfaction before verification ("Great!", "Done!")
+- Trusting sub-agent success reports without independent verification
 
 ---
 
@@ -109,9 +168,16 @@ Run full test suite (FE and BE in parallel if separate commands):
 ```
 ✓ Implementation complete: [task-id]
   Tests: [N] passing, 0 failing
+  Build: exit 0
+  Verified: [timestamp of fresh test run]
 
 ACs covered:
-  ✓ AC-1  ✓ AC-2  ✓ AC-3
+  ✓ AC-1 → [test name]
+  ✓ AC-2 → [test name]
+  ✓ AC-3 → [test name]
 
 Next: /code-review [task-id]
 ```
+
+**Optional skills (insert before /code-review):**
+- `/security-review [task-id]` — secrets, injection, insecure defaults, dependency risk

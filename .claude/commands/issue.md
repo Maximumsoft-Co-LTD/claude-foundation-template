@@ -24,19 +24,22 @@ Read:
 
 ## Step 2 — Investigate
 
-Read relevant source files to find the root cause.
-- Do NOT retry the same approach more than twice. If stuck → document and ask the user.
-- Identify root cause, not just the symptom.
+Follow `/debug` Phases 1–3 (root cause investigation → pattern analysis → hypothesis testing).
+Do NOT implement the fix yet — that's Step 3.
 
+If stuck after 3 hypotheses → document the blocker and ask the user.
 
 ---
 
 ## Step 3 — Fix using TDD
 
-1. Write a **failing test** that reproduces the bug. Run it — confirm it fails.
-2. Fix the code so the test passes.
-3. Run the full test suite — confirm no regressions.
-4. Keep the fix minimal.
+Follow `rules/testing.md` — Verify RED is mandatory before implementing:
+
+1. Write a **failing test** that reproduces the bug.
+2. **Run it — confirm it fails** (expected failure, not a setup error). Never skip this.
+3. Implement the minimal fix — ONE change, address root cause only.
+4. Run the full test suite — confirm all pass, 0 regressions.
+5. Keep the fix minimal. No "while I'm here" improvements.
 
 
 ---
@@ -61,7 +64,9 @@ Append one issue entry to `docs/sprints/[sprint-id]/[task-id]/[task-id]-issues.m
 ✓ Issue logged: docs/sprints/[sprint-id]/[task-id]/[task-id]-issues.md
   Severity: [level]  |  Test added: yes/no  |  Blocks: [list or none]
 
-Next: /testing [task-id]
+Next:
+  Called during /implement → continue implementation
+  Called after /code-review  → /testing [task-id]
 ```
 
 If unresolvable → document as `status: blocked`, list what information is needed, ask the user.

@@ -41,7 +41,7 @@ Fill `docs/templates/RETRO-TASK-TEMPLATE.md` with the data from Steps 1–2. Sav
 
 1. Change task status to `done` in its sprint table.
 2. Add to the **Done** table at the bottom with today's date and sprint.
-3. If "Knowledge sharing" section has any non-empty items → ask: "Add to CLAUDE.md? (yes / no)" and append to the relevant section if confirmed.
+3. If "Knowledge sharing" section has any non-empty items → note them in the retro doc. CLAUDE.md updates are reviewed in `/retro-sprint` and `/brain-update` — do not prompt here.
 
 
 ---

@@ -116,6 +116,10 @@ Fix any issue found before presenting to the user.
 
 ## Step 3 — Present for confirmation
 
+<HARD-GATE>
+DO NOT save the requirement doc until the user explicitly confirms. Wait for "confirm" or edits.
+</HARD-GATE>
+
 Print the full drafted requirement doc, then ask:
 ```
 Does this requirement look right?

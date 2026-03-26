@@ -75,6 +75,11 @@ Read existing draft `[task-id]-backend.md` and `docs/templates/BACKEND-DESIGN-TE
 
 ## Step 1b — Clarify ambiguities before designing
 
+<HARD-GATE>
+If ambiguities exist, collect ALL into one message and wait for answers before proceeding to Step 2.
+Exception: if everything is clear → skip entirely. Do NOT ask unnecessary questions.
+</HARD-GATE>
+
 After loading all context (requirement doc, FE design, existing codebase), scan for gaps that would block writing a correct BE design:
 - Unclear **business logic** — rules, conditions, or calculations not specified in ACs?
 - Missing **data requirements** — fields, relationships, or constraints not defined anywhere?
@@ -103,6 +108,16 @@ Key requirements:
 - **API Endpoints** — every endpoint must match `[task-id]-frontend.md` API contracts exactly.
 - **Error Handling Strategy** — standard envelope (`error`, `code`, `fields`). Never expose stack traces.
 - **Implementation Plan** — file paths must be **real paths** from Existing Code Context. `/implement` follows this plan exactly.
+  - **Granularity rule:** every step must be a single action (2-5 minutes). Never combine "write test AND implement" into one step.
+  - Each step format: `- [ ] [action] → [exact file path] → verify: [command]`
+  - Example bite-sized sequence:
+    ```
+    - [ ] Write failing unit test for [AC] → src/handlers/foo_test.go → run: go test ./src/handlers/...
+    - [ ] Run test — confirm RED → go test ./src/handlers/...
+    - [ ] Implement handler minimal code → src/handlers/foo.go
+    - [ ] Run test — confirm GREEN → go test ./src/handlers/...
+    - [ ] Commit: "test: add foo handler tests"
+    ```
 - **TDD Test Plan** — min 1 unit + 1 integration per AC. Include 401, 403, 429, validation tests. Integration tests use real DB. Written BEFORE code.
 
 ---
@@ -135,6 +150,7 @@ Re-read the full backend design doc and verify:
 - [ ] Every AC has at least one unit test AND one integration test row in the TDD Test Plan.
 - [ ] Every endpoint in the TDD Test Plan includes 401/403/validation error test cases.
 - [ ] Every file path in the Implementation Plan is a real path from Existing Code Context — not hypothetical.
+- [ ] Every Implementation Plan step is a single action (2-5 min). No step combines "write test AND implement."
 - [ ] Every FE API contract from `[task-id]-frontend.md` has a matching endpoint (method, path, response shape) in this doc.
 - [ ] No required section (per point level) is empty, `TBD`, or missing.
 - [ ] Coverage check (Step 2b) shows no unresolved `⚠️` items.
@@ -160,3 +176,7 @@ TDD Test Plan — write these failing tests BEFORE implementing:
 
 Next: /implement [task-id]
 ```
+
+**Optional skills (insert before /implement):**
+- `/db-schema-review [task-id]` — review schema design before writing any code
+- `/adr [task-id] [title]` — record a non-trivial architectural decision made during this step

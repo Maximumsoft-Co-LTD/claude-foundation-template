@@ -107,17 +107,22 @@ Re-read the Production Readiness output just written and verify:
 - [ ] Every AC from `[task-id]-requirement.md` appears in the output — none silently skipped.
 - [ ] Every `BLOCKED` entry has a specific reason stated.
 - [ ] No AC is marked `READY` if its E2E / Manual verification used mocked or stubbed data.
-- [ ] Step numbers in this command file are sequential (1→2→3→4→5→6→7→8) — no gaps.
+- [ ] Step numbers in this command file are sequential (1→2→3→4→5→6a/6b/6c→7→8) — no gaps.
 
 Fix any issue found before proceeding.
 
 ---
 
-## Step 7 — Regression check
+## Step 7 — Regression check + Final Verification (Iron Law)
 
-Run the full test suite (not just task-specific tests) to confirm no existing functionality was broken by this task's changes.
+Run the full test suite **NOW** — this is the single authoritative final run:
 
-- Any newly failing test outside this task's scope → treat as regression → fix before proceeding.
+1. **Run full suite** — do not rely on memory of Step 4.
+2. **Confirm** exit code 0, zero failures, zero regressions outside this task's scope.
+3. **Trace** every AC to its passing test by name — no AC is "probably covered."
+4. Any newly failing test outside this task's scope → regression → fix before proceeding.
+
+If you're about to write "should pass" or "probably fine" → **STOP**. Run the command first.
 
 ---
 
@@ -140,4 +145,8 @@ Next:
   Failing or missing coverage → fix and re-run /testing [task-id]
   All pass, all ACs covered  → /retro-task [task-id]
 ```
+
+**Optional skills (insert after all ACs are READY, before /retro-task):**
+- `/accessibility-review [task-id]` — WCAG 2.1 AA audit (FE tasks)
+- `/test-coverage [task-id]` — coverage gaps mapped to ACs, missing test list
 

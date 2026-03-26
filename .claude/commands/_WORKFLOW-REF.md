@@ -11,12 +11,15 @@
     → /brain-update [sprint-id] (recommended — extract learnings to brain/)
 ```
 
-**Multiple tasks in parallel (2-phase):**
+**Multiple tasks in parallel (subagent-driven):**
 ```
 /discovery → /new-sprint → /run-tasks [task-id] [task-id] ...
     Phase 1: requirement + fe-design + be-design (parallel) → ⏸ user reviews all plans
-    Phase 2: implement + code-review + testing + retro-task (parallel, after approval)
-    → /git-commit (per task) → /retro-sprint → /brain-update [sprint-id]
+    Phase 2: per task 3-agent pipeline:
+        Implementer agent → Spec Reviewer agent → Quality Reviewer agent
+        (loops back on failure, proceeds on pass)
+    → /git-commit (per task, with branch finish options)
+    → /retro-sprint → /brain-update [sprint-id]
 ```
 
 ## Commands
@@ -31,13 +34,28 @@
 | `/be-design` | `[task-id]` | Write BE design + implementation plan + TDD test plan before touching any code |
 | `/implement` | `[task-id]` | Write failing tests then implement following FE + BE design docs |
 | `/issue` | `[task-id] [description]` | Write failing test → fix → log during implementation |
-| `/code-review` | `[task-id]` | Review code against design docs and all ACs |
+| `/code-review` | `[task-id]` | Two-stage review: spec compliance → code quality |
 | `/testing` | `[task-id]` | Run full suite, cross-check every AC has a test |
 | `/retro-task` | `[task-id]` | Write retrospective for one task, mark it done |
 | `/retro-sprint` | `[sprint-id]` | Aggregate all task retros → sprint retro, evaluate goals |
-| `/git-commit` | `[task-id]` | Stage selectively + commit with conventional message |
-| `/next-task` | `[task-id]` _(optional)_ | Load next todo task after finishing current one |
+| `/git-commit` | `[task-id]` | Stage, commit, then choose: merge / PR / keep / discard |
+| `/debug` | `[description]` | 4-phase systematic debugging — root cause before fixes |
+| `/next-task` | `[task-id]` _(optional)_ | Load next todo task; auto-reconcile stale BACKLOG statuses; show task context card |
 | `/brain-update` | `[sprint-id]` | Extract retro learnings → write atomic notes into `brain/` |
+
+## /issue vs /debug — Which to use?
+
+| Situation | Command |
+|-----------|---------|
+| Bug found during active implementation — you know what broke | `/issue [task-id] [desc]` |
+| Critical issue found after code-review — specific failing check | `/issue [task-id] [desc]` |
+| Unknown root cause — symptom without clear origin | `/debug [task-id] [desc]` |
+| Flaky test, intermittent failure, unexpected regression | `/debug [task-id] [desc]` |
+| Production incident — no sprint context | `/debug [desc]` (no task-id) |
+
+**Rule:** `/issue` is fix-first (calls `/debug` Phases 1–3 internally). `/debug` is investigation-first for unknown/complex causes. When in doubt: if you can name the likely root cause, use `/issue`. If you're guessing, use `/debug` first.
+
+---
 
 ## Skills (optional, insert where needed)
 
@@ -111,11 +129,43 @@ discovery → backlog → todo → in-progress → review → testing → done
 | **FE Design** | Approach + Existing Code Context + Component list + TDD (min. 1 test/AC) | + Env/Config Deps + Component Breakdown + API Contracts + State & Data Flow + Fail State table | + UI/UX Overview + Loading States + Impl Plan + E2E Tests + Fail Case Matrix + Async Sequence | + User Journey + Behavior Mapping + Routing + Responsive + State Inventory + Edge Cases | + Analytics Events + Performance + full Fail Flows + A11y + Design Decisions |
 | **BE Design** | Endpoint spec + Existing Code Context + TDD (min. 1 test/AC) | + API Versioning + Input Validation + full TDD Test Plan | + Data Models + Service Layer + Business Logic + Error Handling + Impl Plan | + Auth Matrix + Sequence Diagram + Data Contracts + Events + Security + Logging + Env Vars + Migrations + Ext Deps | + Class Diagram + Caching + Performance + Design Decisions |
 
+## Superpowers-Inspired Principles
+
+These principles are adopted from [obra/superpowers](https://github.com/obra/superpowers) and enforced across all commands:
+
+| Principle | Enforced in | Rule |
+|-----------|-------------|------|
+| **Verification before completion** | `/implement` Step 4 | No completion claims without fresh test evidence |
+| **Multiple test runs are intentional** | `/implement` Step 4, `/code-review` Step 0, `/testing` Step 7b, `/git-commit` Step 8 | Each run is a freshness gate — time elapses between phases. This is not duplication. |
+| **Two-stage review** | `/code-review` Steps 2a-2b | Spec compliance first, then code quality |
+| **Receiving review feedback** | `/code-review` Step 3c | Verify before implementing, push back with reasoning |
+| **Systematic debugging** | `/debug` | 4-phase root cause process, max 3 fix attempts |
+| **Subagent-driven development** | `/run-tasks` Step 6 | 3-agent pipeline: implementer → spec reviewer → quality reviewer |
+| **Finishing a branch** | `/git-commit` Step 8 | 4 structured options: merge / PR / keep / discard |
+| **HARD-GATE: approach approval** | `/discovery` Step 3b | No `/new-sprint` until user explicitly picks an approach |
+| **HARD-GATE: task breakdown** | `/new-sprint` Step 3 | Wait for user to confirm sub-task table before writing docs |
+| **HARD-GATE: AC confirmation** | `/requirement` Step 3 | Wait for "confirm" before saving requirement doc |
+| **HARD-GATE: design clarification** | `/fe-design` Step 1b, `/be-design` Step 1b | If ambiguities exist, collect all into one message and wait |
+| **HARD-GATE: staging confirmation** | `/git-commit` Step 5 | Show file list, wait for yes/no/edit — never `git add -A` silently |
+| **Bite-sized task granularity** | `/fe-design` + `/be-design` Step 2 | Every Implementation Plan step = single action, 2-5 min |
+| **Worktree isolation** | `/implement` Step 0b | Create isolated git worktree per task before any code |
+
+## Discovery Coverage Check — Two Levels (Both Required)
+
+- `/new-sprint` Step 3b: **task-level** — does every discovery goal have a task assigned?
+- `/requirement` Step 2b: **AC-level** — does every discovery goal have an AC in this task?
+
+Both checks are required. They operate at different granularity and do not duplicate each other.
+
+---
+
 ## TDD Rules
-- Tests are written **before** implementation code — always.
-- Integration tests use **real dependencies** (real DB, real services) — never mocks at the integration layer.
-- A bug fix always starts with a **failing test** that reproduces the bug.
-- Never skip, `.only`, or comment out a failing test — fix the code instead.
+
+Full rules auto-loaded from `.claude/rules/testing.md`. Key points:
+- Test first — always. Code written before test = **delete it**.
+- Verify RED is mandatory — watch test fail before implementing.
+- Real dependencies at integration layer — never mocks.
+- Rationalization red flags table — see `rules/testing.md`.
 
 ## ID Format
 - Sprint: `SP[N]` — e.g. `SP1`, `SP2`, `SP3`

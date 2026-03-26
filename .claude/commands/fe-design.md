@@ -70,6 +70,11 @@ Read existing draft `[task-id]-frontend.md` and `docs/templates/FRONTEND-DESIGN-
 
 ## Step 1b — Clarify ambiguities before designing
 
+<HARD-GATE>
+If ambiguities exist, collect ALL into one message and wait for answers before proceeding to Step 2.
+Exception: if everything is clear → skip entirely. Do NOT ask unnecessary questions.
+</HARD-GATE>
+
 After loading all context (requirement doc, existing codebase), scan for gaps that would block writing a correct FE design:
 - Unclear **UI behavior** — interactions, states, or flows not described in ACs?
 - Missing **API shape** — endpoint, request/response format not specified anywhere?
@@ -96,6 +101,16 @@ For every section required at this point level (per the table above), write impl
 
 Key requirements:
 - **Implementation Plan** — file paths must be **real paths** from Existing Code Context, not hypothetical. `/implement` follows this plan exactly.
+  - **Granularity rule:** every step must be a single action (2-5 minutes). Never combine "write test AND implement" into one step.
+  - Each step format: `- [ ] [action] → [exact file path] → verify: [command]`
+  - Example bite-sized sequence:
+    ```
+    - [ ] Write failing test for [AC] → src/components/Foo.test.tsx → run: npm test Foo
+    - [ ] Run test — confirm RED → npm test Foo
+    - [ ] Implement [component] minimal code → src/components/Foo.tsx
+    - [ ] Run test — confirm GREEN → npm test Foo
+    - [ ] Commit: "test: add Foo component tests"
+    ```
 - **TDD Test Plan** — min 1 unit + 1 integration per AC. Written BEFORE code.
 - **E2E Test Plan** — min 1 scenario per AC. Format: "Given → When → Then." Written BEFORE code.
 - **Fail Case Matrix** — every user action that can fail must have: presentation pattern + exact error copy + recovery CTA + input preserved flag.
@@ -126,6 +141,7 @@ Re-read the full frontend design doc and verify:
 - [ ] Every AC has at least one TDD test row (unit + integration) in the TDD Test Plan.
 - [ ] Every AC has at least one E2E scenario row in the E2E Test Plan.
 - [ ] Every file path in the Implementation Plan is a real path from Existing Code Context — not hypothetical.
+- [ ] Every Implementation Plan step is a single action (2-5 min). No step combines "write test AND implement."
 - [ ] Fail Case Matrix covers every user action that can fail.
 - [ ] No required section (per point level) is empty, `TBD`, or missing.
 - [ ] Coverage check (Step 2b) shows no unresolved `⚠️` items.
@@ -154,3 +170,6 @@ E2E Test Plan:
 
 Next: /be-design [task-id]
 ```
+
+**Optional skills (insert before /be-design):**
+- `/adr [task-id] [title]` — record a non-trivial design decision made during this step

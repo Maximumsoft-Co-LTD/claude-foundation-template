@@ -43,17 +43,36 @@ Run `git diff main...HEAD` to identify all changed files.
 
 ---
 
-## Step 2 — Review each changed file
+## Step 2a — Stage 1: Spec Compliance Review
 
-Check every file against:
+**Goal:** Does the code do what the spec says? Nothing more, nothing less.
 
-**Correctness**
+Check every changed file against requirement + design docs:
+
+**AC Coverage**
 - Every AC has working code that satisfies it?
+- No AC silently skipped or partially implemented?
+- No extra features added beyond what ACs specify?
+
+**Design Match**
 - Implementation matches design docs (correct endpoints, components, data models)?
+- API contracts match exactly (method, path, request/response shape)?
+- Data models use the exact field names from design?
 
 **TDD Compliance**
-- Test for every row in both TDD Test Plan tables?
+- Is there git commit evidence of red→green cycle (test commits precede implementation commits)?
 - Integration tests use real DB/services — not mocks?
+- Any implementation file created before its test file? (git log — test commit should come first)
+- Do NOT recount rows here — `/testing` Step 3 does the exhaustive row-by-row coverage check.
+
+**Spec verdict:** `PASS` (all ACs covered, design matched) or `FAIL` (list gaps).
+If FAIL → stop. Fix spec gaps before proceeding to Stage 2.
+
+---
+
+## Step 2b — Stage 2: Code Quality Review
+
+**Goal:** Is the code well-written? Only run this after Stage 1 passes.
 
 **Performance**
 - N+1 query risk (loops triggering DB calls)?
@@ -110,6 +129,33 @@ Re-read the review report just written and verify:
 - [ ] Security and TDD Compliance sections were explicitly checked — not just assumed OK.
 
 Fix any gap found before updating docs.
+
+---
+
+## Step 3c — Receiving review feedback (when issues found)
+
+If the review found Critical or Minor issues, follow this protocol when fixing:
+
+**Response pattern:**
+1. **Read** — complete feedback without reacting.
+2. **Understand** — restate the technical requirement in own words.
+3. **Verify** — check against codebase reality. Is the feedback correct for THIS codebase?
+4. **Evaluate** — technically sound? Or does the reviewer lack context?
+5. **Implement** — one item at a time, test each fix individually.
+
+**When to push back (with technical reasoning):**
+- Suggestion breaks existing functionality
+- Reviewer lacks full context (e.g., legacy/compatibility reasons)
+- Violates YAGNI — grep codebase, if unused, don't add
+- Conflicts with architectural decisions in design docs
+
+**Implementation order for multi-issue feedback:**
+1. Blocking issues (breaks, security)
+2. Simple fixes (typos, imports)
+3. Complex fixes (refactoring, logic)
+4. Test each fix individually → verify no regressions
+
+**Never:** blind implementation without verification, performative agreement ("Great point!"), batch multiple fixes without testing each.
 
 ---
 

@@ -50,8 +50,39 @@ Wait for user's answers.
 
 1. Fill every section from user's answers. Write `TBD — needs input` for anything unanswered.
 2. Section 8 (Approaches): structure at least 2 options. If only one mentioned, add placeholder Option B.
+   Each option must have: **Description**, **Pros**, **Cons**, **Recommended** (yes/no with reason).
 3. Section 10 (Unknowns): mark each as `- [ ]` checkbox.
 4. Section 13 (Next Steps): always include "When ready → `/new-sprint [sprint-id] \"[epic description]\"`".
+
+---
+
+## Step 3b — HARD-GATE: Approach Approval
+
+<HARD-GATE>
+DO NOT proceed to Step 4 or suggest `/new-sprint` until user has explicitly chosen an approach.
+Exception: if user says "obvious" or "skip gate" → mark the single/recommended approach as selected and proceed.
+</HARD-GATE>
+
+Present the approaches as a numbered choice:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Discovery: [disc-id]-[name]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Option 1: [Approach name]
+  Pros: [...]   Cons: [...]
+
+Option 2: [Approach name]
+  Pros: [...]   Cons: [...]
+
+Recommendation: Option [N] — [one-line reason]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Which approach? (pick number, suggest alternative, or "go with recommendation")
+```
+
+Wait for user's choice. Once chosen:
+- Update Section 8 in the discovery doc — mark chosen option as `✓ SELECTED`, others as `✗ Not chosen`.
+- Proceed to Step 4.
 
 ---
 
@@ -66,7 +97,8 @@ Add to the **Discovery Backlog** section:
 
 Before reporting output, re-read `docs/discovery/[disc-id]-[name].md` in full and verify:
 - [ ] All 10 topic sections are filled — no section left as `TBD` unless explicitly unanswerable.
-- [ ] At least 2 options exist in Approaches section.
+- [ ] At least 2 options exist in Approaches section, each with Description / Pros / Cons / Recommended.
+- [ ] One approach is marked `✓ SELECTED` — approach approval gate was completed.
 - [ ] All open questions are formatted as `- [ ]` checkboxes.
 - [ ] Next Steps section includes the `/new-sprint` instruction.
 

@@ -165,15 +165,50 @@ Reply:
 
 # ━━━ PHASE 2: IMPLEMENT ━━━━━━━━━━━━━━━━━━
 
-## Step 6 — Implement + Review + Test (parallel per tier)
+> **Note:** Phase 2 uses a 3-agent pipeline that replaces the standalone commands:
+> - Spec Reviewer ≈ `/code-review` Stage 1 (spec compliance)
+> - Quality Reviewer ≈ `/code-review` Stage 2 + `/testing`
+>
+> Do NOT also run `/code-review` or `/testing` manually for tasks processed by `/run-tasks`.
 
-For each task, launch `Agent [task-id] — Implement+Review+Test` (run_in_background: true):
-> Read `.claude/commands/implement.md`, `.claude/commands/code-review.md`, `.claude/commands/testing.md` — follow every step for `[task-id]` in that order.
+## Step 6 — Subagent-driven implementation (parallel per tier)
+
+For each task, use a **3-agent pipeline** per task:
+
+### Agent 1: Implementer
+Launch `Agent [task-id] — Implement` (run_in_background: true):
+> Read `.claude/commands/implement.md` — follow every step for `[task-id]`.
 > **Read `cross-task-context.md`** — reuse shared components. No duplicate implementations.
-> For any issues found during review or testing → follow `/issue` process inline.
+> For any issues found → follow `/debug` process inline — this includes writing a failing test BEFORE implementing the fix. The Iron Law applies inside agents.
+> Self-review before completing: re-read requirements, verify all ACs covered.
 > Return: DONE, ISSUES_FIXED (list), or BLOCKED (reason).
 
-Print checkpoint.
+### Agent 2: Spec Reviewer
+After implementer completes, launch `Agent [task-id] — Spec Review` (foreground — wait for result):
+> Review all changes against `[task-id]-requirement.md` and design docs.
+> Check: every AC has working code? Design contracts matched exactly? No extras, no gaps?
+> Return: PASS or FAIL (list specific spec gaps).
+
+If FAIL → send gaps back to Implementer agent to fix → re-review (foreground).
+
+### Agent 3: Quality Reviewer
+After spec review passes, launch `Agent [task-id] — Quality Review` (foreground — wait for result):
+> Review all changes for performance, security, code quality, edge cases.
+> Run `.claude/commands/testing.md` — follow every step for `[task-id]`.
+> Return: APPROVED or REQUEST_CHANGES (list issues by severity).
+
+If REQUEST_CHANGES with Critical issues → send back to Implementer → re-review (foreground).
+
+**Print checkpoint after all 3 agents complete per task.**
+
+---
+
+### Dispatching rules (from Superpowers)
+- Each agent gets **isolated context** — construct exactly what they need, never inherit session history.
+- Agent prompt must include: specific scope, clear goal, constraints, expected output format.
+- After all agents return: verify fixes don't conflict across tasks, run full test suite.
+- If agents edited same files → resolve conflicts before proceeding.
+- **Parallel worktrees:** when Tier 1 has multiple tasks, each Implementer agent creates its own worktree via `/implement` Step 0b. Worktree paths: `.worktrees/[task-id]`. Agents work in separate branches — no conflicts unless they edit shared files outside their worktree.
 
 ---
 
