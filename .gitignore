@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+.DS_Store?
+._*
+
+# Logs
+*.log
+logs/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Plugin distribution source (not installed — active skills are in .claude/skills/)
+skills/
+
+# Worktrees
+.worktrees/
