@@ -3,6 +3,7 @@ type: concept
 tags: [solution-engineer, architecture, C4, UML, diagrams, mermaid]
 related: [CON-solution-design-process, CON-system-integration-patterns, CON-technical-requirements]
 updated: 2026-03-25
+source: template
 ---
 
 # Architecture Diagrams: C4 Model

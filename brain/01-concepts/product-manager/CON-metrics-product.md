@@ -3,6 +3,7 @@ type: concept
 tags: [product-manager, metrics, analytics, HEART, AARRR, north-star]
 related: [CON-okr-framework, CON-product-vision-strategy, CON-product-discovery]
 updated: 2026-03-25
+source: template
 ---
 
 # Product Metrics: Measuring What Matters

@@ -3,6 +3,7 @@ type: concept
 tags: [product-manager, roadmap, planning, strategy]
 related: [CON-product-vision-strategy, CON-okr-framework, CON-stakeholder-management]
 updated: 2026-03-25
+source: template
 ---
 
 # Roadmap Types: Choosing the Right Format

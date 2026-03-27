@@ -3,6 +3,7 @@ type: concept
 tags: [developer, SOLID, OOP, design-principles, clean-code]
 related: [CON-clean-code, CON-design-patterns, CON-refactoring]
 updated: 2026-03-25
+source: template
 ---
 
 # SOLID Principles

@@ -3,6 +3,7 @@ type: concept
 tags: [product-manager, OKR, goals, metrics, outcome]
 related: [CON-product-vision-strategy, CON-metrics-product, CON-roadmap-types]
 updated: 2026-03-25
+source: template
 ---
 
 # OKR Framework

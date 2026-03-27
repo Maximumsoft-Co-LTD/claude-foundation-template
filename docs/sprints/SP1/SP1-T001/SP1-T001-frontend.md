@@ -13,7 +13,7 @@
 - Storybook: [link]
 
 ## UI/UX Overview
-<!-- Fill in with /fe-design SP1 SP1-T001 -->
+<!-- Fill in with /design fe SP1-T001 -->
 
 ## Routing & Navigation
 | Route | Component | Auth required | Notes |

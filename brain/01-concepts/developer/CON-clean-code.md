@@ -3,6 +3,7 @@ type: concept
 tags: [developer, clean-code, naming, DRY, KISS, YAGNI, refactoring]
 related: [CON-solid-principles, CON-refactoring, CON-code-review-checklist]
 updated: 2026-03-25
+source: template
 ---
 
 # Clean Code

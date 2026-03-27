@@ -3,6 +3,7 @@ type: concept
 tags: [ai, LLM, prompt-engineering, RAG, langchain, openai, anthropic, claude]
 related: [CON-api-design-principles, CON-async-patterns, CON-caching-strategies, CON-error-handling]
 updated: 2026-03-25
+source: template
 ---
 
 # LLM Integration

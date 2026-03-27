@@ -3,6 +3,7 @@ type: concept
 tags: [product-owner, backlog, prioritization, refinement]
 related: [CON-user-story-writing, CON-acceptance-criteria, CON-sprint-planning-po, CON-sprint-mechanics]
 updated: 2026-03-25
+source: template
 ---
 
 # Product Backlog Management

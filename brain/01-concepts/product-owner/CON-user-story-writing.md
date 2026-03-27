@@ -3,6 +3,7 @@ type: concept
 tags: [product-owner, user-story, AC, INVEST, backlog]
 related: [CON-acceptance-criteria, CON-product-backlog-management]
 updated: 2026-03-25
+source: template
 ---
 
 # User Story Writing

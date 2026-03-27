@@ -3,6 +3,7 @@ type: concept
 tags: [product-owner, acceptance-criteria, user-stories, gherkin]
 related: [CON-user-story-writing, CON-definition-of-done, CON-sprint-planning-po]
 updated: 2026-03-25
+source: template
 ---
 
 # Acceptance Criteria

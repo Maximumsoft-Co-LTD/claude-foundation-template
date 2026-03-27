@@ -3,6 +3,7 @@ type: concept
 tags: [devops, kubernetes, containers, orchestration, helm]
 related: [CON-containerization, CON-cicd-pipeline, CON-deployment-strategies, CON-infrastructure-as-code]
 updated: 2026-03-25
+source: template
 ---
 
 # Container Orchestration

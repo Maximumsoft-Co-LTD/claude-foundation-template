@@ -3,6 +3,7 @@ type: concept
 tags: [infra, networking, DNS, VPC, load-balancer, CDN, SSL]
 related: [CON-cloud-fundamentals, CON-sre-fundamentals, CON-security-fundamentals]
 updated: 2026-03-25
+source: template
 ---
 
 # Networking Basics

@@ -3,6 +3,7 @@ type: concept
 tags: [infra, cloud, AWS, GCP, Azure, IaaS, PaaS, SaaS]
 related: [CON-sre-fundamentals, CON-scalability-patterns, CON-networking-basics]
 updated: 2026-03-25
+source: template
 ---
 
 # Cloud Fundamentals

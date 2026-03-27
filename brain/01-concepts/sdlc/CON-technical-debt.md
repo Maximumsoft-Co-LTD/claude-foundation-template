@@ -3,6 +3,7 @@ type: concept
 tags: [sdlc, technical-debt, refactoring, quality, maintenance]
 related: [CON-sdlc-phases, CON-definition-of-done]
 updated: 2026-03-25
+source: template
 ---
 
 # Technical Debt

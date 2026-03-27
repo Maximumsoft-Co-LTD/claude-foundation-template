@@ -3,6 +3,7 @@ type: concept
 tags: [backend, api-security, oauth2, cors, csrf, jwt, api-key, security]
 related: [CON-authentication-authorization, CON-security-fundamentals, CON-api-design-principles, CON-rate-limiting]
 updated: 2026-03-25
+source: template
 ---
 
 # API Security

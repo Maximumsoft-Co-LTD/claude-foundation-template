@@ -3,6 +3,7 @@ type: concept
 tags: [architecture, DDD, domain, strategic, tactical, bounded-context]
 related: [CON-clean-architecture, CON-microservices-patterns, CON-event-driven-architecture, CON-database-patterns]
 updated: 2026-03-25
+source: template
 ---
 
 # Domain-Driven Design (DDD)

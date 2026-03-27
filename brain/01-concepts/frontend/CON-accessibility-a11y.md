@@ -3,6 +3,7 @@ type: concept
 tags: [frontend, accessibility, a11y, WCAG, ARIA, keyboard]
 related: [CON-component-architecture]
 updated: 2026-03-25
+source: template
 ---
 
 # Accessibility (a11y)

@@ -3,6 +3,7 @@ type: concept
 tags: [developer, algorithms, data-structures, complexity, big-o]
 related: [CON-solid-principles, CON-clean-code, CON-design-patterns, CON-sql-fundamentals]
 updated: 2026-03-25
+source: template
 ---
 
 # Algorithms & Data Structures

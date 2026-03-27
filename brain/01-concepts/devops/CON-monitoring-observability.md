@@ -3,6 +3,7 @@ type: concept
 tags: [devops, monitoring, observability, metrics, logs, traces, alerting]
 related: [CON-cicd-pipeline, CON-deployment-strategies]
 updated: 2026-03-25
+source: template
 ---
 
 # Monitoring & Observability

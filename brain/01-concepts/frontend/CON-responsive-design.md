@@ -3,6 +3,7 @@ type: concept
 tags: [frontend, responsive, mobile-first, breakpoints, CSS, layout]
 related: [CON-component-architecture, CON-accessibility-a11y]
 updated: 2026-03-25
+source: template
 ---
 
 # Responsive Design

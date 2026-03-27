@@ -3,6 +3,7 @@ type: concept
 tags: [agile, user-stories, scrum, product-owner]
 related: [CON-user-story-writing, CON-acceptance-criteria, CON-product-backlog-management, CON-scrum-artifacts]
 updated: 2026-03-25
+source: template
 ---
 
 # User Story Format

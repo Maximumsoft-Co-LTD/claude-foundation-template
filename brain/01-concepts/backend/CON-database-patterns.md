@@ -3,6 +3,7 @@ type: concept
 tags: [backend, database, SQL, ORM, migrations, indexing, transactions]
 related: [CON-backend-layers, CON-caching-strategies]
 updated: 2026-03-25
+source: template
 ---
 
 # Database Patterns

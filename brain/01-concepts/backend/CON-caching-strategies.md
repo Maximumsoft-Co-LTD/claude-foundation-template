@@ -3,6 +3,7 @@ type: concept
 tags: [backend, caching, Redis, performance, cache-invalidation]
 related: [CON-backend-layers, CON-database-patterns, CON-async-patterns]
 updated: 2026-03-25
+source: template
 ---
 
 # Caching Strategies

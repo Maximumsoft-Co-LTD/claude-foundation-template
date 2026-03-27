@@ -3,6 +3,7 @@ type: concept
 tags: [product-owner, stakeholders, communication, prioritization]
 related: [CON-product-backlog-management, CON-product-vision-strategy, CON-roadmap-types]
 updated: 2026-03-25
+source: template
 ---
 
 # Stakeholder Management

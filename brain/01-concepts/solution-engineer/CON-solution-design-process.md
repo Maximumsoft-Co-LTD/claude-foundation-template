@@ -3,6 +3,7 @@ type: concept
 tags: [solution-engineer, solution-design, requirements, feasibility]
 related: [CON-system-integration-patterns, CON-technical-requirements, CON-architecture-diagrams, CON-rfp-rfi-response]
 updated: 2026-03-25
+source: template
 ---
 
 # Solution Design Process

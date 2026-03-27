@@ -3,6 +3,7 @@ type: concept
 tags: [scrum, artifacts, backlog, increment, sprint-backlog]
 related: [CON-scrum-roles, CON-scrum-ceremonies]
 updated: 2026-03-25
+source: template
 ---
 
 # Scrum Artifacts

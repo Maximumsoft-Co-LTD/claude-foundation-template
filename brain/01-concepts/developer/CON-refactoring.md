@@ -3,6 +3,7 @@ type: concept
 tags: [developer, refactoring, code-quality, technical-debt]
 related: [CON-clean-code, CON-solid-principles, CON-design-patterns]
 updated: 2026-03-25
+source: template
 ---
 
 # Refactoring

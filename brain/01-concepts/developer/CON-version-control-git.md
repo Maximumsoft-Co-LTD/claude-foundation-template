@@ -3,6 +3,7 @@ type: concept
 tags: [developer, git, version-control, branching, workflow]
 related: [CON-branch-commit-format, CON-code-review-checklist]
 updated: 2026-03-25
+source: template
 ---
 
 # Version Control & Git Workflow

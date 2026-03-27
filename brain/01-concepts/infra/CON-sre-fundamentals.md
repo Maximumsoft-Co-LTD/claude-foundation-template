@@ -3,6 +3,7 @@ type: concept
 tags: [infra, SRE, SLI, SLO, SLA, error-budget, reliability]
 related: [CON-cloud-fundamentals, CON-scalability-patterns]
 updated: 2026-03-25
+source: template
 ---
 
 # SRE Fundamentals (Site Reliability Engineering)

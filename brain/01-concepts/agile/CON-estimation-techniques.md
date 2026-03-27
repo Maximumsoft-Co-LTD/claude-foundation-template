@@ -3,6 +3,7 @@ type: concept
 tags: [agile, estimation, planning-poker, story-points, t-shirt-sizing]
 related: [CON-sprint-mechanics, CON-scrum-artifacts]
 updated: 2026-03-25
+source: template
 ---
 
 # Estimation Techniques

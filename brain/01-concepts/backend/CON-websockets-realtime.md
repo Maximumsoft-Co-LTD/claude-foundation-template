@@ -3,6 +3,7 @@ type: concept
 tags: [backend, websockets, real-time, SSE, polling, socket-io]
 related: [CON-async-patterns, CON-api-design-principles, CON-scalability-patterns, CON-backend-layers]
 updated: 2026-03-25
+source: template
 ---
 
 # WebSockets & Real-Time

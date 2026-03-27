@@ -3,6 +3,7 @@ type: concept
 tags: [data, SQL, database, query, joins, indexes, transactions]
 related: [CON-database-patterns, CON-data-modeling, CON-backend-layers]
 updated: 2026-03-25
+source: template
 ---
 
 # SQL Fundamentals

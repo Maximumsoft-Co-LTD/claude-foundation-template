@@ -3,6 +3,7 @@ type: concept
 tags: [solution-engineer, requirements, NFR, functional, non-functional]
 related: [CON-solution-design-process, CON-system-integration-patterns, CON-sre-fundamentals, CON-scalability-patterns]
 updated: 2026-03-25
+source: template
 ---
 
 # Technical Requirements: Functional and Non-Functional

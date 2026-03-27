@@ -7,7 +7,7 @@ When running `/new-sprint`:
   1. Fill the Sub-tasks table in the sprint overview doc
   2. Add tasks to `docs/BACKLOG.md`
 
-Per-task files are created when that task actually begins (`/requirement`, `/fe-design`, `/be-design`).
+Per-task files are created when that task actually begins (`/requirement`, `/design fe`, `/design be`).
 
 ## Why
 

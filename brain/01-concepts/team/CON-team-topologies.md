@@ -3,6 +3,7 @@ type: concept
 tags: [team, organization, team-topologies, conways-law, platform-team, stream-aligned]
 related: [CON-microservices-patterns, CON-domain-driven-design, CON-scrum-roles, CON-agile-manifesto]
 updated: 2026-03-25
+source: template
 ---
 
 # Team Topologies

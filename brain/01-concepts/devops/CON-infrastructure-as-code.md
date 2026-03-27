@@ -3,6 +3,7 @@ type: concept
 tags: [devops, IaC, Terraform, infrastructure, automation]
 related: [CON-containerization, CON-cicd-pipeline, CON-gitops]
 updated: 2026-03-25
+source: template
 ---
 
 # Infrastructure as Code (IaC)

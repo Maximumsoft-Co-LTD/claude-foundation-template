@@ -5,7 +5,7 @@ disable-model-invocation: false
 ---
 
 # /adr
-Workflow position: **during /fe-design or /be-design → START → continue design**
+Workflow position: **during /design fe or /design be → START → continue design**
 
 Capture a non-trivial architectural decision as an immutable record. Run when a design doc contains a decision that future engineers will question — "why X and not Y?"
 Arguments: `[task-id] [short-title]`  — e.g. `SP1-T002 use-event-sourcing-for-orders`
@@ -121,7 +121,7 @@ In the relevant design doc (`[task-id]-backend.md` or `[task-id]-frontend.md`), 
 ✓ [task-id]-[backend/frontend].md — Design Decisions section updated
 
 Status: Accepted
-Next: continue /[fe-design|be-design] [task-id]
+Next: continue /[design fe|design be] [task-id]
 ```
 
 To supersede an existing ADR: update its `Status:` to `Superseded by ADR-[NNN]` and link to the new one.

@@ -3,6 +3,7 @@ type: concept
 tags: [solution-engineer, integration, API, webhook, queue, ETL, ESB]
 related: [CON-solution-design-process, CON-architecture-diagrams]
 updated: 2026-03-25
+source: template
 ---
 
 # System Integration Patterns

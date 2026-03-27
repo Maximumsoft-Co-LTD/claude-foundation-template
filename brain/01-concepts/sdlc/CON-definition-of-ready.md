@@ -3,6 +3,7 @@ type: concept
 tags: [sdlc, agile, ready, backlog-refinement]
 related: [CON-definition-of-done, CON-sdlc-phases]
 updated: 2026-03-25
+source: template
 ---
 
 # Definition of Ready (DoR)

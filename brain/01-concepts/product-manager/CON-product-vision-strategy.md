@@ -3,6 +3,7 @@ type: concept
 tags: [product-manager, vision, strategy, market, north-star]
 related: [CON-okr-framework, CON-roadmap-types, CON-metrics-product, CON-product-discovery]
 updated: 2026-03-25
+source: template
 ---
 
 # Product Vision and Strategy

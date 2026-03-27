@@ -4,6 +4,21 @@ All notable changes to claude-foundation-template are documented here.
 
 ---
 
+## [0.7.0] — 2026-03-27
+
+### Added
+- `/status` command — read-only sprint snapshot: active sprint, task progress counts (done / in-progress / todo / blocked), last completed step inferred per task from doc file existence, suggested next command per task; no state mutations
+- `brain/04-lessons/` seeded with 3 example LES- notes (`LES-001` tdd-skipped-on-deadline, `LES-002` mock-vs-real-db-divergence, `LES-003` discovery-skipped-caused-rework) — shows the format teams should follow when writing real lessons
+- `source: template` tag added to frontmatter of all 76 generic educational concept notes in `brain/01-concepts/` subdirectories — distinguishes pre-seeded reference knowledge from project-specific content; 7 root-level methodology notes (sprint-lifecycle, tdd-rules, etc.) left untagged
+- Source tag legend in `brain/BRAIN-INDEX.md` — explains `source: template` (reference knowledge) vs `source: template-example` (illustrative examples to replace) vs absent (organically grown)
+- `brain/00-MOC/MOC-Lessons.md` updated with links to the 3 seeded LES- notes
+
+### Fixed
+- All remaining stale `/fe-design` → `/design fe` and `/be-design` → `/design be` references across 18 active files (`.claude/rules/`, `.claude/skills/`, `docs/`, `brain/`)
+- All remaining `/brain-update` references replaced with "Step 6 of `/retro-sprint`" in `brain/BRAIN-INDEX.md`, `brain/05-sprints/SP1-brain.md`, `brain/00-MOC/MOC-Workflow.md`, and `.claude/rules/brain.md`
+
+---
+
 ## [0.6.0] — 2026-03-27
 
 ### Added

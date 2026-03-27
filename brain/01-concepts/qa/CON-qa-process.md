@@ -3,6 +3,7 @@ type: concept
 tags: [qa, process, shift-left, testing-strategy, release]
 related: [CON-test-types, CON-testing-pyramid, CON-bug-lifecycle]
 updated: 2026-03-25
+source: template
 ---
 
 # QA Process

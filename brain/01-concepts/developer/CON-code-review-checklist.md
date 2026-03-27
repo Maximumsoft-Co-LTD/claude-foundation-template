@@ -3,6 +3,7 @@ type: concept
 tags: [developer, code-review, PR, checklist, quality]
 related: [CON-clean-code, CON-solid-principles]
 updated: 2026-03-25
+source: template
 ---
 
 # Code Review Checklist

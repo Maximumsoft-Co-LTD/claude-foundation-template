@@ -3,6 +3,7 @@ type: concept
 tags: [sdlc, phases, lifecycle]
 related: [CON-sdlc-models, CON-definition-of-done, CON-definition-of-ready]
 updated: 2026-03-25
+source: template
 ---
 
 # SDLC Phases

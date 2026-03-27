@@ -3,6 +3,7 @@ type: concept
 tags: [product-owner, sprint-planning, scrum, sprint-goal]
 related: [CON-scrum-ceremonies, CON-definition-of-ready, CON-product-backlog-management, CON-sprint-mechanics]
 updated: 2026-03-25
+source: template
 ---
 
 # Sprint Planning: The Product Owner's Role

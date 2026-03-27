@@ -3,6 +3,7 @@ type: concept
 tags: [devops, gitops, kubernetes, argocd, flux, infrastructure-as-code]
 related: [CON-cicd-pipeline, CON-container-orchestration, CON-infrastructure-as-code, CON-deployment-strategies]
 updated: 2026-03-25
+source: template
 ---
 
 # GitOps

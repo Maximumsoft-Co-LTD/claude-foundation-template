@@ -3,6 +3,7 @@ type: concept
 tags: [backend, rate-limiting, throttling, api-security, performance]
 related: [CON-api-design-principles, CON-api-security, CON-caching-strategies, CON-scalability-patterns]
 updated: 2026-03-25
+source: template
 ---
 
 # Rate Limiting

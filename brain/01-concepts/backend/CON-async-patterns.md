@@ -3,6 +3,7 @@ type: concept
 tags: [backend, async, queue, pub-sub, event-driven, webhook]
 related: [CON-backend-layers, CON-caching-strategies]
 updated: 2026-03-25
+source: template
 ---
 
 # Async Patterns

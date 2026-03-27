@@ -3,6 +3,7 @@ type: concept
 tags: [architecture, microservices, circuit-breaker, saga, service-mesh, api-gateway]
 related: [CON-event-driven-architecture, CON-domain-driven-design, CON-clean-architecture, CON-cicd-pipeline, CON-container-orchestration]
 updated: 2026-03-25
+source: template
 ---
 
 # Microservices Patterns

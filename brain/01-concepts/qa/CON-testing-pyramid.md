@@ -3,6 +3,7 @@ type: concept
 tags: [qa, testing, pyramid, unit, integration, E2E]
 related: [CON-test-types, CON-qa-process]
 updated: 2026-03-25
+source: template
 ---
 
 # Testing Pyramid

@@ -3,6 +3,7 @@ type: concept
 tags: [backend, architecture, layers, separation-of-concerns]
 related: [CON-api-design-principles, CON-database-patterns]
 updated: 2026-03-25
+source: template
 ---
 
 # Backend Layered Architecture

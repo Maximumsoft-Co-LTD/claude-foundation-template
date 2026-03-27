@@ -3,6 +3,7 @@ type: concept
 tags: [backend, security, auth, JWT, OAuth2, RBAC, session]
 related: [CON-api-design-principles, CON-error-handling]
 updated: 2026-03-25
+source: template
 ---
 
 # Authentication & Authorization

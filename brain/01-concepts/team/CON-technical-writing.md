@@ -3,6 +3,7 @@ type: concept
 tags: [team, technical-writing, documentation, README, runbook, ADR]
 related: [CON-document-structure, CON-code-review-checklist, CON-branch-commit-format]
 updated: 2026-03-25
+source: template
 ---
 
 # Technical Writing

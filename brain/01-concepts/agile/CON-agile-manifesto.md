@@ -3,6 +3,7 @@ type: concept
 tags: [agile, manifesto, values, principles]
 related: [CON-scrum-roles, CON-scrum-ceremonies]
 updated: 2026-03-25
+source: template
 ---
 
 # Agile Manifesto

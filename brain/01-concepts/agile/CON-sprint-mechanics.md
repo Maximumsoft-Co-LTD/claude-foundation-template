@@ -3,6 +3,7 @@ type: concept
 tags: [scrum, sprint, velocity, capacity, burndown]
 related: [CON-scrum-ceremonies, CON-scrum-artifacts]
 updated: 2026-03-25
+source: template
 ---
 
 # Sprint Mechanics

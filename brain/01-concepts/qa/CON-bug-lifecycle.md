@@ -3,6 +3,7 @@ type: concept
 tags: [qa, bug, defect, lifecycle, severity, priority]
 related: [CON-testing-pyramid, CON-qa-process]
 updated: 2026-03-25
+source: template
 ---
 
 # Bug Lifecycle

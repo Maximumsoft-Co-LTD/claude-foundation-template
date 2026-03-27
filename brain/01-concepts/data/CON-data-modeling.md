@@ -3,6 +3,7 @@ type: concept
 tags: [data, data-modeling, ER-diagram, normalization, schema-design, NoSQL]
 related: [CON-sql-fundamentals, CON-database-patterns, CON-scalability-patterns]
 updated: 2026-03-25
+source: template
 ---
 
 # Data Modeling

@@ -18,7 +18,7 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 
 | MOC | When to open |
 |-----|--------------|
-| [[00-MOC/MOC-Workflow]] | Sprint lifecycle, commands, `/discovery` through `/brain-update` |
+| [[00-MOC/MOC-Workflow]] | Sprint lifecycle, commands, `/discovery` through `/retro-sprint` |
 | [[00-MOC/MOC-Architecture]] | Project structure, rules, hooks, conventions |
 | [[00-MOC/MOC-Patterns]] | Reusable code patterns & implementation approaches |
 | [[00-MOC/MOC-Decisions]] | ADR registry — all architectural & team decisions |
@@ -184,7 +184,13 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 
 ## 🎓 Lessons Learned
 
-*(Empty until first sprint retro — populated by `/brain-update`)*
+> The notes below are **illustrative examples** seeded with this template so teams can see the expected format and depth. Replace them with your own project lessons after your first sprint retro.
+
+| ID | Lesson | Tags | Sprint |
+|----|--------|------|--------|
+| [[04-lessons/LES-001-tdd-skipped-on-deadline]] | TDD Skipped Under Deadline Pressure Creates More Rework | tdd, deadline, technical-debt | example |
+| [[04-lessons/LES-002-mock-vs-real-db-divergence]] | Mocked Integration Tests Masked a Real Migration Bug | testing, mocks, integration, database | example |
+| [[04-lessons/LES-003-discovery-skipped-caused-rework]] | Skipping /discovery on a "Simple" Feature Led to Mid-Sprint Scope Expansion | discovery, scope, planning | example |
 
 ---
 
@@ -261,11 +267,21 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 
 ## 🔄 How the Brain Grows
 
-1. **After `/retro-sprint`** → run `/brain-update [sprint-id]` to extract lessons & decisions
+1. **After `/retro-sprint`** → Step 6 of `/retro-sprint` runs automatically to extract lessons & decisions
 2. **After any `/discovery`** → brain auto-checked for past lessons (Step 0 in command)
 3. **After any architectural debate** → log in `02-decisions/` as a DEC note
 4. **Any reusable pattern found** → atomic note in `03-patterns/`
 5. **New domain knowledge** → add concept note to `01-concepts/[domain]/`
+
+### Source Tag Legend
+
+Notes in this brain carry a `source` field in their frontmatter to indicate origin:
+
+| Value | Meaning |
+|-------|---------|
+| `source: template` | Pre-seeded reference knowledge (concepts, patterns, decisions). Generic best-practice content shipped with this template. Safe to keep, extend, or replace with project-specific versions. |
+| `source: template-example` | Illustrative examples showing the expected note structure and depth. Seeded so teams have a concrete model to follow. Replace with your own project notes after the first sprint retro. |
+| *(absent)* | Organically grown — created during a real sprint by this team. These are the most valuable notes. |
 
 ---
 

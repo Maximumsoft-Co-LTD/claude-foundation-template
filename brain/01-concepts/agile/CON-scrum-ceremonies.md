@@ -3,6 +3,7 @@ type: concept
 tags: [scrum, ceremonies, sprint-planning, daily, review, retro, refinement]
 related: [CON-scrum-roles, CON-scrum-artifacts, CON-sprint-mechanics]
 updated: 2026-03-25
+source: template
 ---
 
 # Scrum Ceremonies

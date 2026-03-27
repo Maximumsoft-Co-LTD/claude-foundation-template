@@ -9,7 +9,7 @@
 | **Status** | draft |
 
 ## API Endpoints
-<!-- Fill in with /be-design SP1 SP1-T001 -->
+<!-- Fill in with /design be SP1-T001 -->
 
 ### `METHOD /api/path`
 - **Purpose:**

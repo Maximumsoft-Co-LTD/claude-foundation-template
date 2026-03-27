@@ -3,6 +3,7 @@ type: concept
 tags: [frontend, state, react-query, zustand, redux, form-state]
 related: [CON-component-architecture, CON-api-integration]
 updated: 2026-03-25
+source: template
 ---
 
 # State Management

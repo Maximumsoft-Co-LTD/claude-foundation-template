@@ -14,7 +14,7 @@ updated: 2026-03-25
 ## Core Flow
 
 ```
-/discovery → /new-sprint → /requirement → /fe-design → /be-design
+/discovery → /new-sprint → /requirement → /design fe → /design be
     → /implement → /issue (loop) → /code-review → /testing
     → /retro-task → /git-commit → /retro-sprint
 ```
@@ -40,8 +40,8 @@ updated: 2026-03-25
 | `/discovery` | Structured 10-topic exploration before any planning |
 | `/new-sprint` | Create sprint, propose + confirm task breakdown |
 | `/requirement` | Draft ACs + user stories for one task |
-| `/fe-design` | Frontend TDD plan + implementation approach |
-| `/be-design` | Backend endpoint spec + TDD plan |
+| `/design fe` | Frontend TDD plan + implementation approach |
+| `/design be` | Backend endpoint spec + TDD plan |
 | `/implement` | Write failing tests → implement → green |
 | `/issue` | Bug-first: failing test → fix → log |
 | `/code-review` | AC coverage check + quality review |
@@ -51,7 +51,6 @@ updated: 2026-03-25
 | `/git-commit` | Selective stage + conventional commit |
 | `/next-task` | Load next todo task from BACKLOG.md |
 | `/run-tasks` | Orchestrate multiple tasks in parallel |
-| `/brain-update` | Extract retro learnings → brain (new) |
 
 ## Status Lifecycle
 

@@ -3,6 +3,7 @@ type: concept
 tags: [devops, deployment, blue-green, canary, rolling, feature-flag]
 related: [CON-cicd-pipeline, CON-monitoring-observability]
 updated: 2026-03-25
+source: template
 ---
 
 # Deployment Strategies

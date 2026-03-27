@@ -3,6 +3,7 @@ type: concept
 tags: [devops, cicd, pipeline, automation, deployment]
 related: [CON-containerization, CON-deployment-strategies, CON-monitoring-observability]
 updated: 2026-03-25
+source: template
 ---
 
 # CI/CD Pipeline

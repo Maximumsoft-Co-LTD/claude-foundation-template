@@ -89,8 +89,8 @@ END → /discovery [next-disc-id] (next epic)
 |---------|------|------|---------------------------|------|
 | `/discovery` | Before any sprint planning | `[disc-id] [name]` | None | User picks approach → `/new-sprint` |
 | `/new-sprint` | After approach approved | `[sprint-id] "epic"` | Discovery doc exists (or explicit override) | User confirms tasks → `/requirement` or `/run-tasks` |
-| `/requirement` | Before designing any task | `[task-id]` | Task exists in BACKLOG.md | User confirms ACs → `/fe-design` |
-| `/design fe` | After requirement confirmed | `[task-id]` | `[task-id]-requirement.md` has non-empty ACs | Clarifications answered (if any) → `/be-design` |
+| `/requirement` | Before designing any task | `[task-id]` | Task exists in BACKLOG.md | User confirms ACs → `/design fe` |
+| `/design fe` | After requirement confirmed | `[task-id]` | `[task-id]-requirement.md` has non-empty ACs | Clarifications answered (if any) → `/design be` |
 | `/design be` | After FE design saved | `[task-id]` | `[task-id]-requirement.md` has non-empty ACs | Clarifications answered (if any) → `/implement` |
 | `/implement` | After design docs complete | `[task-id]` | Design docs exist with TDD test plans | All tests green → `/code-review` |
 | `/issue` | Bug with known cause, during impl or review | `[task-id] [desc]` | Inside an active sprint task | Returns to calling command (implement or code-review) |
@@ -194,7 +194,7 @@ Standard flow deviations — documented patterns for common real-world scenarios
 ```
 1. /requirement [task-id]               ← scope ACs to UI only
 2. /design fe [task-id]                 ← full FE design
-3. SKIP /be-design                      ← no [task-id]-backend.md needed
+3. SKIP /design be                      ← no [task-id]-backend.md needed
 4. /implement [task-id]                 ← HAS_BE=false; BE agents not launched
 5. /code-review → /testing → /retro-task → /git-commit  ← as normal
 
@@ -210,7 +210,7 @@ Notes:
 
 ```
 1. /requirement [task-id]               ← scope ACs to API behavior only
-2. SKIP /fe-design                      ← no [task-id]-frontend.md needed
+2. SKIP /design fe                      ← no [task-id]-frontend.md needed
 3. /design be [task-id]                 ← full BE design
 4. /implement [task-id]                 ← HAS_FE=false; FE agents not launched
 5. /code-review → /testing → /retro-task → /git-commit  ← as normal
@@ -230,7 +230,7 @@ Notes:
 2. /requirement [task-id]
    Frame ACs as questions: "Given [problem], when [explored],
    then [decision documented with evidence and rationale]."
-3. SKIP /fe-design, /be-design, /implement, /code-review, /testing
+3. SKIP /design fe, /design be, /implement, /code-review, /testing
 4. Conduct research: read docs, prototype throwaway code, compare options
 5. Write findings as:
    - docs/discovery/[disc-id]-[name].md  (if leading to a sprint), OR
@@ -356,11 +356,11 @@ Skills extend the workflow with optional quality gates. See `_WORKFLOW-REF.md` f
 
 | Skill | Insert After | Purpose |
 |-------|-------------|---------|
-| `/db-schema-review [task-id]` | `/be-design` | Review schema before writing any code |
+| `/db-schema-review [task-id]` | `/design be` | Review schema before writing any code |
 | `/security-review [task-id]` | `/implement` | Secrets, injection, insecure defaults, dep risk |
 | `/accessibility-review [task-id]` | `/testing` | WCAG 2.1 AA audit for FE tasks |
 | `/test-coverage [task-id]` | `/testing` | Coverage gaps mapped to ACs |
-| `/adr [task-id] [title]` | During `/fe-design` or `/be-design` | Record a non-trivial architectural decision |
+| `/adr [task-id] [title]` | During `/design fe` or `/design be` | Record a non-trivial architectural decision |
 | `/pr-create [task-id]` | `/git-commit` (Option 2) | Push branch + open PR with pre-filled body |
 | `/session-handoff [task-id]` | End of any mid-task session | Serialize context for resumption |
 | `/refactor [task-id]` | After `/retro-task` | Safe, test-first tech-debt restructuring |

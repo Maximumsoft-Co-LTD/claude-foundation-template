@@ -3,6 +3,7 @@ type: concept
 tags: [developer, design-patterns, GoF, creational, structural, behavioral]
 related: [CON-solid-principles, CON-clean-code, CON-refactoring]
 updated: 2026-03-25
+source: template
 ---
 
 # Design Patterns (Gang of Four)

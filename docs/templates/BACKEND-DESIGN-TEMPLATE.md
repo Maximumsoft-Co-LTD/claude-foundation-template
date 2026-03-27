@@ -9,7 +9,7 @@
 | **Assignee** | - |
 | **Status** | draft / ready / implemented |
 
-<!-- Section scope by points: see /be-design command -->
+<!-- Section scope by points: see /design be command -->
 
 ---
 

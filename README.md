@@ -197,6 +197,7 @@ Full quick reference (flow diagram, hard gates, escape hatches): `docs/WORKFLOW-
 | `/retro-sprint` | `[sprint-id]` | Sprint retro (after ALL tasks done) |
 | `/git-commit` | `[task-id]` | Stage selectively + commit + choose merge/PR/keep/discard |
 | `/next-task` | `[task-id]?` | Load next task; auto-reconcile stale BACKLOG statuses |
+| `/status` | _(none)_ | Read-only sprint snapshot: progress counts, last step per task, suggested next action |
 
 ### /issue vs /debug — Which to use?
 
@@ -398,8 +399,8 @@ Common real-world deviations from the standard flow — see `docs/WORKFLOW-QUICK
 | Scenario | Short path |
 |----------|-----------|
 | **Hotfix** | `/debug` → TDD fix → `/git-commit` → PR (skip sprint flow) |
-| **FE-only task** | Skip `/be-design`; `/implement` sets `HAS_BE=false` automatically |
-| **BE-only task** | Skip `/fe-design`; `/implement` sets `HAS_FE=false` automatically |
+| **FE-only task** | Skip `/design be`; `/implement` sets `HAS_BE=false` automatically |
+| **BE-only task** | Skip `/design fe`; `/implement` sets `HAS_FE=false` automatically |
 | **Exploratory spike** | `/requirement` (questions as ACs) → research → write discovery/brain doc → `/retro-task` |
 | **Blocked task** | `/issue` → mark `blocked` → `/next-task` → resume when unblocked |
 | **Multi-sprint epic** | One `/discovery` → one `/new-sprint` per deployable slice; task IDs never reset |

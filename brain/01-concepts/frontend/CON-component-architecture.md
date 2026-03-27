@@ -3,6 +3,7 @@ type: concept
 tags: [frontend, components, atomic-design, composability, react]
 related: [CON-state-management, CON-api-integration, CON-performance-frontend]
 updated: 2026-03-25
+source: template
 ---
 
 # Component Architecture

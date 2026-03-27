@@ -3,6 +3,7 @@ type: concept
 tags: [architecture, event-driven, EDA, CQRS, event-sourcing, kafka, message-queue]
 related: [CON-domain-driven-design, CON-async-patterns, CON-microservices-patterns, CON-database-patterns]
 updated: 2026-03-25
+source: template
 ---
 
 # Event-Driven Architecture (EDA)

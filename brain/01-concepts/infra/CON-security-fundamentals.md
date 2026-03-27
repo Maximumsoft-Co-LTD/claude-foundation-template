@@ -3,6 +3,7 @@ type: concept
 tags: [security, infra, OWASP, secure-coding, threat-model]
 related: [CON-sre-fundamentals, CON-cloud-fundamentals, CON-networking-basics]
 updated: 2026-03-25
+source: template
 ---
 
 # Security Fundamentals
@@ -71,7 +72,7 @@ Fix:
 ### A04 — Insecure Design
 ```
 Problem: Security not considered in design phase
-Fix: Threat modeling during /discovery and /be-design
+Fix: Threat modeling during /discovery and /design be
 ```
 
 ### A05 — Security Misconfiguration

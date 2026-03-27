@@ -3,6 +3,7 @@ type: concept
 tags: [sdlc, agile, done, quality-gate]
 related: [CON-definition-of-ready, CON-sdlc-phases]
 updated: 2026-03-25
+source: template
 ---
 
 # Definition of Done (DoD)

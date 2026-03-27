@@ -20,8 +20,8 @@ docs/
 │       ├── SP1-retro.md                ← /retro-sprint output
 │       └── SP1-T001/
 │           ├── SP1-T001-requirement.md ← /requirement output
-│           ├── SP1-T001-frontend.md    ← /fe-design output
-│           ├── SP1-T001-backend.md     ← /be-design output
+│           ├── SP1-T001-frontend.md    ← /design fe output
+│           ├── SP1-T001-backend.md     ← /design be output
 │           ├── SP1-T001-issues.md      ← /issue output (auto-created)
 │           └── SP1-T001-retro.md       ← /retro-task output
 └── templates/
@@ -61,8 +61,8 @@ brain/                                  ← 🧠 knowledge vault
 | `disc-NNN-name.md` | `/discovery` |
 | `SP[N]-overview.md` | `/new-sprint` |
 | `SP[N]-T[NNN]-requirement.md` | `/requirement` |
-| `SP[N]-T[NNN]-frontend.md` | `/fe-design` |
-| `SP[N]-T[NNN]-backend.md` | `/be-design` |
+| `SP[N]-T[NNN]-frontend.md` | `/design fe` |
+| `SP[N]-T[NNN]-backend.md` | `/design be` |
 | `SP[N]-T[NNN]-issues.md` | `/issue` (auto) |
 | `SP[N]-T[NNN]-retro.md` | `/retro-task` |
 | `SP[N]-retro.md` | `/retro-sprint` |

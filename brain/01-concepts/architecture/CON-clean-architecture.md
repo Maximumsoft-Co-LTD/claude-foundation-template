@@ -3,6 +3,7 @@ type: concept
 tags: [architecture, clean-architecture, hexagonal, onion, SOLID]
 related: [CON-solid-principles, CON-domain-driven-design, CON-backend-layers, CON-microservices-patterns]
 updated: 2026-03-25
+source: template
 ---
 
 # Clean Architecture

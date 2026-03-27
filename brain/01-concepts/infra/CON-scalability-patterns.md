@@ -3,6 +3,7 @@ type: concept
 tags: [infra, scalability, horizontal, vertical, caching, sharding, stateless]
 related: [CON-sre-fundamentals, CON-cloud-fundamentals]
 updated: 2026-03-25
+source: template
 ---
 
 # Scalability Patterns

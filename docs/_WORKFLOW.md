@@ -51,7 +51,7 @@ discovery → backlog → todo → in-progress → review → testing → done
 | `discovery` | `/discovery` |
 | `backlog` | `/discovery` (when open questions resolved) |
 | `todo` | `/new-sprint` |
-| `in-progress` | `/requirement`, `/next-task`, `/fe-design`, `/be-design`, `/implement` |
+| `in-progress` | `/requirement`, `/next-task`, `/design fe`, `/design be`, `/implement` |
 | `blocked` | `/issue` (when blocking other tasks) |
 | `review` | `/code-review` |
 | `testing` | `/testing` |

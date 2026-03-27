@@ -5,7 +5,7 @@ disable-model-invocation: false
 ---
 
 # /db-schema-review
-Workflow position: **/be-design → START → /implement**
+Workflow position: **/design be → START → /implement**
 
 Review the database schema design from the BE design doc before any code is written. Catches structural issues, naming problems, missing indexes, and migration risks while the cost to fix is zero.
 Arguments: `[task-id]`  — e.g. `SP1-T002`

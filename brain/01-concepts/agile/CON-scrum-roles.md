@@ -3,6 +3,7 @@ type: concept
 tags: [scrum, roles, product-owner, scrum-master, development-team]
 related: [CON-scrum-ceremonies, CON-scrum-artifacts, CON-agile-manifesto]
 updated: 2026-03-25
+source: template
 ---
 
 # Scrum Roles

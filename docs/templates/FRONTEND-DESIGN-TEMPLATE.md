@@ -9,7 +9,7 @@
 | **Assignee**    | -                                                             |
 | **Status**      | draft / ready / implemented                                   |
 
-<!-- Section scope by points: see /fe-design command -->
+<!-- Section scope by points: see /design fe command -->
 
 ## Approach
 <!-- 1pt+ required -->

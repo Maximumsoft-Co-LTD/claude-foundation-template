@@ -3,6 +3,7 @@ type: concept
 tags: [frontend, API, fetching, React-Query, error-handling, loading-states]
 related: [CON-state-management, CON-component-architecture]
 updated: 2026-03-25
+source: template
 ---
 
 # API Integration (Frontend)

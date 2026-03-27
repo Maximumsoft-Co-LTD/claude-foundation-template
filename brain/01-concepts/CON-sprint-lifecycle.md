@@ -20,8 +20,8 @@ A sprint is an epic broken into E2E-testable vertical slices, each taken through
     ↓
 /requirement            ← AC + user stories per task
     ↓
-/fe-design              ← component plan + TDD test cases (FE)
-/be-design              ← endpoint spec + TDD test cases (BE)
+/design fe              ← component plan + TDD test cases (FE)
+/design be              ← endpoint spec + TDD test cases (BE)
     ↓
 /implement              ← write failing tests → implement → green
     ↓
@@ -45,7 +45,7 @@ A sprint is an epic broken into E2E-testable vertical slices, each taken through
 
 ## Hard Rules
 
-- No `/implement` before both `/fe-design` AND `/be-design` are complete
+- No `/implement` before both `/design fe` AND `/design be` are complete
 - No `/retro-sprint` while any task is not `done`
 - Discovery is **recommended** before every sprint (warn if skipped, don't block)
 

@@ -15,7 +15,11 @@ updated: 2026-03-25
 
 | ID | Lesson | Source | Sprint | Date |
 |----|--------|--------|--------|------|
-| *(empty — will populate after first /retro-sprint)* | | | | |
+| [[../04-lessons/LES-001-tdd-skipped-on-deadline]] | TDD Skipped Under Deadline Pressure Creates More Rework | template-example | example | — |
+| [[../04-lessons/LES-002-mock-vs-real-db-divergence]] | Mocked Integration Tests Masked a Real Migration Bug | template-example | example | — |
+| [[../04-lessons/LES-003-discovery-skipped-caused-rework]] | Skipping /discovery on a "Simple" Feature Led to Mid-Sprint Scope Expansion | template-example | example | — |
+
+> These are **illustrative examples** shipped with the template. Add your own entries here after each sprint retro.
 
 ---
 

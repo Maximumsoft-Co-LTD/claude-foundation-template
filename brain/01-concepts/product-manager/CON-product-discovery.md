@@ -3,6 +3,7 @@ type: concept
 tags: [product-manager, discovery, user-research, jtbd, double-diamond]
 related: [CON-product-vision-strategy, CON-okr-framework, CON-metrics-product, CON-user-story-writing]
 updated: 2026-03-25
+source: template
 ---
 
 # Product Discovery

@@ -3,6 +3,7 @@ type: concept
 tags: [qa, testing, unit, integration, E2E, performance, security]
 related: [CON-testing-pyramid, CON-qa-process, CON-bug-lifecycle]
 updated: 2026-03-25
+source: template
 ---
 
 # Test Types

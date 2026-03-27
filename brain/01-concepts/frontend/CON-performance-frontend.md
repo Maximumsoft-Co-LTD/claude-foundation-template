@@ -3,6 +3,7 @@ type: concept
 tags: [frontend, performance, Core-Web-Vitals, optimization, bundle-size]
 related: [CON-component-architecture, CON-state-management]
 updated: 2026-03-25
+source: template
 ---
 
 # Frontend Performance

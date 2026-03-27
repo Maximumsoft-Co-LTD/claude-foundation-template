@@ -45,4 +45,4 @@ tags: [sprint, example]
 
 ---
 
-*Populate this file after `/retro-sprint SP1` via `/brain-update SP1`*
+*Populate this file after `/retro-sprint SP1` via Step 6 of `/retro-sprint SP1`*

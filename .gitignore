@@ -13,7 +13,7 @@ logs/
 !.env.example
 
 # Plugin distribution source (not installed — active skills are in .claude/skills/)
-skills/
+/skills/
 
 # Worktrees
 .worktrees/

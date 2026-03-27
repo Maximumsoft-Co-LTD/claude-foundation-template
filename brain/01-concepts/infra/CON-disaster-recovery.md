@@ -3,6 +3,7 @@ type: concept
 tags: [infra, disaster-recovery, RTO, RPO, backup, failover, HA]
 related: [CON-sre-fundamentals, CON-cloud-fundamentals]
 updated: 2026-03-25
+source: template
 ---
 
 # Disaster Recovery

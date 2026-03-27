@@ -33,7 +33,7 @@ Read:
 - Any design docs that exist for this task
 
 From the context of this session, identify:
-- **Last completed step** in the workflow (e.g. "completed `/fe-design`, starting `/be-design`")
+- **Last completed step** in the workflow (e.g. "completed `/design fe`, starting `/design be`")
 - **Current step** — exactly where execution stopped
 - **Next action** — the specific next thing to do, not just the command
 

@@ -3,6 +3,7 @@ type: concept
 tags: [sdlc, waterfall, agile, spiral, v-model]
 related: [CON-sdlc-phases]
 updated: 2026-03-25
+source: template
 ---
 
 # SDLC Models

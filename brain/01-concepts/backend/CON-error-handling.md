@@ -3,6 +3,7 @@ type: concept
 tags: [backend, error-handling, exceptions, logging, error-codes]
 related: [CON-api-design-principles, CON-backend-layers]
 updated: 2026-03-25
+source: template
 ---
 
 # Error Handling

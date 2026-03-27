@@ -3,6 +3,7 @@ type: concept
 tags: [backend, api, REST, GraphQL, gRPC, design]
 related: [CON-backend-layers, CON-error-handling, CON-authentication-authorization]
 updated: 2026-03-25
+source: template
 ---
 
 # API Design Principles

@@ -3,6 +3,7 @@ type: concept
 tags: [solution-engineer, RFP, RFI, proposal, business-development]
 related: [CON-solution-design-process, CON-technical-requirements]
 updated: 2026-03-25
+source: template
 ---
 
 # RFP/RFI Response: Selling Your Solution

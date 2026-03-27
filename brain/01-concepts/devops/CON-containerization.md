@@ -3,6 +3,7 @@ type: concept
 tags: [devops, docker, containers, images, dockerfile]
 related: [CON-cicd-pipeline, CON-container-orchestration, CON-infrastructure-as-code]
 updated: 2026-03-25
+source: template
 ---
 
 # Containerization (Docker)
