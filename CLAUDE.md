@@ -17,7 +17,7 @@ A workflow template for Claude Code. Provides structured sprint management, TDD 
 
 - `.claude/commands/` — slash command definitions invoked by Claude Code
 - `.claude/rules/` — path-scoped conventions loaded automatically when Claude edits matching files
-- `.claude/hooks/` — shell scripts executed at lifecycle events (PostToolUse: lint, test)
+- `.claude/hooks/` — Python scripts executed at lifecycle events (PostToolUse: lint, test)
 - `docs/templates/` — Markdown templates for each workflow stage
 - `docs/sprints/` — sprint and task output docs, one folder per sprint/task
 - `docs/BACKLOG.md` — auto-updated task registry with status and story points
@@ -35,6 +35,7 @@ A workflow template for Claude Code. Provides structured sprint management, TDD 
 - Task IDs are global and never reset across sprints
 - Tasks sized at 13 story points must be broken down before any work begins
 - Tests must be written before implementation code — never mocks at the integration layer
+- Hooks require Python >= 3.10 (scripts use `X | Y` union type syntax)
 
 ---
 

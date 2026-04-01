@@ -54,6 +54,15 @@
   WHEN [action]
   THEN [outcome]
 
+## Definition of Done
+<!-- 1pt+ -->
+- [ ] Code reviewed and approved
+- [ ] All acceptance criteria verified
+- [ ] Tests pass (unit + integration)
+- [ ] No regressions in existing tests
+- [ ] Documentation updated (if applicable)
+- [ ] Branch merged to main
+
 ## Data & Business Rules
 <!-- 3pt+ -->
 | Rule ID | Rule | Example | Applies to AC |
@@ -61,7 +70,7 @@
 | R-1     |      |         |              |
 
 ## Success Metrics
-<!-- 2pt+ -->
+<!-- 3pt+ -->
 - [ ] Metric-1:
 - [ ] Metric-2:
 
@@ -95,23 +104,28 @@
 |    |       |
 
 ## Non-Functional Requirements
+<!-- 5pt+ -->
 | Category | Requirement | Target | How to Verify |
 |----------|------------|--------|---------------|
 | Performance | | | |
 | Security | | | |
 
 ## Rollout / Release Strategy
+<!-- 5pt+ -->
 - **Strategy:** all-at-once / feature flag / gradual rollout
 - **Feature flag name:**
 - **Rollback plan:**
 
 ## Out of Scope
+<!-- 1pt+ -->
 -
 
 ## Dependencies
+<!-- 2pt+ -->
 -
 
 ## Test Data / Seed Requirements
+<!-- 3pt+ -->
 | What | Value / Setup | Who sets it up |
 |------|---------------|----------------|
 |      |               |                |

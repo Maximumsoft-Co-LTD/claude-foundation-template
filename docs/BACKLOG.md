@@ -22,12 +22,16 @@
 
 ---
 
-## SP1 — Example Epic
+<!-- Replace this block with your first sprint. Example format:
+
+## SP1 — [Epic Title]
 > `docs/sprints/SP1/SP1-overview.md`
 
 | Task | Title | Depends On | Points | Status | Priority | Assigned |
 |------|-------|------------|--------|--------|----------|----------|
-| SP1-T001 | Example Task | - | - | `todo` | high | - |
+| SP1-T001 | [Task title] | — | 3 | `todo` | high | — |
+
+-->
 
 ---
 
@@ -35,4 +39,3 @@
 
 | Task | Sprint | Title | Completed |
 |------|--------|-------|-----------|
-| - | - | - | - |

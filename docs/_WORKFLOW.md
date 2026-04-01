@@ -2,7 +2,7 @@
 
 # Workflow Reference
 
-## Full Flow
+## Full Flow (single task)
 
 ```mermaid
 flowchart TD
@@ -13,12 +13,14 @@ flowchart TD
     subgraph TASK ["↻ repeat per task"]
         C([/next-task\nreconcile statuses\npick next todo]) --> R([/requirement\ndraft ACs +\nrequirement doc])
         R --> D([/design fe\nFE design + TDD plan])
-        D --> E([/design be\nBE design + TDD plan])
-        E --> F([/implement\nwrite failing tests\nthen implement])
-        F --> G([/issue\nTDD fix + log])
-        G -->|bug found| G
-        G --> H([/code-review\nreview code\nupdate requirement.md ✓/✗])
-        H -->|critical issues| G
+        R --> E([/design be\nBE design + TDD plan])
+        D --> F
+        E --> F
+        F([/implement\nwrite failing tests\nthen implement]) -->|bugs found| G([/issue\nTDD fix + log])
+        G -->|more bugs| G
+        G --> H
+        F -->|no bugs| H
+        H([/code-review\nreview code\nupdate requirement.md ✓/✗]) -->|critical issues| G
         H -->|approved| I([/testing\nfull suite\nAC coverage check])
         I -->|failing| G
         I -->|all pass| J([/retro-task\nwrite retro\nmark done])
@@ -26,8 +28,14 @@ flowchart TD
         K -->|more tasks| C
     end
 
-    K -->|all tasks done| L([/retro-sprint\naggregate retros\nevaluate goals])
+    K -->|all tasks done| L([/retro-sprint\naggregate retros\nevaluate goals\nupdate brain ✦])
 ```
+
+> **Design layer skipping:** FE-only tasks → run only `/design fe`. BE-only tasks → run only `/design be`. Infra/docs tasks → skip `/design` entirely.
+
+## Parallel Flow (multiple tasks)
+
+Use `/run-tasks [task-id] [task-id] ...` instead of the single-task loop above when running multiple tasks in the same sprint simultaneously. Agents are spawned per task and coordinated via `docs/sprints/[sprint-id]/cross-task-context.md`.
 
 ## ID Format
 
@@ -68,10 +76,12 @@ discovery → backlog → todo → in-progress → review → testing → done
 | `/design fe` | `[task-id]` | FE design + TDD test plan |
 | `/design be` | `[task-id]` | BE design + TDD test plan |
 | `/implement` | `[task-id]` | Write failing tests → implement |
-| `/issue` | `[task-id] [desc]` | TDD fix + log bug |
+| `/issue` | `[task-id] [desc]` | TDD fix + log bug (optional — only when bugs found) |
 | `/code-review` | `[task-id]` | Review code + update requirement.md ACs |
 | `/testing` | `[task-id]` | Full suite + AC coverage check |
 | `/retro-task` | `[task-id]` | Write retro, mark task done |
 | `/git-commit` | `[task-id]` | Stage selectively + commit |
 | `/next-task` | `[task-id]?` | Reconcile statuses → load next task |
-| `/retro-sprint` | `[sprint-id]` | Sprint retro (after ALL tasks done) |
+| `/retro-sprint` | `[sprint-id]` | Sprint retro + brain update (after ALL tasks done) |
+| `/status` | — | Read-only sprint progress snapshot |
+| `/debug` | `[task-id] [desc]` | Systematic 4-phase root cause investigation |

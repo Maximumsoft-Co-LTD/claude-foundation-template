@@ -4,6 +4,13 @@ Workflow position: **/requirement → START → /implement**
 Write the complete design and TDD test plan. Run BEFORE writing any code.
 Arguments: `[type] [task-id]`  — type is `fe` or `be`, e.g. `/design fe SP1-T002`
 
+> **When to skip a layer:**
+> - FE-only task (no backend changes) → run only `/design fe`. Skip `/design be`.
+> - BE-only task (API/data/infra, no UI) → run only `/design be`. Skip `/design fe`.
+> - Infra/docs-only task → skip `/design` entirely; proceed straight to `/implement`.
+>
+> `/implement` Step 1 handles a missing design doc gracefully (sets `HAS_FE` or `HAS_BE = false` and skips that layer).
+
 ---
 
 ## Step 0 — Check brain for patterns and decisions
@@ -88,7 +95,7 @@ Scan for gaps that would block writing a correct design:
 
 Never ask about things already answered in the requirement doc, codebase exploration, or (for be) the FE design doc.
 
-After receiving answers → append a `## Clarifications` table to the doc before the main content.
+Follow the clarification protocol in `.claude/rules/clarification.md`.
 
 ---
 

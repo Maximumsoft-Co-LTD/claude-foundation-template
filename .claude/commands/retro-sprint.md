@@ -56,7 +56,7 @@ Mark sprint header as done:
 
 ---
 
-## Step 6 — Extract brain knowledge (recommended)
+## Step 6 — Extract brain knowledge (required)
 
 Scan all retro and issue files for knowledge worth preserving:
 - **Decisions**: "we decided to...", trade-offs resolved, approaches chosen over alternatives
@@ -73,7 +73,7 @@ PATTERNS ([N]): [2] [title] — [one-line description] ...
 LESSONS ([N]):  [3] [title] — [one-line description] ...
 CONCEPTS ([N]): [4] [title] — [one-line description] ...
 
-Write all / pick numbers / skip:
+Write all / pick numbers:
 ```
 
 For each confirmed item, write an atomic note to the matching folder:
@@ -97,7 +97,7 @@ After writing notes:
 ```
 ✓ docs/sprints/[sprint-id]/[sprint-id]-retro.md
 ✓ BACKLOG.md — [sprint-id] marked done
-✓ brain/ — [N] decisions · [N] patterns · [N] lessons written  (or: skipped)
+✓ brain/ — [N] decisions · [N] patterns · [N] lessons written
 
 Summary: [N/N] goals achieved  |  [X] → [Y] days  |  [N] issues  |  [N] action items
 

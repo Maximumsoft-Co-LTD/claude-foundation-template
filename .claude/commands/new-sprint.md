@@ -46,6 +46,11 @@ Proposed sub-tasks for [sprint-id] — [epic title]:
 ```
 Points: 1 trivial · 2 small · 3 medium-small · 5 medium · 8 large · **13 = too big, split first**.
 
+<HARD-GATE>
+If ANY task in the table is assigned 13 points → STOP. Do not proceed to Step 3b.
+Break down every 13pt task into smaller tasks (each ≤ 8pt), re-present the full table, and wait for user confirmation before continuing.
+</HARD-GATE>
+
 ---
 
 ## Step 3b — Coverage check vs discovery

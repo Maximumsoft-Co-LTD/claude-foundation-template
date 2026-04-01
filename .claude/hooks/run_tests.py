@@ -139,6 +139,7 @@ else:
         cmd = detect_runner()
 
 if not cmd:
+    print("⚠ No test runner detected — skipping tests. Add a test framework to enable auto-testing.", file=sys.stderr)
     sys.exit(0)
 
 try:
