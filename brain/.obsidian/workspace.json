@@ -185,6 +185,9 @@
   },
   "active": "d55e009ef6a8a8b0",
   "lastOpenFiles": [
+    "04-lessons/LES-003-discovery-skipped-caused-rework.md",
+    "04-lessons/LES-002-mock-vs-real-db-divergence.md",
+    "04-lessons/LES-001-tdd-skipped-on-deadline.md",
     "Untitled.canvas",
     "Untitled.base",
     "01-concepts/CON-task-id-format.md",
@@ -214,8 +217,6 @@
     "06-glossary/GLO-tdd.md",
     "06-glossary/GLO-story-points.md",
     "06-glossary/GLO-sprint.md",
-    "06-glossary/GLO-posttooluse.md",
-    "06-glossary/GLO-moc.md",
     "06-glossary",
     "05-sprints",
     "03-patterns",
