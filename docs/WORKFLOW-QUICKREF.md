@@ -7,6 +7,39 @@ Full command details: `.claude/commands/`. Full rules: `CLAUDE.md` + `.claude/ru
 
 ## A. FLOW DIAGRAM
 
+### Visual Flow (Mermaid)
+
+```mermaid
+flowchart TD
+    A([/discovery]) --> B([/new-sprint\nscaffold tasks\nSP-N-T-NNN global IDs])
+
+    B --> C
+
+    subgraph TASK ["↻ repeat per task"]
+        C([/next-task\nreconcile statuses\npick next todo]) --> R([/requirement\ndraft ACs +\nrequirement doc])
+        R --> D([/design fe\nFE design + TDD plan])
+        R --> E([/design be\nBE design + TDD plan])
+        D --> F
+        E --> F
+        F([/implement\nwrite failing tests\nthen implement]) -->|bugs found| G([/issue\nTDD fix + log])
+        G -->|more bugs| G
+        G --> H
+        F -->|no bugs| H
+        H([/code-review\nreview code\nupdate requirement.md ✓/✗]) -->|critical issues| G
+        H -->|approved| I([/testing\nfull suite\nAC coverage check])
+        I -->|failing| G
+        I -->|all pass| J([/retro-task\nwrite retro\nmark done])
+        J --> K([/git-commit\nstage + commit])
+        K -->|more tasks| C
+    end
+
+    K -->|all tasks done| L([/retro-sprint\naggregate retros\nevaluate goals\nupdate brain ✦])
+```
+
+> **Design layer skipping:** FE-only tasks → run only `/design fe`. BE-only tasks → run only `/design be`. Infra/docs tasks → skip `/design` entirely.
+
+---
+
 ### Single-Task Flow (Sequential)
 
 ```
@@ -65,7 +98,8 @@ END → /discovery [next-disc-id] (next epic)
 ### Multi-Task Flow (Parallel)
 
 ```
-/new-sprint → /run-tasks [task-id] [task-id] ...
+/new-sprint → /run-tasks [task-id] [task-id] ...        ← Agent tool (default)
+           → /run-tasks-p [task-id] [task-id] ...       ← claude -p subprocesses (leaner context)
      │
      ├── Phase 1: PLAN (all tasks in parallel per tier)
      │     requirement → cross-task alignment
@@ -76,7 +110,7 @@ END → /discovery [next-disc-id] (next epic)
      │
      └── Phase 2: IMPLEMENT (all tasks in parallel per tier)
            implement → spec review → quality review + testing → retro-task
-           (3-agent pipeline per task — no separate /code-review needed)
+           (3-subprocess pipeline per task — no separate /code-review needed)
            │
            └── /git-commit per task → /retro-sprint when all done
 ```

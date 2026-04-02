@@ -64,6 +64,6 @@ Two levels: **Sprint (Epic)** → **Tasks (Sub-tasks)**
 
 Single task: `/discovery → /new-sprint → /requirement → /design fe → /design be → /implement → /issue (loop) → /code-review → /testing → /retro-task → /git-commit → /next-task (repeat per task) → /retro-sprint (once ALL tasks done, includes brain update)`
 
-Multiple tasks in parallel: `/run-tasks [task-id] [task-id] ...`
+Multiple tasks in parallel: `/run-tasks [task-id] [task-id] ...` (Agent tool) or `/run-tasks-p [task-id] [task-id] ...` (headless `claude -p` — leaner parent context)
 
 Full workflow reference: `.claude/commands/_WORKFLOW-REF.md` — see **Superpowers-Inspired Principles** table for enforcement details.

@@ -21,6 +21,15 @@
     → /retro-sprint (includes brain update)
 ```
 
+**Multiple tasks in parallel (headless / token-efficient):**
+```
+/discovery → /new-sprint → /run-tasks-p [task-id] [task-id] ...
+    Same Phase 1 + Phase 2 structure as /run-tasks, but uses claude -p subprocesses
+    instead of Agent tool — outputs go to .claude/rtp/[run-id]/ logs, not parent context.
+    → /git-commit (per task) → /retro-sprint
+```
+Use `/run-tasks-p` when running many tasks and parent context size is a concern.
+
 ## Commands
 
 | Command | Args | When to use |
@@ -38,7 +47,8 @@
 | `/next-task` | `[task-id]` _(optional)_ | Load next todo task; auto-reconcile stale BACKLOG statuses; show task context card |
 | `/retro-sprint` | `[sprint-id]` | Aggregate all task retros → sprint retro, evaluate goals + extract brain knowledge |
 | `/debug` | `[description]` | 4-phase systematic debugging — for standalone incidents outside sprint context |
-| `/run-tasks` | `[task-id] [task-id] ...` | Run multiple tasks in parallel through the full flow |
+| `/run-tasks` | `[task-id] [task-id] ...` | Run multiple tasks in parallel through the full flow (Agent tool) |
+| `/run-tasks-p` | `[task-id] [task-id] ...` | Same as `/run-tasks` but uses `claude -p` subprocesses — leaner parent context |
 
 ## /issue vs /debug — Which to use?
 

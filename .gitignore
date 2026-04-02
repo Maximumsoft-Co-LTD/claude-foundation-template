@@ -17,3 +17,6 @@ logs/
 
 # Worktrees
 .worktrees/
+
+# run-tasks-p runtime state (subprocess logs + status files)
+.claude/rtp/
