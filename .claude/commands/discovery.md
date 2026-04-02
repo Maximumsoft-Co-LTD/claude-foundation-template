@@ -2,6 +2,9 @@
 Workflow position: **START → /new-sprint**
 
 Run a structured discovery session before any sprint planning.
+
+**Alternative:** use `/brainstorm` for conversational superpowers-style discovery (one question at a time, visual companion, 2–3 approach proposals).
+
 Arguments: `[disc-id] [name]`  — e.g. `disc-001 user-authentication`
 
 ---

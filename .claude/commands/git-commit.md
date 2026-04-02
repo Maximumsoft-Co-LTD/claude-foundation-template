@@ -87,6 +87,8 @@ After user confirms → create the commit.
 
 Run full test suite. If tests fail → stop. Fix before proceeding.
 
+**Superpowers integration:** If the superpowers plugin is available, invoke `Skill("superpowers:finishing-a-development-branch")` — it handles the 4-option flow with worktree cleanup. Otherwise, follow the inline steps below.
+
 Present exactly these 4 options and wait for user choice:
 
 ```

@@ -49,6 +49,9 @@ Use `/run-tasks-p` when running many tasks and parent context size is a concern.
 | `/debug` | `[description]` | 4-phase systematic debugging — for standalone incidents outside sprint context |
 | `/run-tasks` | `[task-id] [task-id] ...` | Run multiple tasks in parallel through the full flow (Agent tool) |
 | `/run-tasks-p` | `[task-id] [task-id] ...` | Same as `/run-tasks` but uses `claude -p` subprocesses — leaner parent context |
+| `/brainstorm` | `[disc-id] [name]` | Conversational discovery via superpowers:brainstorming — alternative to `/discovery` |
+| `/write-plan` | `[task-id]` | Detailed bite-sized implementation plan via superpowers:writing-plans — after `/design be` |
+| `/execute-plan` | `[task-id]` | Subagent-driven plan execution via superpowers:subagent-driven-development — after `/write-plan` |
 
 ## /issue vs /debug — Which to use?
 
@@ -97,6 +100,27 @@ Use `/run-tasks-p` when running many tasks and parent context size is a concern.
 |-------|------|--------------|
 | `/session-handoff` | `[task-id]` | end of any mid-task session — serialize context for resumption |
 
+### Superpowers Skills (requires [obra/superpowers](https://github.com/obra/superpowers) plugin)
+
+Invoked via `Skill("superpowers:<name>")`. Template commands take priority — these provide richer behavior at specific integration points. See `.claude/rules/superpowers.md` for priority and path override rules.
+
+| Superpowers Skill | Used by | Purpose |
+|---|---|---|
+| `using-superpowers` | Auto-loaded at session start | Skill-check-before-action orchestrator |
+| `brainstorming` | `/brainstorm` (alt to `/discovery`) | Conversational design exploration, visual companion |
+| `writing-plans` | `/write-plan` | Detailed bite-sized implementation plans |
+| `executing-plans` | `/execute-plan` (fallback) | Plan execution with review checkpoints |
+| `subagent-driven-development` | `/execute-plan`, `/run-tasks` Phase 2 | Fresh subagent per task + two-stage review |
+| `dispatching-parallel-agents` | invoked inside `subagent-driven-development` | Parallel independent task dispatch |
+| `test-driven-development` | invoked inside `subagent-driven-development` | TDD iron law with rationalization prevention |
+| `systematic-debugging` | `.claude/skills/debug/SKILL.md` | 4-phase root cause investigation |
+| `verification-before-completion` | `/implement` Step 4 | Evidence-before-claims gate |
+| `requesting-code-review` | `/code-review` Step 2a | Subagent spec compliance review dispatch |
+| `receiving-code-review` | `/code-review` Step 3c | Technical evaluation of review feedback |
+| `using-git-worktrees` | `/implement` Step 0b, `/execute-plan` Step 2 | Isolated workspace setup with safety checks |
+| `finishing-a-development-branch` | `/git-commit` Step 8 | Branch completion with 4 structured options |
+| `writing-skills` | Meta | Creating new SKILL.md files for this template |
+
 ## Status Lifecycle
 
 ```
@@ -137,24 +161,24 @@ discovery → backlog → todo → in-progress → review → testing → done
 
 ## Superpowers-Inspired Principles
 
-These principles are adopted from [obra/superpowers](https://github.com/obra/superpowers) and enforced across all commands:
+These principles are adopted from [obra/superpowers](https://github.com/obra/superpowers) and enforced across all commands. Principles marked ✦ now have an invocable superpowers skill backing them (requires superpowers plugin).
 
 | Principle | Enforced in | Rule |
 |-----------|-------------|------|
-| **Verification before completion** | `/implement` Step 4 | No completion claims without fresh test evidence |
+| **Verification before completion** ✦ | `/implement` Step 4 | No completion claims without fresh test evidence · `superpowers:verification-before-completion` |
 | **Multiple test runs are intentional** | `/implement` Step 4, `/code-review` Step 0, `/testing` Step 7b, `/git-commit` Step 8 | Each run is a freshness gate — time elapses between phases. This is not duplication. |
-| **Two-stage review** | `/code-review` Steps 2a-2b | Spec compliance first, then code quality |
-| **Receiving review feedback** | `/code-review` Step 3c | Verify before implementing, push back with reasoning |
-| **Systematic debugging** | `/debug` | 4-phase root cause process, max 3 fix attempts |
-| **Subagent-driven development** | `/run-tasks` Step 6 | 3-agent pipeline: implementer → spec reviewer → quality reviewer |
-| **Finishing a branch** | `/git-commit` Step 8 | 4 structured options: merge / PR / keep / discard |
+| **Two-stage review** ✦ | `/code-review` Steps 2a-2b | Spec compliance first, then code quality · `superpowers:requesting-code-review` |
+| **Receiving review feedback** ✦ | `/code-review` Step 3c | Verify before implementing, push back with reasoning · `superpowers:receiving-code-review` |
+| **Systematic debugging** ✦ | `/debug` | 4-phase root cause process, max 3 fix attempts · `superpowers:systematic-debugging` |
+| **Subagent-driven development** ✦ | `/run-tasks` Step 6, `/execute-plan` | 3-agent pipeline: implementer → spec reviewer → quality reviewer · `superpowers:subagent-driven-development` |
+| **Finishing a branch** ✦ | `/git-commit` Step 8 | 4 structured options: merge / PR / keep / discard · `superpowers:finishing-a-development-branch` |
 | **HARD-GATE: approach approval** | `/discovery` Step 3b | No `/new-sprint` until user explicitly picks an approach |
 | **HARD-GATE: task breakdown** | `/new-sprint` Step 3 | Wait for user to confirm sub-task table before writing docs |
 | **HARD-GATE: AC confirmation** | `/requirement` Step 3 | Wait for "confirm" before saving requirement doc |
 | **HARD-GATE: design clarification** | `/design` Step 1b | If ambiguities exist, collect all into one message and wait |
 | **HARD-GATE: staging confirmation** | `/git-commit` Step 5 | Show file list, wait for yes/no/edit — never `git add -A` silently |
-| **Bite-sized task granularity** | `/design` Step 2 | Every Implementation Plan step = single action, 2-5 min |
-| **Worktree isolation** | `/implement` Step 0b | Create isolated git worktree per task before any code |
+| **Bite-sized task granularity** ✦ | `/design` Step 2, `/write-plan` | Every Implementation Plan step = single action, 2-5 min · `superpowers:writing-plans` |
+| **Worktree isolation** ✦ | `/implement` Step 0b, `/execute-plan` Step 2 | Create isolated git worktree per task before any code · `superpowers:using-git-worktrees` |
 
 ## Discovery Coverage Check — Two Levels (Both Required)
 

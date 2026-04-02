@@ -67,3 +67,22 @@ Single task: `/discovery → /new-sprint → /requirement → /design fe → /de
 Multiple tasks in parallel: `/run-tasks [task-id] [task-id] ...` (Agent tool) or `/run-tasks-p [task-id] [task-id] ...` (headless `claude -p` — leaner parent context)
 
 Full workflow reference: `.claude/commands/_WORKFLOW-REF.md` — see **Superpowers-Inspired Principles** table for enforcement details.
+
+## Superpowers Integration
+
+This template integrates with the [obra/superpowers](https://github.com/obra/superpowers) plugin. When installed, superpowers skills enhance existing commands at specific integration points:
+
+- `brainstorming` — conversational design exploration with visual companion (`/brainstorm` command)
+- `writing-plans` — detailed bite-sized implementation plans (`/write-plan` command)
+- `executing-plans` / `subagent-driven-development` — subagent execution pipeline (`/execute-plan` command)
+- `systematic-debugging` — 4-phase root cause investigation (referenced by `.claude/skills/debug/SKILL.md`)
+- `verification-before-completion` — evidence-before-claims gate (invoked from `/implement` Step 4)
+- `requesting-code-review` / `receiving-code-review` — subagent review dispatch (invoked from `/code-review`)
+- `using-git-worktrees` — safe worktree setup (invoked from `/implement` Step 0b)
+- `finishing-a-development-branch` — structured branch completion (invoked from `/git-commit` Step 8)
+
+**Bridge commands:** `/brainstorm` · `/write-plan` · `/execute-plan`
+
+**Priority rule:** Template commands always take priority. Superpowers skills provide the quality backbone but never override sprint-aware template behavior. See `.claude/rules/superpowers.md` for details.
+
+**Graceful degradation:** All template commands work unchanged when superpowers is not installed.

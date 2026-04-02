@@ -45,6 +45,8 @@ Run `git diff main...HEAD` to identify all changed files.
 
 ## Step 2a — Stage 1: Spec Compliance Review
 
+**Superpowers integration:** If the superpowers plugin is available, dispatch the spec compliance reviewer using `Skill("superpowers:requesting-code-review")` — it provides a spec-document-reviewer subagent with precise context. Otherwise, perform the review inline below.
+
 **Goal:** Does the code do what the spec says? Nothing more, nothing less.
 
 Check every changed file against requirement + design docs:
@@ -133,6 +135,8 @@ Fix any gap found before updating docs.
 ---
 
 ## Step 3c — Receiving review feedback (when issues found)
+
+**Superpowers integration:** If the superpowers plugin is available, invoke `Skill("superpowers:receiving-code-review")` before implementing any feedback — it enforces technical evaluation over performative agreement.
 
 If the review found Critical or Minor issues, follow this protocol when fixing:
 

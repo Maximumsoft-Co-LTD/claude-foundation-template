@@ -21,6 +21,8 @@ Skip if brain doesn't exist yet.
 
 ## Step 0b — Set up isolated worktree
 
+If the superpowers plugin is available, invoke `Skill("superpowers:using-git-worktrees")` for smart directory selection and safety verification. Otherwise, follow the inline steps below.
+
 Check if already in a worktree:
 ```bash
 git rev-parse --show-toplevel
@@ -137,6 +139,8 @@ Wait for both agents. If either reported bugs → run `/issue [task-id] [descrip
 ---
 
 ## Step 4 — Verification before completion (Iron Law)
+
+**This step implements the `superpowers:verification-before-completion` protocol.** If the superpowers plugin is available, invoke `Skill("superpowers:verification-before-completion")` to enforce the gate function. Otherwise, follow the inline steps below.
 
 **No completion claims without fresh verification evidence.** Run everything in this step — do not rely on output from Step 3 sub-agents.
 

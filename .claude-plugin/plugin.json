@@ -18,5 +18,13 @@
     "slash-commands",
     "retrospective",
     "task-management"
+  ],
+  "dependencies": [
+    {
+      "name": "superpowers",
+      "source": "claude-plugins-official",
+      "optional": true,
+      "reason": "Provides invocable skills for brainstorming, TDD, debugging, verification, and subagent-driven development. All template commands work without it."
+    }
   ]
 }
