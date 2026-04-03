@@ -62,11 +62,24 @@ Print: `Worktree ready: .worktrees/[task-id] on branch [branch-name]`
 
 Parse `[task-id]`, extract `[sprint-id]`.
 
-Read **in parallel**:
+Read **in parallel** and store content in memory as `DOC_OVERVIEW`, `DOC_REQ`, `DOC_FE`, `DOC_BE`:
 - `docs/sprints/[sprint-id]/[sprint-id]-overview.md`
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md`
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md`
+
+These are injected into every sub-agent prompt — agents must NOT re-read these files.
+
+**Section extraction rule (size guard):** Before injecting into a sub-agent, check character count:
+- ≤ 6000 chars → inject full doc
+- \> 6000 chars → extract only the section that agent needs (from `## Section Name` to the next `##`)
+
+| Agent | From DOC_REQ | From DOC_FE | From DOC_BE |
+|-------|-------------|-------------|-------------|
+| A — FE Tests | `## Acceptance Criteria` | `## TDD Test Plan` | — |
+| B — BE Tests | `## Acceptance Criteria` | — | `## TDD Test Plan` |
+| C — FE Impl | `## Acceptance Criteria` | `## Implementation Plan` | — |
+| D — BE Impl | `## Acceptance Criteria` | — | `## Implementation Plan` |
 
 Validate:
 - Missing requirement or empty ACs → stop: "Run `/requirement [task-id]` first."
@@ -106,11 +119,33 @@ For each AC in requirement: is there at least one test row in FE or BE TDD Test 
 **If `HAS_FE` AND `HAS_BE`:** launch 2 parallel sub-agents:
 
 > **Agent A — FE Tests**
-> Write all test files from `[task-id]-frontend.md` TDD Test Plan.
+> --- REQUIREMENT: ACCEPTANCE CRITERIA (apply section extraction rule) ---
+> [inject `## Acceptance Criteria` section from DOC_REQ]
+> ---
+> --- FE DESIGN: TDD TEST PLAN (apply section extraction rule) ---
+> [inject `## TDD Test Plan` section from DOC_FE]
+> ---
+> --- CONTEXT7 FE LIBRARY DOCS ---
+> [inject fetched FE library docs from Step 1]
+> ---
+> WORKTREE PATH: [inject absolute worktree path from Step 0b]
+> ---
+> Write all test files from the TDD Test Plan above.
 > Run FE tests — confirm every new test **fails** (red). Do NOT write implementation code.
 
 > **Agent B — BE Tests**
-> Write all test files from `[task-id]-backend.md` TDD Test Plan.
+> --- REQUIREMENT: ACCEPTANCE CRITERIA (apply section extraction rule) ---
+> [inject `## Acceptance Criteria` section from DOC_REQ]
+> ---
+> --- BE DESIGN: TDD TEST PLAN (apply section extraction rule) ---
+> [inject `## TDD Test Plan` section from DOC_BE]
+> ---
+> --- CONTEXT7 BE LIBRARY DOCS ---
+> [inject fetched BE library docs from Step 1]
+> ---
+> WORKTREE PATH: [inject absolute worktree path from Step 0b]
+> ---
+> Write all test files from the TDD Test Plan above.
 > Run BE tests — confirm every new test **fails** (red). Do NOT write implementation code.
 
 Wait for both agents. Collect red-test confirmation.
@@ -128,14 +163,36 @@ This is the normal path for FE-only and BE-only tasks — no error, no missing-d
 **If `HAS_FE` AND `HAS_BE`:** launch 2 parallel sub-agents:
 
 > **Agent C — FE Implementation**
-> Implement components, routing, state, API calls, loading/error states, analytics, responsive, accessibility per `[task-id]-frontend.md` Implementation Plan.
-> Implement only what the design specifies — no extras, no shortcuts.
+> --- REQUIREMENT: ACCEPTANCE CRITERIA (apply section extraction rule) ---
+> [inject `## Acceptance Criteria` section from DOC_REQ]
+> ---
+> --- FE DESIGN: IMPLEMENTATION PLAN (apply section extraction rule) ---
+> [inject `## Implementation Plan` section from DOC_FE]
+> ---
+> --- CONTEXT7 FE LIBRARY DOCS ---
+> [inject fetched FE library docs from Step 1]
+> ---
+> WORKTREE PATH: [inject absolute worktree path from Step 0b]
+> ---
+> Implement components, routing, state, API calls, loading/error states, analytics, responsive, accessibility per the Implementation Plan above.
+> Tests are already written — implement until they pass. No extras, no shortcuts.
 > Run FE tests after each logical unit. Log any bugs found (do NOT run /issue — report in output).
 > Final state: all FE tests green.
 
 > **Agent D — BE Implementation**
-> Implement endpoints, validation, service logic, repository, event publishing, caching, logging, security per `[task-id]-backend.md` Implementation Plan.
-> Implement only what the design specifies — no extras, no shortcuts.
+> --- REQUIREMENT: ACCEPTANCE CRITERIA (apply section extraction rule) ---
+> [inject `## Acceptance Criteria` section from DOC_REQ]
+> ---
+> --- BE DESIGN: IMPLEMENTATION PLAN (apply section extraction rule) ---
+> [inject `## Implementation Plan` section from DOC_BE]
+> ---
+> --- CONTEXT7 BE LIBRARY DOCS ---
+> [inject fetched BE library docs from Step 1]
+> ---
+> WORKTREE PATH: [inject absolute worktree path from Step 0b]
+> ---
+> Implement endpoints, validation, service logic, repository, event publishing, caching, logging, security per the Implementation Plan above.
+> Tests are already written — implement until they pass. No extras, no shortcuts.
 > Run BE tests after each logical unit. Log any bugs found (do NOT run /issue — report in output).
 > Final state: all BE tests green.
 

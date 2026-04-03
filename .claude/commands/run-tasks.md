@@ -20,6 +20,47 @@ Two gated phases:
 1. Parse `[task-id]` list from `$ARGUMENTS`. Extract `[sprint-id]` from each.
 2. Read `docs/BACKLOG.md` — collect status, `depends_on`, priority per task. Skip tasks already `done` or `in-progress` (warn).
 3. Build tiers: tasks with no unmet `depends_on` = Tier 1; tasks depending on Tier 1 = Tier 2; etc.
+4. Set `MAX_PARALLEL = 4`. If total tasks > 8, set `MAX_PARALLEL = 3` to avoid rate limits. Launch agents in rolling batches of MAX_PARALLEL — wait for each batch to complete before starting the next.
+
+---
+
+## Step 1.5 — Sprint Context Snapshot + Codebase Manifest
+
+**Read once — inject everywhere. Never ask agents to re-read these.**
+
+### Sprint Snapshot
+Read and store as `SPRINT_SNAPSHOT`:
+- `docs/sprints/[sprint-id]/[sprint-id]-overview.md`
+- Relevant rows from `docs/BACKLOG.md` (filter to task IDs being run only)
+- Latest file in `docs/discovery/` if it exists
+
+If a file is missing, omit that section silently — do not fail.
+
+### Codebase Manifest
+Read and store as `CODEBASE_MANIFEST`:
+- Directory tree (2 levels) of the project source root (`src/`, `app/`, `pkg/`, etc.)
+- Package/module config: `package.json`, `go.mod`, `pyproject.toml`, `Cargo.toml` (whichever exists)
+- Shared types: any `types.*`, `*.d.ts`, `interfaces.*` in src/
+- DB schema: `schema.*`, or latest file in `migrations/`
+- Test config: `jest.config.*`, `pytest.ini`, `vitest.config.*` (whichever exists)
+
+Inject in implementation agents (Steps 6+) as a `--- CODEBASE MANIFEST ---` block. Agents must NOT explore the codebase independently — everything they need is pre-loaded.
+
+### Section Extraction Rule (size guard)
+Before injecting any task doc into an agent prompt:
+- ≤ 6000 chars → inject full doc
+- > 6000 chars → extract only the sections that agent type needs (see table)
+
+Extract from the heading `## Section Name` to the next `##` heading.
+
+| Agent | From REQ | From FE doc | From BE doc |
+|-------|----------|-------------|-------------|
+| Requirement | — | — | — |
+| FE Design | `## Acceptance Criteria` | — | — |
+| BE Design | `## Acceptance Criteria` | `## API Contracts` + `## Endpoints` | — |
+| Implementer | `## Acceptance Criteria` | `## Implementation Plan` | `## Implementation Plan` |
+| Spec Reviewer | `## Acceptance Criteria` | `## API Contracts` | `## API Contracts` |
+| Quality Reviewer | `## Acceptance Criteria` | — | — |
 
 **Register all phase tasks:**
 ```
@@ -56,7 +97,10 @@ Phase 2 — Implement: implement → code-review → testing → retro-task
 
 ## Step 2 — Requirement (parallel per tier)
 
-For each task, launch `Agent [task-id] — Requirement` (run_in_background: true):
+Launch agents in batches of MAX_PARALLEL. For each task, launch `Agent [task-id] — Requirement` (run_in_background: true):
+> --- SPRINT CONTEXT (pre-loaded — do NOT re-read these files) ---
+> [inject SPRINT_SNAPSHOT]
+> ---
 > Read `.claude/commands/requirement.md`, follow every step for `[task-id]`.
 > Save to `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`.
 > Return: DONE or BLOCKED (reason).
@@ -87,9 +131,19 @@ Rules: be specific (vague notes are useless to sub-agents). If tasks are fully i
 
 ## Step 3 — FE Design (parallel per tier)
 
-For each task, launch `Agent [task-id] — FE Design` (run_in_background: true):
+Launch agents in batches of MAX_PARALLEL. For each task, launch `Agent [task-id] — FE Design` (run_in_background: true):
+> --- SPRINT CONTEXT ---
+> [inject SPRINT_SNAPSHOT]
+> ---
+> --- REQUIREMENT: ACCEPTANCE CRITERIA (pre-loaded — apply section extraction rule) ---
+> [inject `## Acceptance Criteria` section from REQ doc]
+> ---
+> --- CROSS-TASK CONTEXT ---
+> [inject cross-task-context.md content]
+> ---
 > Read `.claude/commands/design.md`, follow every step for `fe [task-id]`.
-> **Read `docs/sprints/[sprint-id]/cross-task-context.md` first** — use exact names/structure for any shared component listed there.
+> The Acceptance Criteria above are the source of truth — no file reading needed.
+> Use exact names/structure for any shared component listed in cross-task context above.
 > Save to `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md`.
 > Return: DONE or BLOCKED (reason).
 
@@ -110,9 +164,22 @@ If two tasks define conflicting shapes for the same endpoint → resolve now. Pr
 
 ## Step 4 — BE Design (parallel per tier)
 
-For each task, launch `Agent [task-id] — BE Design` (run_in_background: true):
+Launch agents in batches of MAX_PARALLEL. For each task, launch `Agent [task-id] — BE Design` (run_in_background: true):
+> --- SPRINT CONTEXT ---
+> [inject SPRINT_SNAPSHOT]
+> ---
+> --- REQUIREMENT: ACCEPTANCE CRITERIA (pre-loaded — apply section extraction rule) ---
+> [inject `## Acceptance Criteria` section from REQ doc]
+> ---
+> --- FE DESIGN: API CONTRACTS + ENDPOINTS (pre-loaded — apply section extraction rule) ---
+> [inject `## API Contracts` and `## Endpoints` sections from FE doc]
+> ---
+> --- CROSS-TASK CONTEXT ---
+> [inject cross-task-context.md content]
+> ---
 > Read `.claude/commands/design.md`, follow every step for `be [task-id]`.
-> **Read `docs/sprints/[sprint-id]/cross-task-context.md` first** — implement API contracts exactly as FE expects. If an endpoint is owned by another task, reference it instead of re-implementing.
+> Implement API contracts exactly as defined in the FE design above — no file reading needed.
+> If an endpoint is owned by another task, reference cross-task context above instead of re-implementing.
 > Save to `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md`.
 > Return: DONE or BLOCKED (reason).
 
@@ -177,24 +244,55 @@ For each task, use a **3-agent pipeline** per task:
 
 ### Agent 1: Implementer
 Launch `Agent [task-id] — Implement` (run_in_background: true):
+> --- SPRINT CONTEXT ---
+> [inject SPRINT_SNAPSHOT]
+> ---
+> --- CODEBASE MANIFEST ---
+> [inject CODEBASE_MANIFEST]
+> ---
+> --- REQUIREMENT: ACCEPTANCE CRITERIA (apply section extraction rule) ---
+> [inject `## Acceptance Criteria` section from REQ doc]
+> ---
+> --- FE DESIGN: IMPLEMENTATION PLAN (apply section extraction rule) ---
+> [inject `## Implementation Plan` section from FE doc]
+> ---
+> --- BE DESIGN: IMPLEMENTATION PLAN (apply section extraction rule) ---
+> [inject `## Implementation Plan` section from BE doc]
+> ---
+> --- CROSS-TASK CONTEXT ---
+> [inject cross-task-context.md content]
+> ---
 > Read `.claude/commands/implement.md` — follow every step for `[task-id]`.
-> **Read `cross-task-context.md`** — reuse shared components. No duplicate implementations.
-> For any issues found → follow `/debug` process inline — this includes writing a failing test BEFORE implementing the fix. The Iron Law applies inside agents.
-> Self-review before completing: re-read requirements, verify all ACs covered.
+> All context is pre-loaded above — do NOT read design docs or explore codebase independently.
+> Reuse shared components listed in cross-task context. No duplicate implementations.
+> For any issues found → follow `/debug` process inline — Iron Law applies inside agents.
+> Self-review before completing: verify all ACs above are covered.
 > Return: DONE, ISSUES_FIXED (list), or BLOCKED (reason).
 
 ### Agent 2: Spec Reviewer
 After implementer completes, launch `Agent [task-id] — Spec Review` (foreground — wait for result):
-> Review all changes against `[task-id]-requirement.md` and design docs.
-> Check: every AC has working code? Design contracts matched exactly? No extras, no gaps?
+> --- REQUIREMENT: ACCEPTANCE CRITERIA ---
+> [inject `## Acceptance Criteria` section from REQ doc]
+> ---
+> --- FE DESIGN: API CONTRACTS (apply section extraction rule) ---
+> [inject `## API Contracts` section from FE doc]
+> ---
+> --- BE DESIGN: API CONTRACTS (apply section extraction rule) ---
+> [inject `## API Contracts` section from BE doc]
+> ---
+> Review all git changes against the ACs and API contracts above.
+> Check: every AC has working code? Contracts matched exactly? No extras, no gaps?
 > Return: PASS or FAIL (list specific spec gaps).
 
 If FAIL → send gaps back to Implementer agent to fix → re-review (foreground).
 
 ### Agent 3: Quality Reviewer
 After spec review passes, launch `Agent [task-id] — Quality Review` (foreground — wait for result):
+> --- REQUIREMENT: ACCEPTANCE CRITERIA ---
+> [inject `## Acceptance Criteria` section from REQ doc]
+> ---
+> Read `.claude/commands/testing.md` — follow every step for `[task-id]`.
 > Review all changes for performance, security, code quality, edge cases.
-> Run `.claude/commands/testing.md` — follow every step for `[task-id]`.
 > Return: APPROVED or REQUEST_CHANGES (list issues by severity).
 
 If REQUEST_CHANGES with Critical issues → send back to Implementer → re-review (foreground).

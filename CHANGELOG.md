@@ -4,6 +4,40 @@ All notable changes to claude-foundation-template are documented here.
 
 ---
 
+## [0.11.0] — 2026-04-03
+
+### Added
+- **Sprint Context Snapshot** — `/run-tasks` and `/run-tasks-p` pre-load sprint overview, relevant backlog rows, and latest discovery doc once in the parent session; injected into every agent prompt as `--- SPRINT CONTEXT ---`. Agents no longer read these files independently.
+- **Codebase Manifest** — parent scans directory tree, package config, shared types, DB schema, and test config once at the start of Phase 2; injected into all implementation agents. Agents no longer explore the codebase independently on every task.
+- **Section extraction rule (size guard)** — docs > 6,000 chars are trimmed to the relevant section per agent type before injection. Full mapping table added to `/run-tasks`, `/run-tasks-p`, and `/implement`:
+
+  | Agent | From REQ | From FE | From BE |
+  |-------|----------|---------|---------|
+  | FE Design | AC only | — | — |
+  | BE Design | AC only | API Contracts + Endpoints | — |
+  | FE/BE Test (A/B) | AC only | TDD Test Plan / — | — / TDD Test Plan |
+  | FE/BE Impl (C/D) | AC only | Impl Plan / — | — / Impl Plan |
+  | Spec Reviewer | AC only | API Contracts | API Contracts |
+  | Quality Reviewer | AC only | — | — |
+
+- **`MAX_PARALLEL` cap** — `/run-tasks` and `/run-tasks-p` launch agents in rolling batches (default 4, auto-lower to 3 for >8 tasks) instead of all-at-once; prevents API rate-limit throttling on large sprints.
+- **`extract_section()` bash helper** in `/run-tasks-p` — reusable awk-based function for section-targeted doc injection; returns full file when ≤ 6,000 chars, extracts named `## Section` block otherwise.
+- **Snapshot-to-file** in `/run-tasks-p` — sprint snapshot and codebase manifest written to `.claude/rtp/[run-id]/sprint-snapshot.md` and `.../codebase-manifest.md`; injected via `$(cat file)` instead of shell variable interpolation, eliminating quoting/escaping failures with large docs.
+- **Step 4 BE Design** fully written out in `/run-tasks-p` as `run_be_design()` bash function (was previously a one-line stub); injects AC, API Contracts, and Endpoints sections; includes MAX_PARALLEL batching loop.
+
+### Changed
+- `/implement` sub-agents (A/B/C/D) each receive only the sections relevant to their role — test agents receive TDD Test Plan, implementation agents receive Implementation Plan. Full docs are no longer injected wholesale into all 4 agents.
+- `/run-tasks` Phase 2 Spec Reviewer receives AC + API Contracts only (not full design docs). Quality Reviewer receives AC only.
+- All agent prompts no longer include explicit file paths for pre-loaded content — agents cannot re-read injected docs, eliminating redundant file reads per agent.
+
+### Performance impact (9-task sprint, requirement phase)
+- Sprint context reads: **9× → 1×** (sprint overview, discovery, backlog)
+- Codebase exploration: **N× → 1×** (implementation phase)
+- Per-agent context size: **reduced by ~60–80%** for implementation agents via section extraction
+- Rate-limit pressure: eliminated for sprints with 8+ tasks via MAX_PARALLEL batching
+
+---
+
 ## [0.10.0] — 2026-04-03
 
 ### Added

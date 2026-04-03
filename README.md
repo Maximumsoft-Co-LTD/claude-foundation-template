@@ -157,10 +157,12 @@ The brain fills up naturally as you run `/retro-sprint` — brain update is buil
 ```
 /new-sprint → /run-tasks [task-id] [task-id] ...        # Agent tool (rich context)
          or → /run-tasks-p [task-id] [task-id] ...      # claude -p (lean parent context)
-    Phase 1: requirement → design fe → design be (parallel) → ⏸ user reviews
-    Phase 2: implement → spec review → quality review → retro-task (parallel)
+    Phase 1: requirement → design fe → design be (parallel, MAX 4 at once) → ⏸ user reviews
+    Phase 2: implement → spec review → quality review → retro-task (parallel, MAX 4 at once)
     → /git-commit per task → /retro-sprint
 ```
+
+**Context optimization (both variants):** The parent session pre-loads sprint overview, backlog rows, discovery doc, and a codebase manifest **once** — injected into every agent. Each agent type receives only the doc sections it needs (AC list, TDD Test Plan, or Implementation Plan) rather than full design docs. File paths are never passed to agents, preventing redundant reads.
 
 Full quick reference (flow diagram, hard gates, escape hatches): `docs/WORKFLOW-QUICKREF.md`
 
@@ -172,8 +174,8 @@ Full quick reference (flow diagram, hard gates, escape hatches): `docs/WORKFLOW-
 | `/brainstorm` | `[disc-id] [name]` | Open-ended ideation — superpowers bridge, alternative to `/discovery` |
 | `/new-sprint` | `[SP[N]] [epic description]` | Create sprint, scaffold tasks as user stories with E2E validation scenarios |
 | `/requirement` | `[task-id]` | Draft ACs + requirement doc |
-| `/run-tasks` | `[task-id] [task-id] ...` | Run multiple tasks in parallel (2-phase pipeline) |
-| `/run-tasks-p` | `[task-id] [task-id] ...` | Headless variant — spawns `claude -p` subprocesses; parent context stays lean |
+| `/run-tasks` | `[task-id] [task-id] ...` | Run multiple tasks in parallel (2-phase pipeline); MAX_PARALLEL cap + context pre-loading |
+| `/run-tasks-p` | `[task-id] [task-id] ...` | Headless variant — spawns `claude -p` subprocesses; parent context stays lean; file-based context injection |
 | `/design` | `[fe\|be] [task-id]` | Frontend or backend design + TDD test plan |
 | `/write-plan` | `[task-id]` | Bite-sized implementation plan — superpowers bridge, use after `/design be` |
 | `/implement` | `[task-id]` | Write failing tests → implement → verify |
