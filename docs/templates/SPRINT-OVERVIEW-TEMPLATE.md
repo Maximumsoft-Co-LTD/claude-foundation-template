@@ -44,9 +44,20 @@
 ## Sub-tasks
 <!-- mermaid dependency diagram if helpful -->
 
-| Task ID | Title | Type | E2E Scenario | Depends On | Points | Status |
-|---------|-------|------|--------------|------------|--------|--------|
-|         |       | feat / fix / chore | | — | | `todo` |
+| Task ID | User Story | Type | Depends On | Points | Status |
+|---------|-----------|------|------------|--------|--------|
+|         | As a [role], I want [X], so that [Y] | feat / fix / chore / infra | — | | `todo` |
+
+### E2E Validation Scenarios
+<!-- Each non-infra task gets a named block. Minimum 2 scenarios per feat task (happy path + one edge/error). -->
+
+**[Task ID] — [short name]**
+1. GIVEN [precondition]
+   WHEN [user action at UI]
+   THEN [observable outcome]
+2. GIVEN [error/edge condition]
+   WHEN [user action]
+   THEN [expected behavior]
 
 ## Architecture Overview
 <!-- mermaid graph showing how sprint components fit together -->

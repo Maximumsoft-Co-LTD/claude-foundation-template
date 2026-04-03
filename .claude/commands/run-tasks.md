@@ -65,8 +65,8 @@ For each task, launch `Agent [task-id] — Requirement` (run_in_background: true
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [Phase name] — complete
-  ✓ SP1-T001 — [Title]
-  ✓ SP1-T002 — [Title]
+  ✓ SP1-T001 — [User Story]
+  ✓ SP1-T002 — [User Story]
   ✗ SP1-T003 — BLOCKED: [reason]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
@@ -143,9 +143,9 @@ Print results as `✅` (pass) or `⚠️ CONFLICT — [detail] → Resolved: [ac
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 PHASE 1 COMPLETE — Review before implementing
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✓ SP1-T001 — [Title] ([N]pt)
+✓ SP1-T001 — [User Story] ([N]pt)
     docs/sprints/SP1/SP1-T001/{requirement,frontend,backend}.md
-✓ SP1-T002 — [Title] ([N]pt)  ...
+✓ SP1-T002 — [User Story] ([N]pt)  ...
 ✗ SP1-T003 — BLOCKED at [phase]: [reason]
 
 Cross-task alignment : docs/sprints/SP1/cross-task-context.md

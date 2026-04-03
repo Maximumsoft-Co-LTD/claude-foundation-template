@@ -114,8 +114,8 @@ Read all status files. Print checkpoint:
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Requirement — complete
-  ✓ SP1-T001 — [Title]
-  ✓ SP1-T002 — [Title]
+  ✓ SP1-T001 — [User Story]
+  ✓ SP1-T002 — [User Story]
   ✗ SP1-T003 — BLOCKED: [reason]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
@@ -219,9 +219,9 @@ Print `✅` or `⚠️ CONFLICT — [detail] → Resolved: [action]`. Fix confli
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 PHASE 1 COMPLETE — Review before implementing
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✓ SP1-T001 — [Title] ([N]pt)
+✓ SP1-T001 — [User Story] ([N]pt)
     docs/sprints/SP1/SP1-T001/{requirement,frontend,backend}.md
-✓ SP1-T002 — [Title] ([N]pt)  ...
+✓ SP1-T002 — [User Story] ([N]pt)  ...
 ✗ SP1-T003 — BLOCKED at [phase]: [reason]
 
 Cross-task alignment : .claude/rtp/[run-id]/cross-task-context.md

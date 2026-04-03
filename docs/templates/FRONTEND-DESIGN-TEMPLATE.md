@@ -1,4 +1,4 @@
-# [task-id] — [Title] — Frontend Design
+# [task-id] — [User Story] — Frontend Design
 
 ## Metadata
 

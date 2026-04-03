@@ -47,7 +47,7 @@ If push fails due to upstream divergence → stop and report; do not force-push 
 
 ## Step 4 — Compose PR
 
-**Title format:** `[task-id] [Task Title]` (max 72 chars)
+**Title format:** `[task-id] [User Story]` (max 72 chars)
 
 **Body template:**
 ```
@@ -81,7 +81,7 @@ If push fails due to upstream divergence → stop and report; do not force-push 
 
 ```bash
 gh pr create \
-  --title "[task-id] [Task Title]" \
+  --title "[task-id] [User Story]" \
   --body "[composed body]" \
   --base main
 ```
@@ -94,7 +94,7 @@ gh pr create \
 ✓ Pushed: [branch]
 ✓ PR created: [PR URL]
 
-  Title : [task-id] [Task Title]
+  Title : [task-id] [User Story]
   ACs   : [N] checklist items
   Base  : main ← [branch]
 

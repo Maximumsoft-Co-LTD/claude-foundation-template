@@ -91,7 +91,7 @@ If CSS transitions or animations introduced:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Accessibility Review: [task-id] — [Task Title]
+Accessibility Review: [task-id] — [User Story]
 Result: PASS / ISSUES FOUND
 WCAG level targeted: AA (2.1)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -1,4 +1,4 @@
-# [task-id] — [Title] — Backend Design
+# [task-id] — [User Story] — Backend Design
 
 ## Metadata
 | Field | Value |

@@ -1,4 +1,4 @@
-# [task-id] — [Title]
+# [task-id] — [User Story]
 
 ## Metadata
 | Field | Value |

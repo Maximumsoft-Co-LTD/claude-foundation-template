@@ -106,7 +106,7 @@ Tests: [N] passing, 0 failing
 
 **Option 1 — Merge locally:** If `[base-branch]` is `main` or `master` → warn "Team convention is no direct commits to main. Consider Option 2 instead. Continue? (yes/no)". Only proceed if confirmed. Checkout base, pull, merge, run tests, delete feature branch.
 
-**Option 2 — Push and create PR:** `git push -u origin [branch]` then `gh pr create` with title `[task-id] [Task Title]` and body summarising ACs and linking to retro. Use `/pr-create [task-id]` skill for the full PR template.
+**Option 2 — Push and create PR:** `git push -u origin [branch]` then `gh pr create` with title `[task-id] [User Story]` and body summarising ACs and linking to retro. Use `/pr-create [task-id]` skill for the full PR template.
 
 **Option 3 — Keep as-is:** No action. Report: `Keeping branch [name].`
 
@@ -148,7 +148,7 @@ Sprint [sprint-id] complete — run /retro-sprint [sprint-id]
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    ✓ Committed: [commit message]
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   Next  : [task-id] — [Task Title]
+   Next  : [task-id] — [User Story]
    Status: [status]  |  Priority: [priority]  |  Estimate: [X days]
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    [Problem Statement one line]

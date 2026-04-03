@@ -166,7 +166,7 @@ These principles are adopted from [obra/superpowers](https://github.com/obra/sup
 | Principle | Enforced in | Rule |
 |-----------|-------------|------|
 | **Verification before completion** ✦ | `/implement` Step 4 | No completion claims without fresh test evidence · `superpowers:verification-before-completion` |
-| **Multiple test runs are intentional** | `/implement` Step 4, `/code-review` Step 0, `/testing` Step 7b, `/git-commit` Step 8 | Each run is a freshness gate — time elapses between phases. This is not duplication. |
+| **Multiple test runs are intentional** | `/implement` Step 4, `/code-review` Step 0, `/testing` Step 7, `/git-commit` Step 8 | Each run is a freshness gate — time elapses between phases. This is not duplication. |
 | **Two-stage review** ✦ | `/code-review` Steps 2a-2b | Spec compliance first, then code quality · `superpowers:requesting-code-review` |
 | **Receiving review feedback** ✦ | `/code-review` Step 3c | Verify before implementing, push back with reasoning · `superpowers:receiving-code-review` |
 | **Systematic debugging** ✦ | `/debug` | 4-phase root cause process, max 3 fix attempts · `superpowers:systematic-debugging` |
@@ -174,6 +174,7 @@ These principles are adopted from [obra/superpowers](https://github.com/obra/sup
 | **Finishing a branch** ✦ | `/git-commit` Step 8 | 4 structured options: merge / PR / keep / discard · `superpowers:finishing-a-development-branch` |
 | **HARD-GATE: approach approval** | `/discovery` Step 3b | No `/new-sprint` until user explicitly picks an approach |
 | **HARD-GATE: task breakdown** | `/new-sprint` Step 3 | Wait for user to confirm sub-task table before writing docs |
+| **HARD-GATE: vertical slice** | `/new-sprint` Step 3 | Every non-infra task must be a user story with user-facing input, user-visible outcome, and cross-layer scope |
 | **HARD-GATE: AC confirmation** | `/requirement` Step 3 | Wait for "confirm" before saving requirement doc |
 | **HARD-GATE: design clarification** | `/design` Step 1b | If ambiguities exist, collect all into one message and wait |
 | **HARD-GATE: staging confirmation** | `/git-commit` Step 5 | Show file list, wait for yes/no/edit — never `git add -A` silently |
@@ -207,6 +208,8 @@ Full rules auto-loaded from `.claude/rules/testing.md`. Key points:
 [task-id] type: short description (max 72 chars)
 ```
 Types: `feat` `fix` `test` `docs` `refactor` `chore`
+
+> **Task type → commit type mapping:** `feat` → `feat` · `fix` → `fix` · `chore` → `refactor` or `chore` · `infra` → `chore` (infra tasks do not have a dedicated commit type — use `chore`)
 
 ## Branch Format
 ```

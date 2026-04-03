@@ -107,7 +107,7 @@ Read the route/handler definitions in changed files:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Security Review: [task-id] — [Task Title]
+Security Review: [task-id] — [User Story]
 Result: CLEAR / ISSUES FOUND
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CRITICAL (block merge):

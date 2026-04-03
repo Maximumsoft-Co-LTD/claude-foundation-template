@@ -117,7 +117,7 @@ From the BE design doc's API contracts, verify:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DB Schema Review: [task-id] — [Task Title]
+DB Schema Review: [task-id] — [User Story]
 Result: APPROVED / CHANGES REQUESTED
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Critical (fix before implement):

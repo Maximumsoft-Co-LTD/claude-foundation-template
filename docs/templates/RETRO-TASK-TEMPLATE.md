@@ -1,4 +1,4 @@
-# [task-id] — [Task Title] — Retrospective
+# [task-id] — [User Story] — Retrospective
 
 **Sprint:** [sprint-id]
 **Date:** YYYY-MM-DD

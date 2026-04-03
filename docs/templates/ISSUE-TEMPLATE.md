@@ -1,4 +1,4 @@
-# [task-id] — [Task Title] — Issues
+# [task-id] — [User Story] — Issues
 
 <!-- One file per task. Each issue is appended as a new section. -->
 <!-- Summary updates automatically as issues are added. -->

@@ -30,8 +30,13 @@ Arguments: `[sprint-id] [epic description]`  — e.g. `SP2 Build user authentica
 
 Rules:
 - Each task is completable by one person in 1–3 days.
-- **Each task must be a vertical slice** — delivers a complete user-visible outcome (FE + BE, E2E testable). ✅ "User can log in and see their dashboard" ❌ "Build login API" (BE only).
-  - Exception: pure infrastructure tasks (DB migrations, CI) — mark `infra` type, require integration tests.
+- **Each task title MUST be a user story** — phrased as `"As a [role], I want [action], so that [outcome]."` The user story IS the task identifier.
+- **Each task must be a vertical slice** — delivers a complete user-visible outcome (FE + BE + data, E2E testable from UI to persistence and back).
+  - ✅ "As a user, I want to log in with OAuth, so that I can access my dashboard"
+  - ❌ "Build login API" (BE-only layer, not a story)
+  - ❌ "Create login form component" (FE-only layer, not a story)
+  - Exception: pure infrastructure tasks (DB migrations, CI pipeline, env setup) — mark type `infra`, require integration tests, title format: `"[Infra] [what it enables]"` instead of a user story.
+- **Valid types:** `feat` (user-facing feature) · `fix` (user-facing bug fix) · `chore` (refactor/cleanup with observable validation) · `infra` (infra — only type exempt from user story format).
 - No cap on task count — propose as many as needed to cover full epic scope.
 - Order by dependencies. Task IDs continue from the global counter found in Step 1.
 
@@ -40,15 +45,39 @@ Present the breakdown:
 Proposed sub-tasks for [sprint-id] — [epic title]:
 (Last used: T[NNN] → starting from T[NNN+1])
 
-| Task ID  | Title | Type | E2E Scenario (one sentence) | Depends On | Points |
-|----------|-------|------|-----------------------------|------------|--------|
-| SP2-T005 | ...   | fullstack | User does X → sees Y   | —          | 3      |
+| Task ID  | User Story | Type | Depends On | Points |
+|----------|-----------|------|------------|--------|
+| SP2-T005 | As a [role], I want [X], so that [Y] | feat | — | 3 |
 ```
+
+Then, below the table, write the E2E Validation Scenarios as rendered markdown (NOT inside a code block):
+
+### E2E Validation Scenarios
+
+**SP2-T005 — [short name]**
+1. GIVEN [precondition / setup state]
+   WHEN [user action at the UI level]
+   THEN [visible system response — what the user sees/gets]
+2. GIVEN [error or edge condition]
+   WHEN [user action]
+   THEN [expected failure/edge behavior]
+
+Minimum 2 scenarios per `feat` task (happy path + at least one error/edge).
 Points: 1 trivial · 2 small · 3 medium-small · 5 medium · 8 large · **13 = too big, split first**.
 
 <HARD-GATE>
-If ANY task in the table is assigned 13 points → STOP. Do not proceed to Step 3b.
-Break down every 13pt task into smaller tasks (each ≤ 8pt), re-present the full table, and wait for user confirmation before continuing.
+**Before proceeding to Step 3b, verify the entire table passes both checks:**
+
+**Check A — Points:** If ANY task is 13 points → break it into tasks ≤ 8pt each.
+
+**Check B — Vertical Slice:** For each non-`infra` task, verify all three:
+1. **User-facing input** — story starts with a user/role performing an action (not "system does X")
+2. **User-visible outcome** — E2E validation ends with something the user can observe (UI change, notification, download, etc.)
+3. **Crosses layers** — completing the story requires changes in more than one layer (UI + API, or API + DB + response)
+
+Common violations to catch: "Set up DB schema" → merge into the first feature using it · "Create API endpoint" → merge into the story calling it · "Build X component" → merge into the story displaying it.
+
+If ANY check fails → STOP. Fix the table, re-present, wait for confirmation before Step 3b.
 </HARD-GATE>
 
 ---
@@ -82,9 +111,9 @@ Wait for confirmation.
 ## [sprint-id] — [Epic Title]
 > `docs/sprints/[sprint-id]/[sprint-id]-overview.md`
 
-| Task | Title | Depends On | Points | Status | Priority | Assigned |
-|------|-------|------------|--------|--------|----------|----------|
-| SP2-T005 | ... | — | 3 | `todo` | — | — |
+| Task | User Story | Depends On | Points | Status | Priority | Assigned |
+|------|-----------|------------|--------|--------|----------|----------|
+| SP2-T005 | As a [role], I want ... | — | 3 | `todo` | — | — |
 ```
 No per-task files created here. `/requirement` creates them when work begins.
 

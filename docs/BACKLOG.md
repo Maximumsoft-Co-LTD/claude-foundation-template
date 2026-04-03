@@ -27,9 +27,9 @@
 ## SP1 — [Epic Title]
 > `docs/sprints/SP1/SP1-overview.md`
 
-| Task | Title | Depends On | Points | Status | Priority | Assigned |
-|------|-------|------------|--------|--------|----------|----------|
-| SP1-T001 | [Task title] | — | 3 | `todo` | high | — |
+| Task | User Story | Depends On | Points | Status | Priority | Assigned |
+|------|-----------|------------|--------|--------|----------|----------|
+| SP1-T001 | As a [role], I want ... | — | 3 | `todo` | high | — |
 
 -->
 
@@ -37,5 +37,5 @@
 
 ## Done
 
-| Task | Sprint | Title | Completed |
+| Task | Sprint | User Story | Completed |
 |------|--------|-------|-----------|

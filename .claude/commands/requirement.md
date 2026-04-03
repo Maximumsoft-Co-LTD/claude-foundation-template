@@ -9,7 +9,7 @@ Arguments: `[task-id]`  — e.g. `SP1-T001`
 ## Step 0 — Check brain for relevant lessons
 
 If `brain/BRAIN-INDEX.md` exists:
-- Read `brain/00-MOC/MOC-Lessons.md` — scan for lessons related to the task title or domain.
+- Read `brain/00-MOC/MOC-Lessons.md` — scan for lessons related to the User Story or domain.
 - Read any LES notes flagged as `severity: high` — these are mandatory reads before writing ACs.
 - Note any "early warning signs" that apply to this task; factor into AC edge cases.
 
@@ -22,10 +22,10 @@ Skip if brain doesn't exist yet.
 Parse `[task-id]`, extract `[sprint-id]`.
 
 Read in order:
-1. `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — epic goals, sub-task table, E2E scenarios, dependencies
+1. `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — epic goals, sub-task table, E2E Validation Scenarios, dependencies
 2. `docs/discovery/` — scan for related discovery doc. If found, read: Problem Statement, goals, in-scope, constraints, open questions.
 
-From the sprint overview sub-task table, extract: task title, E2E scenario, dependencies, **Points**.
+From the sprint overview sub-task table, extract: **User Story**, dependencies, **Points**. From the E2E Validation Scenarios section, extract the numbered GIVEN/WHEN/THEN scenarios for this task.
 
 **Points-based section scope** (write `"N/A — Xpt task"` for sections not required):
 
@@ -50,11 +50,6 @@ After loading all context, scan for gaps that would block writing correct ACs:
 - Missing **business rules** — conditions, limits, or calculations not stated anywhere?
 - Ambiguous **success criteria** — no way to write a measurable AC?
 
-Scan for gaps that would block writing correct ACs:
-- Unclear **scope** — which users/roles, which platforms, which edge cases are in/out?
-- Missing **business rules** — conditions, limits, or calculations not stated anywhere?
-- Ambiguous **success criteria** — no way to write a measurable AC?
-
 Follow the clarification protocol in `.claude/rules/clarification.md`.
 
 ---
@@ -62,12 +57,13 @@ Follow the clarification protocol in `.claude/rules/clarification.md`.
 ## Step 2 — Draft the requirement doc
 
 - **Problem Statement** — from discovery doc if available; otherwise from epic Problem Statement scoped to this task.
-- **Overview** — one paragraph from the E2E scenario.
+- **Overview** — one paragraph expanding the User Story. Incorporate context from the E2E Validation Scenarios.
 - **User Stories** — "As a [role], I want [goal], so that [reason]." At least one per distinct user action.
 - **Acceptance Criteria** — rules:
   - Specific, testable, user-visible. Format: "Given [context], when [action], then [outcome]."
   - Cover: happy path, at least one failure path, boundary conditions.
   - Minimum 3 ACs. Every AC maps to at least one E2E test.
+  - Seed ACs from the E2E Validation Scenarios in the sprint overview. Each numbered scenario → at least one AC. Expand with additional edge cases.
 - **Success Metrics** — 2–3 measurable metrics aligned with sprint goals.
 - **Design References** — from discovery/sprint overview or placeholder.
 - **Analytics & Tracking** — events aligned with ACs (e.g. `[action]_completed` per key AC).

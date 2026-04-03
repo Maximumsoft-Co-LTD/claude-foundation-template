@@ -44,7 +44,7 @@ From the context of this session, identify:
 Save to `docs/sprints/[sprint-id]/[task-id]/[task-id]-handoff.md` (overwrite if exists):
 
 ```markdown
-# Handoff: [task-id] — [Task Title]
+# Handoff: [task-id] — [User Story]
 
 **Created:** [YYYY-MM-DD HH:MM]
 **Branch:** [branch-name]

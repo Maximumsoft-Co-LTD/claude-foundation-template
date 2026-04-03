@@ -71,19 +71,19 @@ Points:   [done-pts] / [total-pts] pts complete
 
 Tasks
 ─────────────────────────────────────────────────────
-[task-id]  [title]                       [status]
+[task-id]  [user story]                       [status]
   Last step : [last-completed-step]
   Next      : [suggested-command]
   [⚠ N open issues — resolve before implementing]   ← only if issues file has open items
 
-[task-id]  [title]                       [status]
+[task-id]  [user story]                       [status]
   Last step : [last-completed-step]
   Next      : [suggested-command]
 
 ─────────────────────────────────────────────────────
 [If any blocked tasks:]
 Blocked
-  [task-id]  [title] — blocked by: [depends_on or "see issues file"]
+  [task-id]  [user story] — blocked by: [depends_on or "see issues file"]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
