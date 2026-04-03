@@ -76,6 +76,14 @@ If FAIL → stop. Fix spec gaps before proceeding to Stage 2.
 
 **Goal:** Is the code well-written? Only run this after Stage 1 passes.
 
+**Context7 — verify library usage (if available):**
+From `git diff main...HEAD`, identify any external library APIs used in changed files (especially any new packages added).
+For each library that appears in the diff (max 3):
+1. `mcp__plugin_context7_context7__resolve-library-id` → `mcp__plugin_context7_context7__query-docs` — query for correct usage patterns, deprecated APIs, and security best practices.
+2. Flag any usage in the diff that contradicts current docs.
+
+If context7 is not available, proceed using codebase patterns and existing knowledge.
+
 **Performance**
 - N+1 query risk (loops triggering DB calls)?
 - Unnecessary re-renders or missing memoization on FE?
@@ -104,7 +112,7 @@ If FAIL → stop. Fix spec gaps before proceeding to Stage 2.
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Code Review: [task-id] — [Task Title]
+Code Review: [task-id] — [User Story]
 Result: APPROVED / REQUEST CHANGES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Critical (must fix before merge):

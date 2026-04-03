@@ -86,3 +86,25 @@ This template integrates with the [obra/superpowers](https://github.com/obra/sup
 **Priority rule:** Template commands always take priority. Superpowers skills provide the quality backbone but never override sprint-aware template behavior. See `.claude/rules/superpowers.md` for details.
 
 **Graceful degradation:** All template commands work unchanged when superpowers is not installed.
+
+## Context7 Integration
+
+This template uses the [context7](https://github.com/upstash/context7-mcp) MCP plugin to fetch up-to-date library and framework documentation during coding workflows. Training data can be stale; context7 ensures API syntax, configuration, and best practices reflect the current library version.
+
+**Commands with context7 integration:**
+
+| Command | Where | What it fetches |
+|---------|-------|----------------|
+| `/design fe` / `/design be` | Step 1 — after codebase exploration | Framework/library patterns for the detected stack |
+| `/implement` | Step 1 — after loading design docs | API syntax for libraries the implementation plan references |
+| `/debug` | Phase 2 — pattern analysis | Current API behavior of the library involved in the bug |
+| `/issue` | Step 2 — investigate | Expected behavior of the library API in question |
+| `/code-review` | Step 2b — code quality review | Correct usage patterns for libraries appearing in the diff |
+| `/testing` | Step 2 — verify test environment | Test framework setup, assertions, E2E configuration |
+| `/dependency-update` | Step 3 — check breaking changes | Migration guides for major version bumps |
+
+**Tool pattern (always two steps):**
+1. `mcp__plugin_context7_context7__resolve-library-id` — resolve library name → context7 ID
+2. `mcp__plugin_context7_context7__query-docs` — fetch docs for the specific query
+
+**Graceful degradation:** All commands work unchanged when context7 is not installed. Every integration point includes an explicit fallback: "If context7 is not available, proceed using codebase patterns and existing knowledge."

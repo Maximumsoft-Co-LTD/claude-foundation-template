@@ -57,6 +57,15 @@ Note everything that can be **reused**. Do NOT reimplement what already exists.
 
 Write findings as `## Existing Code Context` at the top of your design doc. If the codebase is empty → note "No existing code — establishing conventions" and proceed.
 
+**Context7 — fetch current library docs (if available):**
+From the codebase exploration above, identify the key libraries for this design layer (max 3 — e.g. the UI framework, state/data-fetching library, validation library for FE; or the web framework, ORM, validation library for BE).
+For each library:
+1. `mcp__plugin_context7_context7__resolve-library-id` — resolve the library name to a context7 ID.
+2. `mcp__plugin_context7_context7__query-docs` — query for the specific patterns this design needs (component API, hook usage, query patterns, validation schema syntax, etc.).
+
+Use the returned docs as the source of truth for API syntax and patterns when filling the design doc.
+If context7 is not available, proceed using codebase patterns and existing knowledge.
+
 Read **Points** from requirement doc Metadata. Apply points-based section scope (write `"N/A — Xpt task"` for unrequired sections):
 
 **If fe:**

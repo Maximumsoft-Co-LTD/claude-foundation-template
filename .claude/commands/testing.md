@@ -23,6 +23,14 @@ Read:
 Confirm test DB/services are available and seeded if needed. Check env vars in `[task-id]-backend.md` Environment Variables section.
 If environment not ready → stop and tell the user what is missing.
 
+**Context7 — fetch test framework docs (if available):**
+Identify the project's test runner and E2E framework from the design docs or codebase (e.g. Jest, Vitest, Playwright, Cypress, pytest, go test).
+If unfamiliar setup patterns or E2E configuration are involved:
+1. `mcp__plugin_context7_context7__resolve-library-id` → `mcp__plugin_context7_context7__query-docs` — query for setup, teardown, assertion patterns, and E2E configuration for the detected framework.
+2. Use returned docs to validate test environment configuration before running.
+
+If context7 is not available, proceed using existing codebase test patterns.
+
 
 ---
 

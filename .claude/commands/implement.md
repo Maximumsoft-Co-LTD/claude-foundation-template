@@ -79,6 +79,14 @@ Assess parallelization flags:
 - `SHARED_TYPES`: FE and BE share type/interface definitions
 - `HAS_MIGRATION`: BE includes DB migrations
 
+**Context7 — fetch current library docs (if available):**
+From the design docs loaded above, identify the key libraries the implementation will use (max 3 — e.g. test framework, UI component library, ORM/query builder).
+For each library:
+1. `mcp__plugin_context7_context7__resolve-library-id` — resolve the library name to a context7 ID.
+2. `mcp__plugin_context7_context7__query-docs` — query for the specific patterns needed (test utilities, component API, query syntax, etc.).
+
+Pass the fetched docs as context to sub-agents in Step 2 and Step 3 so they write code against current APIs.
+If context7 is not available, proceed using design doc patterns and existing knowledge.
 
 ---
 

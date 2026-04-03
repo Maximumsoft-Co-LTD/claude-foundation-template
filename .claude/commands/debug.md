@@ -6,6 +6,8 @@ Arguments: `[task-id?] [description]` — e.g. `SP1-T002 API returns 500 on empt
 
 `[task-id]` is optional. If provided, context is loaded from sprint docs and the bug is logged via `/issue` after fix.
 
+> **Superpowers note:** If `superpowers:systematic-debugging` is available, it enhances this command — it extends the 4-phase structure below with deeper pattern analysis and hypothesis testing. The phases and Iron Law below remain authoritative; the skill adds depth within each phase.
+
 ---
 
 ## Iron Law
@@ -48,9 +50,14 @@ If 3+ fixes have failed, question the architecture — don't attempt fix #4.
 ## Phase 2 — Pattern Analysis
 
 1. **Find working examples** — similar working code in same codebase.
-2. **Compare** — what's different between working and broken?
-3. **List every difference** — however small. Don't assume "that can't matter."
-4. **Check dependencies** — what settings, config, env does this need?
+2. **Check library docs (if the bug involves a library):**
+   - Identify the library whose API or behavior is involved in the bug.
+   - If context7 is available: `mcp__plugin_context7_context7__resolve-library-id` → `mcp__plugin_context7_context7__query-docs` with a query targeting the specific API, error code, or behavior.
+   - Use returned docs to verify expected behavior before forming hypotheses. Stale knowledge about library APIs is a common source of incorrect diagnoses.
+   - If context7 is not available, proceed with codebase patterns and existing knowledge.
+3. **Compare** — what's different between working and broken?
+4. **List every difference** — however small. Don't assume "that can't matter."
+5. **Check dependencies** — what settings, config, env does this need?
 
 ---
 

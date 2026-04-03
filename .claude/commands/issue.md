@@ -27,6 +27,8 @@ Read:
 Follow `/debug` Phases 1–3 (root cause investigation → pattern analysis → hypothesis testing).
 Do NOT implement the fix yet — that's Step 3.
 
+> context7 library doc lookup is included in `/debug` Phase 2 — it fires automatically during pattern analysis if the bug involves a library API.
+
 If stuck after 3 hypotheses → document the blocker and ask the user.
 
 ---

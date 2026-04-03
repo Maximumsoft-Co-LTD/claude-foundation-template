@@ -60,8 +60,11 @@ For each outdated package, classify:
 ## Step 3 — Check breaking changes
 
 For each **major version bump**:
-1. Read the package's CHANGELOG or GitHub releases for the version range
-2. List breaking changes that could affect this codebase
+1. **Fetch migration docs via context7 (if available):**
+   - `mcp__plugin_context7_context7__resolve-library-id` → `mcp__plugin_context7_context7__query-docs` with query: "migration guide from [old version] to [new version], breaking changes".
+   - Use returned docs as the primary source of breaking changes — more reliable than reading CHANGELOG manually.
+   - If context7 is not available, read the package's CHANGELOG or GitHub releases for the version range.
+2. List breaking changes that could affect this codebase.
 3. Search codebase for usage of changed APIs: `grep -rn "[package-name]" src/`
 4. Estimate impact: `none` · `low` · `medium` · `high`
 
