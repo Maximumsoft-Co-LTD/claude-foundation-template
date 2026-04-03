@@ -17,7 +17,6 @@ updated: 2026-03-25
 - [[../01-concepts/qa/CON-test-types]] — Unit, Integration, E2E, Regression, Load, Security
 - [[../01-concepts/qa/CON-bug-lifecycle]] — Found → Report → Triage → Fix → Verify → Close
 - [[../01-concepts/qa/CON-qa-process]] — QA เข้ามาตอนไหน, shift-left testing คืออะไร
-- [[../01-concepts/qa/CON-test-case-design]] — Equivalence partitioning, boundary values, exploratory
 
 ## Testing Pyramid
 

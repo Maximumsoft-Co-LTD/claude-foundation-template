@@ -1,5 +1,5 @@
 ---
-type: moc
+type: MOC
 tags: [MOC, team, organization]
 updated: 2026-03-25
 ---
@@ -34,7 +34,6 @@ updated: 2026-03-25
 
 - [[CON-microservices-patterns]] — Service boundaries, API contracts, team ownership
 - [[CON-domain-driven-design]] — Ubiquitous language, bounded contexts, domain modeling
-- [[CON-distributed-teams]] — Time zones, async communication, documentation as sync medium
 
 ---
 
@@ -42,7 +41,6 @@ updated: 2026-03-25
 
 ### "I'm designing a new org structure"
 Start: [[CON-team-topologies]]
-Then: [[CON-conway-law-inverse]]
 
 ### "I'm documenting a service/API"
 Start: [[CON-technical-writing]]

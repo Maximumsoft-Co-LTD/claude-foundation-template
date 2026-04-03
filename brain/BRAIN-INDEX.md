@@ -112,6 +112,7 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 - [[01-concepts/frontend/CON-api-integration]] — REST/GraphQL client, SWR, React Query
 - [[01-concepts/frontend/CON-performance-frontend]] — Bundle size, lazy loading, Core Web Vitals
 - [[01-concepts/frontend/CON-responsive-design]] — Mobile-first, breakpoints, fluid layouts
+- [[01-concepts/frontend/CON-ui-ux-pro-max]] — Design QA skill: palettes, styles, UX guidelines, 10 stacks
 
 ### DevOps
 - [[01-concepts/devops/CON-cicd-pipeline]] — CI stages, CD strategies, best practices
@@ -179,6 +180,7 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 - [[03-patterns/PAT-001-tdd-flow]] — Red → Green → Refactor sequence
 - [[03-patterns/PAT-002-parallel-agent-implementation]] — FE + BE agents in parallel
 - [[03-patterns/PAT-003-discovery-before-sprint]] — Always discover before planning
+- [[03-patterns/PAT-004-superpowers-workflow-integration]] — Superpowers skills layered into template workflow
 
 ---
 
@@ -287,4 +289,4 @@ Notes in this brain carry a `source` field in their frontmatter to indicate orig
 
 *Brain initialized: 2026-03-25 · Framework: Obsidian-style atomic notes + MOC*
 *Domains covered: Workflow · SDLC · Agile/Scrum · Developer · Architecture · Backend · Data · Frontend · DevOps · QA · Product Owner · Product Manager · Infrastructure · Solution Engineer · Team · AI*
-*Total notes: 17 MOCs · 74 concept notes · 3 decisions · 3 patterns · 10 glossary entries*
+*Total notes: 21 MOCs · 76 concept notes · 3 decisions · 4 patterns · 10 glossary entries*

@@ -2,6 +2,7 @@
 type: glossary
 term: Vertical Slice
 tags: [task-design, E2E, fullstack]
+updated: 2026-03-25
 ---
 
 # Vertical Slice

@@ -2,6 +2,7 @@
 type: glossary
 term: Atomic Note
 tags: [PKM, obsidian, knowledge-management]
+updated: 2026-03-25
 ---
 
 # Atomic Note

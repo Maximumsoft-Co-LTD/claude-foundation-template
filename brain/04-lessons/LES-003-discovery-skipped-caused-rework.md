@@ -4,6 +4,7 @@ id: LES-003
 sprint: example
 tags: [discovery, scope, planning]
 source: template-example
+updated: 2026-03-25
 ---
 
 # LES-003 — Skipping /discovery on a "Simple" Feature Led to Mid-Sprint Scope Expansion

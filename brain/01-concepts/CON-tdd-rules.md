@@ -3,6 +3,7 @@ type: concept
 tags: [tdd, testing, quality]
 related: [PAT-001-tdd-flow, DEC-001-real-deps-integration-tests]
 updated: 2026-03-25
+source: template
 ---
 
 # TDD Rules

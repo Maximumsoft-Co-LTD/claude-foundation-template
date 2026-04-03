@@ -3,6 +3,7 @@ type: concept
 tags: [docs, structure, file-organization]
 related: [CON-task-id-format, CON-sprint-lifecycle]
 updated: 2026-03-25
+source: template
 ---
 
 # Document Structure

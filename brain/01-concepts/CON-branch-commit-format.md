@@ -3,6 +3,7 @@ type: concept
 tags: [git, conventions, branch, commit]
 related: [CON-task-id-format]
 updated: 2026-03-25
+source: template
 ---
 
 # Branch & Commit Format

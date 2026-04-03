@@ -3,6 +3,7 @@ type: concept
 tags: [sizing, planning, story-points]
 related: [CON-vertical-slice, CON-sprint-lifecycle]
 updated: 2026-03-25
+source: template
 ---
 
 # Story Points

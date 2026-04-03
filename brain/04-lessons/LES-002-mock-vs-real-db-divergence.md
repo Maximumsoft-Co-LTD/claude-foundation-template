@@ -4,6 +4,7 @@ id: LES-002
 sprint: example
 tags: [testing, mocks, integration, database]
 source: template-example
+updated: 2026-03-25
 ---
 
 # LES-002 — Mocked Integration Tests Masked a Real Migration Bug

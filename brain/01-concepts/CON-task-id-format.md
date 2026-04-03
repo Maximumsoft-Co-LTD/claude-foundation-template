@@ -3,6 +3,7 @@ type: concept
 tags: [task-id, conventions, global-id]
 related: [CON-branch-commit-format, CON-sprint-lifecycle]
 updated: 2026-03-25
+source: template
 ---
 
 # Task ID Format

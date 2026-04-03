@@ -2,6 +2,7 @@
 type: glossary
 term: ADR (Architectural Decision Record)
 tags: [decisions, architecture, documentation]
+updated: 2026-03-25
 ---
 
 # ADR — Architectural Decision Record

@@ -4,6 +4,7 @@ id: LES-001
 sprint: example
 tags: [tdd, deadline, technical-debt]
 source: template-example
+updated: 2026-03-25
 ---
 
 # LES-001 — TDD Skipped Under Deadline Pressure Creates More Rework

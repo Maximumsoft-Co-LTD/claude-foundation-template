@@ -1,5 +1,5 @@
 ---
-type: moc
+type: MOC
 tags: [MOC, AI, LLM]
 updated: 2026-03-25
 ---
@@ -20,9 +20,8 @@ updated: 2026-03-25
 ### Core LLM Concepts
 
 - [[CON-llm-integration]] — Tokens, temperature, prompt engineering, RAG, tool use, cost optimization, error handling, evaluation
-- [[CON-prompt-engineering]] — System vs user prompts, zero/few-shot, chain-of-thought, structured output, prompt injection
-- [[CON-rag-patterns]] — Retrieval-augmented generation, chunking, embedding, vector stores, common pitfalls
-- [[CON-llm-evaluation]] — Manual evaluation, RAGAS metrics, LLM-as-judge, quality assessment
+
+> **Planned notes** (not yet created): CON-prompt-engineering, CON-rag-patterns, CON-llm-evaluation
 
 ### Integration Patterns
 
@@ -33,15 +32,11 @@ updated: 2026-03-25
 
 ### AI Infrastructure
 
-- [[CON-vector-databases]] — Pinecone, Weaviate, Supabase pgvector; trade-offs and selection
-- [[CON-embedding-models]] — OpenAI, Anthropic, open-source; cost vs quality
-- [[CON-cost-analysis-llm]] — Token counting, cost modeling, budget tracking, optimization
+> **Planned notes** (not yet created): CON-vector-databases, CON-embedding-models, CON-cost-analysis-llm
 
 ### Safety & Governance
 
-- [[CON-prompt-injection-defense]] — User input validation, tool boundaries, attack patterns
-- [[CON-llm-bias-mitigation]] — Dataset bias, evaluation on diverse inputs, fairness testing
-- [[CON-data-privacy-ai]] — PII handling, retention policies, customer data in prompts
+> **Planned notes** (not yet created): CON-prompt-injection-defense, CON-llm-bias-mitigation, CON-data-privacy-ai
 
 ---
 
@@ -53,9 +48,8 @@ updated: 2026-03-25
 3. Implement: [[CON-api-design-principles]] + [[CON-error-handling]]
 
 ### "I need to ground LLM responses in real data"
-Start: [[CON-rag-patterns]]
-Then: Choose a vector DB ([[CON-vector-databases]])
-Cost estimate: [[CON-cost-analysis-llm]]
+Start: [[CON-llm-integration]] — section on RAG
+*(Detailed notes CON-rag-patterns, CON-vector-databases, CON-cost-analysis-llm not yet created)*
 
 ### "I want the model to call my APIs"
 Start: [[CON-llm-integration]] — section on Tool Use
@@ -63,29 +57,31 @@ Read: [[CON-api-design-principles]] to ensure your APIs are tool-use friendly
 Reference: [[CON-error-handling]] for tool call timeouts and retries
 
 ### "How do I know if my LLM output is good?"
-Start: [[CON-llm-evaluation]]
+Start: [[CON-llm-integration]] — Evaluation section
 Simple: Manual sampling (rate 50 responses yourself)
 Automated: RAGAS metrics + LLM-as-judge
+*(CON-llm-evaluation not yet created)*
 
 ### "My LLM costs are too high"
-Read: [[CON-cost-analysis-llm]]
-Optimize: [[CON-llm-integration]] — Sections on caching, batching, model selection
+Read: [[CON-llm-integration]] — Sections on caching, batching, model selection
 Profile: Which features consume the most tokens?
+*(CON-cost-analysis-llm not yet created)*
 
 ### "Users are tricking my LLM with weird input"
-Start: [[CON-prompt-injection-defense]]
+Start: [[CON-llm-integration]] — Section on input validation and safety
 Protect: Use tool use + input validation
-Monitor: [[CON-llm-bias-mitigation]] for consistent behavior
+*(CON-prompt-injection-defense not yet created)*
 
 ### "I'm building a chatbot"
 Start: [[CON-llm-integration]] — Multi-turn conversation section
 Add: [[CON-caching-strategies]] for system prompt reuse
-Monitor: [[CON-llm-evaluation]] — Manual + LLM-as-judge feedback loop
+Monitor: Manual sampling + LLM-as-judge feedback loop
 
 ### "I want to use open-source models"
-Start: [[CON-embedding-models]] and [[CON-cost-analysis-llm]]
+Start: [[CON-llm-integration]] — Model selection section
 Trade-off: Speed + cost vs inference quality
 Deploy: [[CON-async-patterns]] (local inference is slower)
+*(CON-embedding-models, CON-cost-analysis-llm not yet created)*
 
 ---
 

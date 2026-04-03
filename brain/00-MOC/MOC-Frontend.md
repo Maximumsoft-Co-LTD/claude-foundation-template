@@ -2,7 +2,7 @@
 type: MOC
 topic: frontend
 tags: [frontend, UI, UX, component, react, state, performance]
-updated: 2026-03-25
+updated: 2026-04-02
 ---
 
 # 🗺️ MOC — Frontend Development
@@ -19,6 +19,7 @@ updated: 2026-03-25
 - [[../01-concepts/frontend/CON-performance-frontend]] — Bundle size, lazy loading, rendering strategies
 - [[../01-concepts/frontend/CON-accessibility-a11y]] — WCAG 2.1 AA, ARIA, keyboard navigation
 - [[../01-concepts/frontend/CON-responsive-design]] — Mobile-first, breakpoints, fluid layout
+- [[../01-concepts/frontend/CON-ui-ux-pro-max]] — Design QA skill: palettes, styles, UX guidelines, 10 stacks
 
 ## State Decision Tree
 
@@ -57,6 +58,19 @@ Every component should have:
 | Virtualization | Lists > 100 items |
 | Image optimization | Hero images, galleries |
 | Prefetching | Predictable navigation |
+
+## Claude Skills for Frontend Work
+
+Use these skills when building UI — invoke with `/skill-name` or via the Skill tool:
+
+| Skill | When to Use |
+|-------|-------------|
+| `frontend-design` | Building web components, pages, dashboards, landing pages — generates production-grade, visually distinctive UI |
+| `ui-ux-pro-max` | Deep UX review, polished interaction design, accessibility + visual hierarchy audit *(install if not present)* |
+
+**Workflow tip:** For any `/design fe` task, invoke `frontend-design` to scaffold the component, then `ui-ux-pro-max` for design QA before implementation.
+
+> **Skill names are exact** — `fe-design`, `frontend`, etc. will fail. Use the full name as shown above.
 
 ## Related MOCs
 

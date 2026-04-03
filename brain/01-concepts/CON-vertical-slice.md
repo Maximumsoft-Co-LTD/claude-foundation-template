@@ -3,6 +3,7 @@ type: concept
 tags: [task-design, vertical-slice, E2E, fullstack]
 related: [CON-story-points, CON-sprint-lifecycle]
 updated: 2026-03-25
+source: template
 ---
 
 # Vertical Slice

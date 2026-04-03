@@ -3,6 +3,7 @@ type: concept
 tags: [sprint, workflow, lifecycle]
 related: [CON-vertical-slice, CON-story-points, CON-tdd-rules]
 updated: 2026-03-25
+source: template
 ---
 
 # Sprint Lifecycle

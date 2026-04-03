@@ -2,6 +2,7 @@
 type: glossary
 term: MOC (Map of Content)
 tags: [PKM, obsidian, knowledge-management]
+updated: 2026-03-25
 ---
 
 # MOC — Map of Content

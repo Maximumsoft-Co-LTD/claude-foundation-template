@@ -18,6 +18,7 @@ updated: 2026-03-25
 | [[../03-patterns/PAT-001-tdd-flow]] | Red → Green → Refactor | Testing | 2026-03-25 |
 | [[../03-patterns/PAT-002-parallel-agent-implementation]] | FE + BE agents in parallel | Architecture | 2026-03-25 |
 | [[../03-patterns/PAT-003-discovery-before-sprint]] | Always discover before planning | Process | 2026-03-25 |
+| [[../03-patterns/PAT-004-superpowers-workflow-integration]] | Superpowers skills layered into template workflow | Workflow | 2026-04-03 |
 
 ---
 
@@ -31,6 +32,9 @@ updated: 2026-03-25
 
 ### Process Patterns
 - [[../03-patterns/PAT-003-discovery-before-sprint]]
+
+### Workflow Patterns
+- [[../03-patterns/PAT-004-superpowers-workflow-integration]]
 
 ---
 
