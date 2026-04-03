@@ -4,6 +4,77 @@ All notable changes to claude-foundation-template are documented here.
 
 ---
 
+## [0.10.0] — 2026-04-03
+
+### Added
+- **`PAT-004 — Superpowers Workflow Integration`** brain note — documents the three-tier priority hierarchy (template commands > bridge commands > direct invocations), all 8 inline integration points, file path overrides, sprint-awareness requirement, and graceful degradation
+- **`CON-ui-ux-pro-max`** concept note — documents the `ui-ux-pro-max` skill: capabilities (161 palettes, 99 UX guidelines, 50+ styles, 10 stacks), workflow position (after `frontend-design`, before `/implement`), exact invocation name, and boundary with `accessibility-review`
+- `PAT-004` registered in `MOC-Patterns.md` (table + Workflow Patterns category) and `MOC-Workflow.md` (Patterns list + Superpowers Integration section)
+- `CON-ui-ux-pro-max` registered in `BRAIN-INDEX.md` Quick Reference and `MOC-Frontend.md` Core Concepts
+
+### Fixed
+- **Brain consistency overhaul — 25 files** cleaned up after full audit:
+  - `MOC-AI.md` — removed 11 broken wikilinks to nonexistent concept files (CON-prompt-engineering, CON-rag-patterns, CON-llm-evaluation, CON-vector-databases, CON-embedding-models, CON-cost-analysis-llm, CON-prompt-injection-defense, CON-llm-bias-mitigation, CON-data-privacy-ai); replaced with "Planned notes" markers; fixed `type: moc` → `type: MOC`
+  - `MOC-QA.md` — removed broken `CON-test-case-design` link
+  - `MOC-Team.md` — removed broken `CON-distributed-teams` and `CON-conway-law-inverse` links; fixed `type: moc` → `type: MOC`
+  - `GLO-tdd.md`, `GLO-acceptance-criteria.md` — removed broken `CON-testing-strategy` links; GLO-acceptance-criteria replaced with `CON-qa-process`
+  - `BRAIN-INDEX.md` — corrected total counts from 17 MOCs/75 concepts to 21 MOCs/76 concepts
+  - `PAT-004` example paths corrected: `DISC-007` → `disc-007` (lowercase); `T042/T042-plan.md` → `SP2-T042/SP2-T042-plan.md`
+  - `_WORKFLOW-REF.md` — fixed stale `/testing` Step 7b reference → Step 7
+- **6 oversized glossary entries trimmed** — GLO-tdd (267→28 lines), GLO-story-points (247→30), GLO-acceptance-criteria (155→30), GLO-discovery (194→25), GLO-sprint (194→30), GLO-posttooluse (225→25); each now follows the `GLO-vertical-slice` pattern (short definition + See Also links to full concept notes)
+- **Frontmatter standardization** across 17 files:
+  - 7 root-level `brain/01-concepts/` notes — added missing `source: template` tag
+  - 3 LES files — added missing `updated: 2026-03-25`
+  - 4 GLO files (adr, atomic-note, moc, vertical-slice) — added missing `updated: 2026-03-25`
+- **`/debug` command** — added note clarifying that `superpowers:systematic-debugging` extends (not overrides) the 4-phase structure
+
+---
+
+## [0.9.0] — 2026-04-03
+
+### Added
+- **Context7 integration** — 7 commands now fetch up-to-date library and framework documentation during coding workflows, preventing stale API knowledge from causing incorrect designs, implementations, or diagnoses:
+  - `/design fe` / `/design be` — queries framework/library docs after codebase exploration; used as source of truth when filling design sections
+  - `/implement` — queries docs for libraries referenced in design docs; fetched context is passed to FE/BE sub-agents
+  - `/debug` Phase 2 — queries library docs during pattern analysis to verify expected behavior before forming hypotheses
+  - `/issue` Step 2 — delegates to `/debug` Phase 2 context7 lookup automatically (no duplicate call)
+  - `/code-review` Step 2b — queries docs for library APIs appearing in the diff to flag deprecated or incorrect usage
+  - `/testing` Step 2 — queries test framework docs (Jest, Vitest, Playwright, Cypress, etc.) when E2E setup patterns are involved
+  - `/dependency-update` Step 3 — queries migration guides for major version bumps instead of manually reading CHANGELOGs
+- **Context7 Integration section in `CLAUDE.md`** — documents which commands use it, the two-step tool pattern (`resolve-library-id` → `query-docs`), and the graceful degradation guarantee
+
+### Design
+- All integration points are advisory and conditional: "if context7 is available … if not, proceed with codebase patterns and existing knowledge." No command fails when the plugin is absent.
+- Max 3 library lookups per command invocation to keep context window overhead bounded.
+
+---
+
+## [0.8.0] — 2026-04-03
+
+### Added
+- **User story format for tasks** — each non-infra task in `/new-sprint` must now be phrased as `"As a [role], I want [action], so that [outcome]."` The user story is the task identifier, replacing the freeform title
+- **E2E Validation Scenarios** — structured `GIVEN/WHEN/THEN` blocks (min 2 per `feat` task) written as rendered markdown below the task table; downstream `/requirement` seeds ACs directly from these scenarios
+- **Vertical Slice HARD-GATE** in `/new-sprint` Step 3 — auto-catches layer-only tasks (BE-only API, FE-only component) and forces rephrase/merge before coverage check; built-in violation examples: "Create API endpoint for X → merge into story calling it"
+- **`infra` task type** — explicit fourth type (`feat / fix / chore / infra`); only `infra` tasks are exempt from user story format; commit type mapping added: `infra → chore`
+- `/run-tasks-p` command — headless `claude -p` variant of `/run-tasks`; same two-phase pipeline but uses subprocesses instead of Agent tool; outputs go to `.claude/rtp/[run-id]/` logs; parent context stays lean; use when running many tasks
+- Bridge commands `/brainstorm`, `/write-plan`, `/execute-plan` — invoke superpowers skills at specific integration points with full sprint context passed through
+- Superpowers skill hooks — 8 integration points wired into existing commands: `brainstorming` (`/brainstorm`), `writing-plans` (`/write-plan`), `executing-plans`/`subagent-driven-development` (`/execute-plan`), `systematic-debugging` (`/debug`), `verification-before-completion` (`/implement` Step 4), `requesting-code-review`/`receiving-code-review` (`/code-review`), `using-git-worktrees` (`/implement` Step 0b), `finishing-a-development-branch` (`/git-commit` Step 8)
+- `.claude/rules/superpowers.md` — priority rules: template commands always win over superpowers orchestrator; file path overrides for superpowers default save paths; graceful degradation guarantee
+- `HARD-GATE: vertical slice` entry in `_WORKFLOW-REF.md` Superpowers-Inspired Principles table
+
+### Changed
+- **Sub-tasks table** — `Title` column → `User Story`; `Type` values clarified to `feat / fix / chore / infra`; separate `E2E Scenario` column removed (replaced by structured E2E Validation Scenarios section below the table)
+- **Two stacked HARD-GATEs merged** — 13-point check and vertical slice check combined into one gate with two named checks (A and B); single re-present cycle on failure
+- **`SPRINT-OVERVIEW-TEMPLATE.md`** — sub-tasks table updated to new format; E2E Validation Scenarios section template added
+- **`requirement.md`** — seeds ACs from sprint-level E2E Validation Scenarios; Overview expands from User Story instead of old one-sentence scenario; duplicate clarification paragraph removed
+
+### Fixed
+- 22 stale `[Title]` / `[Task Title]` references swept across all workflow files: `run-tasks.md`, `run-tasks-p.md`, `code-review.md`, `git-commit.md`, `status.md`, all 5 task templates (`REQUIREMENT`, `FRONTEND-DESIGN`, `BACKEND-DESIGN`, `ISSUE`, `RETRO-TASK`), 4 skill files (`security-review`, `db-schema-review`, `accessibility-review`, `session-handoff`), `pr-create` skill, `docs/BACKLOG.md`
+- E2E Validation Scenarios were inside a markdown code fence in `new-sprint.md` but outside in `SPRINT-OVERVIEW-TEMPLATE.md` — fixed: scenarios are now consistently rendered markdown so `/requirement` can parse them as a named section
+- `infra` task type had no defined commit type — documented as `chore` in `_WORKFLOW-REF.md` Commit Format section
+
+---
+
 ## [0.7.0] — 2026-03-27
 
 ### Added
