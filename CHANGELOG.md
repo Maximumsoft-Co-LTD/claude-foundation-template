@@ -4,6 +4,36 @@ All notable changes to claude-foundation-template are documented here.
 
 ---
 
+## [0.12.0] — 2026-04-08
+
+### Added
+- **Confidence Gate** — AI must self-assess >= 90% confidence before proceeding with any workflow command. If below threshold, stops and asks targeted clarifying questions instead of guessing.
+  - New rule file: `.claude/rules/confidence-gate.md` — defines the 90% threshold, 5 assessment dimensions (requirement clarity, codebase familiarity, AC coverage, dependency awareness, approach clarity), output format for blocked state, and anti-gaming rules
+  - Gate step embedded in 11 workflow commands, positioned after context loading but before main work begins:
+
+    | Command | Gate step | Position |
+    |---------|-----------|----------|
+    | `/implement` | Step 1c | After readiness check, before writing tests |
+    | `/design` | Step 1c | After clarify ambiguities, before filling design |
+    | `/requirement` | Step 1c | After clarify ambiguities, before drafting |
+    | `/discovery` | Step 2b | After receiving user answers, before filling doc |
+    | `/code-review` | Step 1b | After loading context, before spec review |
+    | `/testing` | Step 2b | After verifying env, before TDD coverage check |
+    | `/debug` | Phase 2b | After pattern analysis, before hypothesis |
+    | `/issue` | Step 1b | After parse/classify, before investigation |
+    | `/execute-plan` | Step 1b | After loading context, before worktree setup |
+    | `/write-plan` | Step 1b | After loading context, before invoking skill |
+    | `/new-sprint` | Step 2b | After creating overview, before task breakdown |
+
+  - Each gate assesses **command-specific dimensions** (e.g. `/implement` checks TDD plan clarity; `/debug` checks reproducibility and root cause narrowing)
+  - Anti-gaming rules: confidence must be evidence-based (files read, context received) — not assumptions; "I think I know" ≠ 90%
+  - `CLAUDE.md` Key Constraints updated with confidence gate mention
+
+### Design
+- Commands NOT gated (and why): `/status` (read-only), `/next-task` (navigation), `/git-commit` (mechanical), `/retro-task`/`/retro-sprint` (backward-looking), `/brainstorm` (already has approach HARD-GATE), `/run-tasks`/`/run-tasks-p` (orchestrators — individual commands inside have their own gates)
+
+---
+
 ## [0.11.0] — 2026-04-03
 
 ### Added

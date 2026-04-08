@@ -20,7 +20,7 @@ Or adopt manually into an existing project — see [Manual Adoption](#manual-ado
 | `CLAUDE.md` | Project instructions loaded by Claude Code on every session |
 | `.claude/commands/` | Slash command definitions (`/discovery`, `/implement`, etc.) |
 | `.claude/commands/_WORKFLOW-REF.md` | Full workflow reference: commands, status lifecycle, story points, TDD rules |
-| `.claude/rules/` | Path-scoped convention files auto-loaded when Claude edits matching files |
+| `.claude/rules/` | Path-scoped convention files auto-loaded when Claude edits matching files (includes confidence gate) |
 | `.claude/hooks/` | Python scripts for PostToolUse automation (lint + TDD test enforcement) |
 | `.claude/settings.json` | Hook wiring — connects lifecycle events to hook scripts |
 | `.claude/skills/` | Optional skill commands that extend the core workflow |
@@ -433,6 +433,22 @@ brain/
 **How it grows:** `/retro-sprint` Step 6 extracts learnings and writes them as atomic notes — no separate command needed. Over time the brain becomes the authoritative source for non-obvious project knowledge that can't be derived from the code alone.
 
 **How it's read:** Claude reads `BRAIN-INDEX.md` only when the task requires it — before workflow commands like `/discovery`, `/implement`, or `/design`. Navigation is always MOC → targeted notes — never the whole vault. Full access protocol: `.claude/rules/brain.md`.
+
+---
+
+## Confidence Gate
+
+Every workflow command includes a **confidence gate** — before starting the main work, the AI assesses whether it has enough context to succeed. If confidence is below **90%**, it stops and asks targeted questions instead of guessing.
+
+The gate checks 5 dimensions: requirement clarity, codebase familiarity, AC coverage, dependency awareness, and approach clarity. Each command's gate is **command-specific** — `/implement` checks TDD plan readiness, `/debug` checks bug reproducibility, `/design` checks stack understanding, etc.
+
+Anti-gaming rules prevent confidence inflation: the score must be backed by evidence (files actually read, context actually received), not assumptions. "I think I know" is not 90%.
+
+**11 commands gated:** `/discovery`, `/requirement`, `/design`, `/implement`, `/execute-plan`, `/write-plan`, `/new-sprint`, `/code-review`, `/testing`, `/debug`, `/issue`
+
+**Not gated (by design):** `/status` (read-only), `/next-task` (navigation), `/git-commit` (mechanical), `/retro-task`/`/retro-sprint` (reflection), `/brainstorm` (already has approach HARD-GATE)
+
+Full rules: `.claude/rules/confidence-gate.md`
 
 ---
 
