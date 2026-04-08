@@ -22,6 +22,22 @@ Read:
 
 ---
 
+## Step 1b — Confidence Gate
+
+Assess confidence that you can investigate and resolve this issue based on context loaded so far.
+
+Key dimensions:
+- Bug classified correctly (severity)?
+- Relevant AC identified — you know what behavior should be?
+- Codebase area locatable — you know where to look?
+- Design doc available for expected behavior reference?
+- Root cause investigatable — enough information to start `/debug` phases?
+
+**>= 90%** → proceed to Step 2.
+**< 90%** → **STOP.** State what you know, what you don't, and what you need. Do NOT start investigating until confidence reaches 90%. See `.claude/rules/confidence-gate.md` for output format and anti-gaming rules.
+
+---
+
 ## Step 2 — Investigate
 
 Follow `/debug` Phases 1–3 (root cause investigation → pattern analysis → hypothesis testing).

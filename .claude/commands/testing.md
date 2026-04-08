@@ -34,6 +34,22 @@ If context7 is not available, proceed using existing codebase test patterns.
 
 ---
 
+## Step 2b — Confidence Gate
+
+Assess confidence that you can run and verify the full test suite for this task based on all context loaded so far.
+
+Key dimensions:
+- Test environment ready — DB, services, env vars confirmed?
+- ACs loaded — every AC clear enough to trace to a test?
+- TDD/E2E test plan rows understood — you know what tests should exist?
+- Test framework setup understood — how to run, what output to expect?
+- Regression scope clear — full suite location known?
+
+**>= 90%** → proceed to Step 3.
+**< 90%** → **STOP.** State what you know, what you don't, and what you need. Do NOT run tests until confidence reaches 90%. See `.claude/rules/confidence-gate.md` for output format and anti-gaming rules.
+
+---
+
 ## Step 3 — Cross-check TDD coverage
 
 For every row in all TDD and E2E Test Plan tables, verify a corresponding test exists in the codebase. List any **missing tests** — these must be written before proceeding.

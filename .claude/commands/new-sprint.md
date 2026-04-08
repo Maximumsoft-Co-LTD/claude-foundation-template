@@ -26,6 +26,22 @@ Arguments: `[sprint-id] [epic description]`  — e.g. `SP2 Build user authentica
 
 ---
 
+## Step 2b — Confidence Gate
+
+Assess confidence that you can break this epic into well-scoped, vertical-slice tasks based on all context loaded so far.
+
+Key dimensions:
+- Epic scope clear — problem, users, and goals understood?
+- Discovery doc available — constraints and chosen approach known?
+- Task sizing feasible — enough detail to estimate points?
+- Vertical slice principle applicable — you can identify user-visible outcomes?
+- Global task counter found — no ID collision risk?
+
+**>= 90%** → proceed to Step 3.
+**< 90%** → **STOP.** State what you know, what you don't, and what you need. Do NOT propose tasks until confidence reaches 90%. See `.claude/rules/confidence-gate.md` for output format and anti-gaming rules.
+
+---
+
 ## Step 3 — Propose sub-task breakdown
 
 Rules:

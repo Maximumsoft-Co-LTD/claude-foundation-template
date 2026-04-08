@@ -49,6 +49,22 @@ Wait for user's answers.
 
 ---
 
+## Step 2b — Confidence Gate
+
+Assess confidence that you can fill the discovery doc completely and accurately based on the user's input and answers so far.
+
+Key dimensions:
+- Problem statement understood — who, what, why, how often?
+- Users and stakeholders identified?
+- Constraints and hard limits known?
+- Enough information to propose at least 2 concrete approaches?
+- Risks and scope realistic to assess?
+
+**>= 90%** → proceed to Step 3.
+**< 90%** → **STOP.** State what you know, what you don't, and what you need. Ask targeted follow-up questions. Do NOT fill the doc with guesses. See `.claude/rules/confidence-gate.md` for output format and anti-gaming rules.
+
+---
+
 ## Step 3 — Fill the doc
 
 1. Fill every section from user's answers. Write `TBD — needs input` for anything unanswered.

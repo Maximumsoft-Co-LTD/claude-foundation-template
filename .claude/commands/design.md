@@ -108,6 +108,22 @@ Follow the clarification protocol in `.claude/rules/clarification.md`.
 
 ---
 
+## Step 1c — Confidence Gate
+
+Assess confidence that you can write a complete, correct design for this task based on all context loaded so far.
+
+Key dimensions:
+- Requirements and ACs clear and unambiguous?
+- Codebase patterns explored — naming, state, routing, API, test conventions understood?
+- Stack/library APIs understood (from context7 or existing knowledge)?
+- Constraints from discovery doc accounted for?
+- Points-based scope clear — you know exactly which sections to fill?
+
+**>= 90%** → proceed to Step 2.
+**< 90%** → **STOP.** State what you know, what you don't, and what you need. Do NOT start designing until confidence reaches 90%. See `.claude/rules/confidence-gate.md` for output format and anti-gaming rules.
+
+---
+
 ## Step 2 — Fill the complete design
 
 For every section required at this point level, write implementation-ready content using the matching template as structure.

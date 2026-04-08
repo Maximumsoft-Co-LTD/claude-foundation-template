@@ -43,6 +43,22 @@ Run `git diff main...HEAD` to identify all changed files.
 
 ---
 
+## Step 1b — Confidence Gate
+
+Assess confidence that you can perform a thorough, accurate code review based on all context loaded so far.
+
+Key dimensions:
+- ACs loaded and understood — every AC clear enough to verify?
+- Design docs available — FE/BE specs to check implementation against?
+- Changed files identified — diff scope understood?
+- Codebase conventions understood — can you spot deviations?
+- Security and performance patterns known for this stack?
+
+**>= 90%** → proceed to Step 2a.
+**< 90%** → **STOP.** State what you know, what you don't, and what you need. Do NOT start reviewing until confidence reaches 90%. See `.claude/rules/confidence-gate.md` for output format and anti-gaming rules.
+
+---
+
 ## Step 2a — Stage 1: Spec Compliance Review
 
 **Superpowers integration:** If the superpowers plugin is available, dispatch the spec compliance reviewer using `Skill("superpowers:requesting-code-review")` — it provides a spec-document-reviewer subagent with precise context. Otherwise, perform the review inline below.

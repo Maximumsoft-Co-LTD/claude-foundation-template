@@ -29,6 +29,22 @@ Read **in parallel**:
 
 ---
 
+## Step 1b — Confidence Gate
+
+Assess confidence that you can execute this plan successfully based on all context loaded so far.
+
+Key dimensions:
+- Plan file valid — all steps concrete, no TBD sections?
+- Requirement and design docs loaded — ACs clear?
+- Codebase understood — plan file paths reference real files?
+- Dependencies between plan steps understood?
+- Test strategy clear — you know how to verify each step?
+
+**>= 90%** → proceed to Step 2.
+**< 90%** → **STOP.** State what you know, what you don't, and what you need. Do NOT start execution until confidence reaches 90%. See `.claude/rules/confidence-gate.md` for output format and anti-gaming rules.
+
+---
+
 ## Step 2 — Set up isolated worktree
 
 If the superpowers plugin is available, invoke:

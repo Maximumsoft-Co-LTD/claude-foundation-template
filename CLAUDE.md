@@ -36,6 +36,7 @@ A workflow template for Claude Code. Provides structured sprint management, TDD 
 - Tasks sized at 13 story points must be broken down before any work begins
 - Tests must be written before implementation code — never mocks at the integration layer
 - Hooks require Python >= 3.10 (scripts use `X | Y` union type syntax)
+- **Confidence Gate:** AI must be >= 90% confident before proceeding with any workflow command. If below 90%, STOP and ask for clarification. See `.claude/rules/confidence-gate.md`
 
 ---
 

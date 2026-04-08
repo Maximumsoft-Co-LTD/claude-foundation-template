@@ -54,6 +54,22 @@ Follow the clarification protocol in `.claude/rules/clarification.md`.
 
 ---
 
+## Step 1c — Confidence Gate
+
+Assess confidence that you can write a complete, correct requirement doc for this task based on all context loaded so far.
+
+Key dimensions:
+- Epic scope and this task's role within it clear?
+- User stories concrete — you know the roles, goals, and outcomes?
+- Success criteria measurable — not vague or subjective?
+- Edge cases and failure paths identifiable?
+- Dependencies and out-of-scope boundaries clear?
+
+**>= 90%** → proceed to Step 2.
+**< 90%** → **STOP.** State what you know, what you don't, and what you need. Do NOT draft the requirement until confidence reaches 90%. See `.claude/rules/confidence-gate.md` for output format and anti-gaming rules.
+
+---
+
 ## Step 2 — Draft the requirement doc
 
 - **Problem Statement** — from discovery doc if available; otherwise from epic Problem Statement scoped to this task.

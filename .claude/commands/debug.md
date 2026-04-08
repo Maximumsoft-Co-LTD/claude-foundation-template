@@ -61,6 +61,22 @@ If 3+ fixes have failed, question the architecture — don't attempt fix #4.
 
 ---
 
+## Phase 2b — Confidence Gate
+
+Assess confidence that you have identified the root cause and can fix this bug based on investigation so far.
+
+Key dimensions:
+- Bug reproducible consistently?
+- Root cause narrowed to a specific layer/component?
+- Pattern analysis done — working vs broken code compared?
+- Library API behavior verified (via context7 or docs)?
+- Single hypothesis formed with clear reasoning?
+
+**>= 90%** → proceed to Phase 3.
+**< 90%** → **STOP.** State what you know, what you don't, and what you need. Gather more evidence before attempting any fix. See `.claude/rules/confidence-gate.md` for output format and anti-gaming rules.
+
+---
+
 ## Phase 3 — Hypothesis and Testing
 
 1. **Form single hypothesis** — "I think X causes this because Y."

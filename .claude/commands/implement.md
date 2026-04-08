@@ -112,6 +112,22 @@ For each AC in requirement: is there at least one test row in FE or BE TDD Test 
 
 ---
 
+## Step 1c — Confidence Gate
+
+Assess confidence that you can implement this task successfully based on all context loaded so far.
+
+Key dimensions:
+- Design docs complete and unambiguous?
+- Codebase patterns understood (from brain + exploration)?
+- TDD test plan clear — you know exactly what tests to write?
+- Dependencies and side effects identified?
+- Implementation approach concrete (not vague)?
+
+**>= 90%** → proceed to Step 2.
+**< 90%** → **STOP.** State what you know, what you don't, and what you need. Do NOT write any code until confidence reaches 90%. See `.claude/rules/confidence-gate.md` for output format and anti-gaming rules.
+
+---
+
 ## Step 2 — Write failing tests
 
 **If `SHARED_TYPES`:** write shared type/interface files first, then proceed.

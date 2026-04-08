@@ -20,6 +20,22 @@ Validate: missing requirement or empty ACs → stop: "Run `/requirement [task-id
 
 ---
 
+## Step 1b — Confidence Gate
+
+Assess confidence that you can produce a complete, correct implementation plan based on all context loaded so far.
+
+Key dimensions:
+- Requirement doc complete — ACs specific and testable?
+- Design docs available — architecture, components, API contracts clear?
+- Codebase structure understood — file paths for plan steps identifiable?
+- TDD approach clear — you know test-first ordering for every step?
+- Task scope sized correctly — no 13pt task that should be split?
+
+**>= 90%** → proceed to Step 2.
+**< 90%** → **STOP.** State what you know, what you don't, and what you need. Do NOT start planning until confidence reaches 90%. See `.claude/rules/confidence-gate.md` for output format and anti-gaming rules.
+
+---
+
 ## Step 2 — Invoke superpowers:writing-plans
 
 Invoke the writing-plans skill with the loaded task context:
