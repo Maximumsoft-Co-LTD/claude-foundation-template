@@ -35,7 +35,7 @@ Use `/run-tasks-p` when running many tasks and parent context size is a concern.
 | Command | Args | When to use |
 |---------|------|-------------|
 | `/discovery` | `[disc-id] [name]` | Before planning anything — understand the problem first |
-| `/new-sprint` | `[sprint-id] [epic description]` | Turn a discovered epic into a sprint with scaffolded sub-tasks |
+| `/new-sprint` | `[sprint-id] [epic description]` | Turn a discovered epic into a sprint with scaffolded stories |
 | `/requirement` | `[task-id]` | Draft ACs + requirement doc for a task before design begins |
 | `/design` | `[fe\|be] [task-id]` | Write FE or BE design + implementation plan + TDD test plan before touching any code |
 | `/implement` | `[task-id]` | Write failing tests then implement following FE + BE design docs |
@@ -173,7 +173,7 @@ These principles are adopted from [obra/superpowers](https://github.com/obra/sup
 | **Subagent-driven development** ✦ | `/run-tasks` Step 6, `/execute-plan` | 3-agent pipeline: implementer → spec reviewer → quality reviewer · `superpowers:subagent-driven-development` |
 | **Finishing a branch** ✦ | `/git-commit` Step 8 | 4 structured options: merge / PR / keep / discard · `superpowers:finishing-a-development-branch` |
 | **HARD-GATE: approach approval** | `/discovery` Step 3b | No `/new-sprint` until user explicitly picks an approach |
-| **HARD-GATE: task breakdown** | `/new-sprint` Step 3 | Wait for user to confirm sub-task table before writing docs |
+| **HARD-GATE: story breakdown** | `/new-sprint` Step 3 | Wait for user to confirm stories table before writing docs |
 | **HARD-GATE: vertical slice** | `/new-sprint` Step 3 | Every non-infra task must be a user story with user-facing input, user-visible outcome, and cross-layer scope |
 | **HARD-GATE: AC confirmation** | `/requirement` Step 3 | Wait for "confirm" before saving requirement doc |
 | **HARD-GATE: design clarification** | `/design` Step 1b | If ambiguities exist, collect all into one message and wait |

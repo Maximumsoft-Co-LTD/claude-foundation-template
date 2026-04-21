@@ -72,7 +72,7 @@ Read **Points** from requirement doc Metadata. Apply points-based section scope 
 | Points | Required sections |
 |--------|------------------|
 | **1pt** | Approach, Component list, 1 TDD test per AC |
-| **2pt** | + Component Breakdown, API Contracts Consumed, State & Data Flow, Fail State table |
+| **2pt** | + Scope Overview, Component Breakdown, API Contracts Consumed, State & Data Flow, Fail State table |
 | **3pt** | + UI/UX Overview, Loading & Skeleton States, Implementation Plan, E2E Test Plan, Fail Case Matrix |
 | **5pt+** | All sections — User Journey Map, Behavior Mapping, Routing, Responsive, Analytics, Performance, Fail Flows, Accessibility, State Inventory |
 | **8pt** | All sections + ADR entries for non-obvious design choices |
@@ -81,7 +81,7 @@ Read **Points** from requirement doc Metadata. Apply points-based section scope 
 | Points | Required sections |
 |--------|------------------|
 | **1pt** | API Endpoints (method, path, request, response, key errors), 1 TDD test per AC |
-| **2pt** | + Input Validation Rules, full TDD Test Plan (happy path + key error per AC) |
+| **2pt** | + Scope Overview, Input Validation Rules, full TDD Test Plan (happy path + key error per AC) |
 | **3pt** | + Data Models, Service/Layer Breakdown, Business Logic, Error Handling Strategy, Implementation Plan |
 | **5pt+** | All sections — Authorization & Roles, Sequence Diagram, Class Diagram, Event Publishing, Security, Logging, Env Vars, Caching, DB Migrations, External Deps, Performance |
 | **8pt** | All sections + ADR entries, performance benchmarks, rollback plan |
@@ -129,7 +129,8 @@ Key dimensions:
 For every section required at this point level, write implementation-ready content using the matching template as structure.
 
 **Both types:**
-- **Implementation Plan** — file paths must be **real paths** from Existing Code Context. `/implement` follows this plan exactly.
+- **Scope Overview** — 3–6 bullets. High-level scope for orientation BEFORE the detailed Implementation Plan. Group by layer or feature area (fe: Routing / Components / State / API / E2E. be: DB / Models / Service / Controller / Tests). Each bullet = one paragraph-level chunk of work, not a micro-step. Bullets must match the Implementation Plan's phases — if Scope Overview has "BE endpoint" but Implementation Plan has no controller step, that's a gap.
+- **Implementation Plan** (engineering tasks) — each row below is a Scrum engineering task (layer-level work, NOT a story). Implementers follow these checkboxes in sequence. File paths must be **real paths** from Existing Code Context. `/implement` follows this plan exactly.
   - Every step = single action, 2–5 min. Never combine "write test AND implement."
   - Each step format: `- [ ] [action] → [exact file path] → verify: [command]`
   - Example:
@@ -182,6 +183,7 @@ Re-read the full design doc and verify:
 - [ ] Every Implementation Plan step is a single action (2–5 min).
 - [ ] No required section (per point level) is empty, `TBD`, or missing.
 - [ ] Coverage check shows no unresolved ⚠️ items.
+- [ ] Scope Overview (if required at this point level): 3–6 bullets, each maps to at least one phase in the Implementation Plan. No orphan bullet, no orphan phase.
 
 **If fe additionally:**
 - [ ] Every AC has at least one E2E scenario in the E2E Test Plan.

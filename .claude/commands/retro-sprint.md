@@ -11,7 +11,7 @@ Arguments: `[sprint-id]`  — e.g. `SP1`
 Parse `[sprint-id]`. Read `docs/BACKLOG.md`:
 - Any task NOT `done` → stop: "Tasks still open: [list]. Complete all before running /retro-sprint."
 
-Read `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — Goals, Success Metrics, Sub-tasks, Definition of Done.
+Read `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — Goals, Success Metrics, Stories, Definition of Done.
 
 ---
 

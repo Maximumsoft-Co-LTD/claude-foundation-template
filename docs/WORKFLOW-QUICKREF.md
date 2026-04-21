@@ -166,7 +166,7 @@ Every gate below is a mandatory stop. Do not proceed until the condition is met.
 ┌──────────────────────────────────────────────────────────────────┐
 │ GATE 2 — Task Breakdown Confirmation                             │
 │ Command: /new-sprint Step 3                                      │
-│ Stop: present sub-task table, wait for user to confirm or edit.  │
+│ Stop: present stories table, wait for user to confirm or edit.   │
 │ Do not write docs until user says "confirm."                     │
 └──────────────────────────────────────────────────────────────────┘
 

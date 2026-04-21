@@ -1,7 +1,7 @@
 # /new-sprint
 Workflow position: **/discovery → START → /requirement**
 
-Create a new sprint from an epic description and scaffold all sub-tasks.
+Create a new sprint from an epic description and scaffold all stories.
 Arguments: `[sprint-id] [epic description]`  — e.g. `SP2 Build user authentication with OAuth`
 
 ---
@@ -15,6 +15,11 @@ Arguments: `[sprint-id] [epic description]`  — e.g. `SP2 Build user authentica
 3. Check `docs/discovery/` for a discovery doc related to this epic:
    - **Not found** → warn: "⚠️ No discovery doc found. Running `/discovery` first is recommended. Continue? (y/n)"
    - **Found** → read it (Problem Statement, chosen approach, scope, constraints). Check for unresolved open questions. If any → warn and list them: "These may affect task scope. Continue? (y/n)"
+   - **Epic Breakdown present** (multi-epic discovery) → find the row matching `[epic description]` (match by title or scope — fuzzy match is fine; ask user to confirm if ambiguous). If that row has `Depends On = Ek`:
+     - Look up Ek's title in the Epic Breakdown.
+     - Scan `docs/BACKLOG.md` for a sprint whose epic title matches Ek's title and status is `done`.
+     - If no such sprint exists or it is not `done` → warn: "⚠️ This epic depends on [Ek: epic title], which has no completed sprint yet. Continue? (y/n)"
+   - Also read **Shared entities / cross-epic concerns** from Epic Breakdown — carry forward to the Stories step so shared components are owned by the first epic that needs them.
 
 ---
 
@@ -42,7 +47,7 @@ Key dimensions:
 
 ---
 
-## Step 3 — Propose sub-task breakdown
+## Step 3 — Propose story breakdown
 
 Rules:
 - Each task is completable by one person in 1–3 days.
@@ -58,7 +63,7 @@ Rules:
 
 Present the breakdown:
 ```
-Proposed sub-tasks for [sprint-id] — [epic title]:
+Proposed stories for [sprint-id] — [epic title]:
 (Last used: T[NNN] → starting from T[NNN+1])
 
 | Task ID  | User Story | Type | Depends On | Points |
@@ -120,7 +125,7 @@ Wait for confirmation.
 
 ## Step 4 — Update docs
 
-1. Fill the Sub-tasks table in `[sprint-id]-overview.md` with the confirmed list.
+1. Fill the Stories table in `[sprint-id]-overview.md` with the confirmed list.
 2. Add sprint section to `docs/BACKLOG.md`:
 
 ```markdown

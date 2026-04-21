@@ -41,7 +41,8 @@
 ### Out of Scope
 -
 
-## Sub-tasks
+## Stories
+<!-- Each row = one Scrum Story (vertical slice). Infra-only tasks use type `infra`. -->
 <!-- mermaid dependency diagram if helpful -->
 
 | Task ID | User Story | Type | Depends On | Points | Status |
@@ -79,7 +80,7 @@
 |      |           |        |            |
 
 ## Definition of Done (Sprint Level)
-- [ ] All sub-tasks done
+- [ ] All stories done
 - [ ] All sprint Goals observably achieved
 - [ ] Every Success Metric has an actual result
 - [ ] Full regression suite passes

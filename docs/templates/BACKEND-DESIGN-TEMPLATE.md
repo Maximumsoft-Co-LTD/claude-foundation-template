@@ -245,6 +245,12 @@
 
 ---
 
+## Scope Overview
+<!-- 2pt+ — 3–6 bullets. High-level scope for orientation BEFORE the detailed Implementation Plan. Group by layer or feature area (e.g. DB / Models / Service / Controller / Tests). Each bullet = one paragraph-level chunk of work, not a micro-step. -->
+- **[Area]:** [what gets built at the high level]
+
+---
+
 ## Implementation Plan
 <!-- 3pt+ -->
 <!-- Ordered steps. /implement follows this exactly. -->

@@ -142,6 +142,10 @@
 
 -
 
+## Scope Overview
+<!-- 2pt+ — 3–6 bullets. High-level scope for orientation BEFORE the detailed Implementation Plan. Group by layer or feature area (e.g. Routing / Components / State / API / E2E). Each bullet = one paragraph-level chunk of work, not a micro-step. -->
+- **[Area]:** [what gets built at the high level]
+
 ## Implementation Plan
 <!-- 3pt+ -->
 <!-- Ordered steps. Each step: [N]. [file path] — create/modify — [what] — [design ref]. /implement follows this exactly. -->

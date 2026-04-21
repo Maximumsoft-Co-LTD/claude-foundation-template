@@ -201,15 +201,35 @@ Full quick reference (flow diagram, hard gates, escape hatches): `docs/WORKFLOW-
 
 ---
 
+## Scrum Hierarchy
+
+The template uses standard Agile/Scrum vocabulary — every term maps 1:1 to a concrete artifact in the workflow.
+
+| Template term | Scrum term | Deployable? | User value? |
+|---------------|-----------|-------------|-------------|
+| **Sprint** (`SP[N]`) | Epic — business theme across stories | no | no |
+| **Task** (`SP[N]-T[NNN]`) | Story — vertical slice (FE+BE+data) | **yes** | **yes** |
+| **Scope Overview bullet** (in design doc) | Feature-area summary inside a story | no | no |
+| **Implementation Plan row** (in design doc) | Engineering task — layer-level work | no | no |
+| **Implementation Plan checkbox** | Subtask — atomic 2–5 min action | no | no |
+
+"Task" in this repo always means a Scrum **Story** unless the context explicitly says "engineering task." Every spawned sub-agent receives this mapping as a briefing block so it knows exactly which layer it is working on. Full authoritative definition lives in `CLAUDE.md`.
+
+**Multi-epic discoveries:** `/discovery` now enumerates each epic as a row in a dependency-ordered Epic Breakdown table. `/new-sprint` reads the breakdown and warns if a sprint is started whose prerequisite epic has not been completed yet.
+
+---
+
 ## Task Format
 
-Each task created by `/new-sprint` is a **user story** — `"As a [role], I want [action], so that [outcome]."` — not a layer-level technical title. Each story is a vertical slice: FE + BE + data, delivering a user-visible outcome testable end-to-end.
+Each task created by `/new-sprint` is a **user story** (Scrum Story) — `"As a [role], I want [action], so that [outcome]."` — not a layer-level technical title. Each story is a vertical slice: FE + BE + data, delivering a user-visible outcome testable end-to-end.
 
 Exception: pure infrastructure tasks (DB migrations, CI setup) use `"[Infra] what it enables"` format and are marked type `infra`.
 
 Each task also has **E2E Validation Scenarios** — numbered `GIVEN/WHEN/THEN` steps written at sprint planning time. `/requirement` seeds its acceptance criteria directly from these scenarios.
 
 A **Vertical Slice HARD-GATE** in `/new-sprint` catches layer-only tasks automatically ("Build login API" → must be merged into the user story that calls it) before sprint planning is confirmed.
+
+Requirement docs (1pt+) include a **Value** section — 1–3 bullets on user impact + business outcome (concrete, with metric if known). Design docs (2pt+) include a **Scope Overview** — 3–6 bullets for orientation before the detailed Implementation Plan.
 
 ---
 

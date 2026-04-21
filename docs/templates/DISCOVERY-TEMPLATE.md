@@ -151,7 +151,21 @@
 
 ---
 
-## 16. Glossary / Ubiquitous Language
+## 16. Epic Breakdown
+<!-- Populate when Estimated sprints > 1. Each epic = one /new-sprint invocation. Order by dependency (E1 first, then E2 depending on E1, etc.). If Estimated sprints = 1, leave the table empty. -->
+
+| # | Epic Title | One-line Scope | Depends On | Priority |
+|---|-----------|---------------|------------|----------|
+| E1 | [epic name] | [what it delivers to users] | — | critical / high / medium / low |
+| E2 | [epic name] | [what it delivers to users] | E1 | high |
+
+**Shared entities / cross-epic concerns:**
+<!-- Things used by multiple epics (user model, auth layer, shared component library). First epic to need it owns it. -->
+-
+
+---
+
+## 17. Glossary / Ubiquitous Language
 <!-- Optional: include for 5pt+ or projects with domain-specific vocabulary that needs shared definition -->
 | Term | Definition | Also Known As | NOT the Same As |
 |------|-----------|---------------|-----------------|
@@ -159,9 +173,13 @@
 
 ---
 
-## 17. Next Steps
+## 18. Next Steps
 
 - [ ] Resolve all open questions
 - [ ] Get stakeholder sign-off on chosen approach
 - [ ] Update status to `backlog` when ready
-- [ ] When ready → `/new-sprint [sprint-id] "[epic description]"`
+- [ ] When ready → one `/new-sprint` invocation per epic in order:
+  - `/new-sprint SP[N] "[E1 epic title]"`
+  - `/new-sprint SP[N+1] "[E2 epic title]"` (after E1 sprint is done)
+  - ...
+- [ ] If single-epic discovery → just `/new-sprint [sprint-id] "[epic description]"`

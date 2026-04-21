@@ -109,6 +109,21 @@ STATUS=$(cat .claude/rtp/[run-id]/[task-id]-[phase].status 2>/dev/null || echo "
    done
    ```
 
+   **Scrum Hierarchy** — write to file once, inject into every subprocess prompt:
+   ```bash
+   HIERARCHY_FILE=".claude/rtp/$RUN_ID/scrum-hierarchy.md"
+   cat > "$HIERARCHY_FILE" <<'EOF'
+   --- SCRUM HIERARCHY ---
+   Sprint (SP[N])               = Scrum Epic — business theme, not deployable alone
+   Task (SP[N]-T[NNN])          = Scrum Story — vertical slice (FE+BE+data), user-facing, deployable
+   Scope Overview bullet        = feature-area summary inside the story (not a story)
+   Implementation Plan row      = Scrum engineering task — layer-level work, NOT user-facing
+   Implementation Plan checkbox = Scrum Subtask — atomic 2–5 min action
+   You are working on a Story. Never expand scope beyond the ACs. Never treat Implementation Plan rows as stories.
+   ---
+   EOF
+   ```
+
    **Section extractor** — helper function to reduce injection size:
    ```bash
    # extract_section FILE "Section Name" — returns section content or full file if small
@@ -152,6 +167,8 @@ run_requirement() {
 SPRINT_ID=[sprint-id]
 RUN_DIR=.claude/rtp/$RUN_ID
 HEADLESS=true
+
+$(cat $HIERARCHY_FILE)
 
 --- SPRINT CONTEXT ---
 $(cat $SNAPSHOT_FILE)
@@ -226,6 +243,8 @@ SPRINT_ID=[sprint-id]
 RUN_DIR=.claude/rtp/$RUN_ID
 HEADLESS=true
 
+$(cat $HIERARCHY_FILE)
+
 --- SPRINT CONTEXT ---
 $(cat $SNAPSHOT_FILE)
 ---
@@ -293,6 +312,8 @@ run_be_design() {
 SPRINT_ID=[sprint-id]
 RUN_DIR=.claude/rtp/$RUN_ID
 HEADLESS=true
+
+$(cat $HIERARCHY_FILE)
 
 --- SPRINT CONTEXT ---
 $(cat $SNAPSHOT_FILE)
@@ -401,6 +422,8 @@ run_pipeline() {
 
   # Extract only needed sections per agent type — reduces context size
   local REQ_AC=$(extract_section "$REQ_DOC" "Acceptance Criteria")
+  local FE_SCOPE=$(extract_section "$FE_DOC" "Scope Overview")
+  local BE_SCOPE=$(extract_section "$BE_DOC" "Scope Overview")
   local FE_IMPL=$(extract_section "$FE_DOC" "Implementation Plan")
   local BE_IMPL=$(extract_section "$BE_DOC" "Implementation Plan")
   local FE_CONTRACTS=$(extract_section "$FE_DOC" "API Contracts")
@@ -414,6 +437,8 @@ SPRINT_ID=$SPRINT_ID
 RUN_DIR=$RUN_DIR
 HEADLESS=true
 
+$(cat $HIERARCHY_FILE)
+
 --- SPRINT CONTEXT ---
 $(cat $SNAPSHOT_FILE)
 ---
@@ -423,8 +448,14 @@ $(cat $MANIFEST_FILE 2>/dev/null)
 --- REQUIREMENT: ACCEPTANCE CRITERIA ---
 $REQ_AC
 ---
+--- FE DESIGN: SCOPE OVERVIEW ---
+$FE_SCOPE
+---
 --- FE DESIGN: IMPLEMENTATION PLAN ---
 $FE_IMPL
+---
+--- BE DESIGN: SCOPE OVERVIEW ---
+$BE_SCOPE
 ---
 --- BE DESIGN: IMPLEMENTATION PLAN ---
 $BE_IMPL
@@ -453,6 +484,8 @@ On error: write BLOCKED: [reason] to that file."
 SPRINT_ID=$SPRINT_ID
 RUN_DIR=$RUN_DIR
 HEADLESS=true
+
+$(cat $HIERARCHY_FILE)
 
 You are the Spec Reviewer for $TASK_ID. Review all git changes against the ACs and API contracts below.
 
@@ -500,6 +533,8 @@ On error: write BLOCKED: [reason] to that file."
 SPRINT_ID=$SPRINT_ID
 RUN_DIR=$RUN_DIR
 HEADLESS=true
+
+$(cat $HIERARCHY_FILE)
 
 --- REQUIREMENT: ACCEPTANCE CRITERIA ---
 $REQ_AC

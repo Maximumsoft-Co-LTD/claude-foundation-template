@@ -61,7 +61,19 @@ This project has a **living knowledge base** in `brain/` — an Obsidian-style v
 
 ## Workflow
 
-Two levels: **Sprint (Epic)** → **Tasks (Sub-tasks)**
+### Scrum hierarchy (authoritative vocabulary)
+
+| Template term | Scrum term | Deployable? | User value? |
+|---------------|-----------|-------------|-------------|
+| **Sprint** (`SP[N]`) | Epic — business theme across multiple stories | no | no |
+| **Task** (`SP[N]-T[NNN]`) | Story — vertical slice (FE+BE+data), user-story format enforced | **yes** | **yes** |
+| **Scope Overview bullet** (in design doc) | Feature-area summary inside a story (not a story itself) | no | no |
+| **Implementation Plan row** (in design doc) | Engineering task — layer-level work | no | no |
+| **Implementation Plan checkbox** | Subtask — atomic 2–5 min action | no | no |
+
+Agents that run template commands inherit this vocabulary. "Task" in this repo ALWAYS means a Scrum Story unless the context explicitly says "engineering task."
+
+### Command chain
 
 Single task: `/discovery → /new-sprint → /requirement → /design fe → /design be → /implement → /issue (loop) → /code-review → /testing → /retro-task → /git-commit → /next-task (repeat per task) → /retro-sprint (once ALL tasks done, includes brain update)`
 

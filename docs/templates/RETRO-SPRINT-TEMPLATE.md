@@ -46,7 +46,7 @@
 | - | - | high / med / low |
 
 ## Definition of Done — Sprint Level
-- [ ] All sub-tasks are `done`
+- [ ] All stories are `done`
 - [ ] All success metrics instrumented and verified
 - [ ] Deployed to production
 - [ ] Sprint retro written

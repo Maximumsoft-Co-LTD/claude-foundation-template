@@ -4,6 +4,61 @@ All notable changes to claude-foundation-template are documented here.
 
 ---
 
+## [0.13.0] — 2026-04-22
+
+### Added
+- **Scrum hierarchy — authoritative vocabulary.** A single 5-row mapping table in `CLAUDE.md` aligns template terms with standard Scrum terms so "task" is never ambiguous.
+
+  | Template term | Scrum term | Deployable? | User value? |
+  |---------------|-----------|-------------|-------------|
+  | **Sprint** (`SP[N]`) | Epic — business theme across stories | no | no |
+  | **Task** (`SP[N]-T[NNN]`) | Story — vertical slice (FE+BE+data) | **yes** | **yes** |
+  | **Scope Overview bullet** | Feature-area summary inside a story | no | no |
+  | **Implementation Plan row** | Engineering task — layer-level work | no | no |
+  | **Implementation Plan checkbox** | Subtask — atomic 2–5 min action | no | no |
+
+  Rationale: `/new-sprint` already enforces 1 task = 1 user story via HARD-GATE, but fresh sub-agents had no shared vocabulary. Without it, "task" could mean a Scrum Story OR an engineering task — causing scope expansion or mid-layer stalls.
+
+- **SCRUM HIERARCHY briefing injected into every spawned agent.** A 6-line block is now prepended to each sub-agent prompt so they know the exact layer they are working on.
+  - `/run-tasks` Step 1.5 — defines `SCRUM_HIERARCHY` once, injects into 6 agent prompts (Requirement, FE Design, BE Design, Implementer, Spec Reviewer, Quality Reviewer)
+  - `/run-tasks-p` Step 1.5 — writes `.claude/rtp/$RUN_ID/scrum-hierarchy.md` once, injects via `$(cat $HIERARCHY_FILE)` into 6 headless subprocess prompts
+  - `/implement` Step 1d — new shared block, injected into 4 sub-agents (Agent A FE Tests, B BE Tests, C FE Impl, D BE Impl)
+
+- **Epic Breakdown in `/discovery`** — multi-epic discoveries now enumerate each epic as a row, ordered by dependency, with sequential `/new-sprint` invocations.
+  - `DISCOVERY-TEMPLATE.md` — new Section 16 "Epic Breakdown" table (`# | Epic Title | One-line Scope | Depends On | Priority`) + **Shared entities / cross-epic concerns** bullet
+  - `/discovery` Step 3 — inspects `Estimated sprints`: = 1 leaves table empty, > 1 enumerates each epic with dependency ordering
+  - `/discovery` Next Steps — single-epic lists one `/new-sprint`, multi-epic lists one per epic in dependency order
+  - `/new-sprint` Step 1.3 — new **Epic Breakdown present** check: looks up the epic row, walks `Depends On = Ek`, verifies the prerequisite sprint in `BACKLOG.md` is `done`, warns if not
+  - Also reads **Shared entities / cross-epic concerns** and carries forward to Stories step so shared components are owned by the first epic that needs them
+
+- **Scope Overview section** in FE/BE design templates (2pt+) — 3–6 bullets for orientation before the detailed Implementation Plan.
+  - `FRONTEND-DESIGN-TEMPLATE.md` / `BACKEND-DESIGN-TEMPLATE.md` — new `## Scope Overview` section
+  - `design.md` 2pt tier — Scope Overview added to required sections
+  - `design.md` Step 2c self-check — Scope Overview bullets must each map to at least one phase in the Implementation Plan (no orphans)
+  - `/run-tasks` Implementer agent — Section Extraction table now extracts `## Scope Overview` + `## Implementation Plan` (was Implementation Plan only)
+  - `/run-tasks-p` Implementer subprocess — adds `FE_SCOPE`/`BE_SCOPE` extract_section calls and injects them into the Implementer prompt
+
+- **Value section** in requirement template (1pt+) — 1–3 bullets covering user impact, business outcome (+ optional "why now").
+  - `REQUIREMENT-TEMPLATE.md` — new `## Value` section positioned between Overview and Feature Flow
+  - `/requirement` Step 2 fill logic — Value bullets must be concrete; metric included if known (e.g. "-20% support tickets", "unlocks premium tier"); rejects vague restatements of the user story
+  - `/requirement` Step 3 self-check — Value must include at least user impact + business outcome, not restate the user story
+
+### Changed
+- **Rename "Sub-tasks" → "Stories"** across the template — resolves the last vocabulary collision (template "Sub-tasks" was being confused with Scrum "Subtasks" which are engineering-task checkboxes).
+  - `SPRINT-OVERVIEW-TEMPLATE.md` — `## Sub-tasks` → `## Stories` + header comment clarifying each row = one Scrum Story
+  - `RETRO-SPRINT-TEMPLATE.md` — "All sub-tasks are `done`" → "All stories are `done`"
+  - `new-sprint.md` — 5 references renamed (command description, Step 3 heading, proposal header, update ref, Shared entities carry-forward)
+  - `requirement.md`, `retro-sprint.md`, `_WORKFLOW-REF.md`, `.claude/rules/new-sprint.md`, `docs/WORKFLOW-QUICKREF.md` — references updated
+  - Historical files (`CHANGELOG.md` prior entries, `docs/sprints/SP1/SP1-overview.md`) intentionally left alone
+
+- **Implementation Plan label in `/design`** — each row is now explicitly documented as "a Scrum engineering task (layer-level work, NOT a story). Implementers follow these checkboxes in sequence." Removes ambiguity about what implementers are building.
+
+### Design
+- All 4 `/implement` sub-agents (A/B/C/D) work inside Stories, not engineering tasks — they follow an Implementation Plan that is already broken down by the design phase. The SCRUM HIERARCHY briefing explicitly instructs them: "Do NOT expand scope beyond the ACs. Do NOT treat Implementation Plan rows as stories. Do NOT ask the user mid-layer — follow the plan."
+- `/execute-plan` and `/brainstorm` delegate to superpowers skills and don't spawn their own agents, so no hierarchy injection is needed — superpowers uses its own vocabulary.
+
+---
+
 ## [0.12.0] — 2026-04-08
 
 ### Added

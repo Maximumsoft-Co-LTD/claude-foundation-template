@@ -22,16 +22,16 @@ Skip if brain doesn't exist yet.
 Parse `[task-id]`, extract `[sprint-id]`.
 
 Read in order:
-1. `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — epic goals, sub-task table, E2E Validation Scenarios, dependencies
+1. `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — epic goals, Stories table, E2E Validation Scenarios, dependencies
 2. `docs/discovery/` — scan for related discovery doc. If found, read: Problem Statement, goals, in-scope, constraints, open questions.
 
-From the sprint overview sub-task table, extract: **User Story**, dependencies, **Points**. From the E2E Validation Scenarios section, extract the numbered GIVEN/WHEN/THEN scenarios for this task.
+From the sprint overview Stories table, extract: **User Story**, dependencies, **Points**. From the E2E Validation Scenarios section, extract the numbered GIVEN/WHEN/THEN scenarios for this task.
 
 **Points-based section scope** (write `"N/A — Xpt task"` for sections not required):
 
 | Points | Required sections |
 |--------|------------------|
-| **1pt** | Problem Statement, Acceptance Criteria (min 2–3), Out of Scope, Definition of Done |
+| **1pt** | Problem Statement, Value, Acceptance Criteria (min 2–3), Out of Scope, Definition of Done |
 | **2pt** | + User Stories, Dependencies |
 | **3pt** | + Feature Flow (mermaid), System Behavior, Data & Business Rules, Success Metrics |
 | **5pt+** | All sections — full doc |
@@ -74,6 +74,7 @@ Key dimensions:
 
 - **Problem Statement** — from discovery doc if available; otherwise from epic Problem Statement scoped to this task.
 - **Overview** — one paragraph expanding the User Story. Incorporate context from the E2E Validation Scenarios.
+- **Value** — 1–3 bullets covering user impact + business outcome (+ optional "why now"). Concrete; include metric if known (e.g. "-20% support tickets", "unlocks premium tier"). Avoid vague restatements of the user story — if Value just repeats "users can X", it's not value.
 - **User Stories** — "As a [role], I want [goal], so that [reason]." At least one per distinct user action.
 - **Acceptance Criteria** — rules:
   - Specific, testable, user-visible. Format: "Given [context], when [action], then [outcome]."
@@ -115,6 +116,7 @@ Re-read the drafted requirement doc in full and verify:
 - [ ] At least one failure-path AC exists.
 - [ ] Every in-scope discovery item is either covered by an AC or explicitly marked Out of Scope.
 - [ ] Success Metrics are measurable (not vague like "works correctly").
+- [ ] Value section: at least user impact + business outcome are filled, concrete, and do NOT just restate the user story.
 
 Fix any issue found before presenting to the user.
 

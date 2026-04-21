@@ -128,6 +128,25 @@ Key dimensions:
 
 ---
 
+## Step 1d — Scrum hierarchy briefing
+
+Every sub-agent spawned in Step 2 and Step 3 receives this block as part of its prompt. Define once here so the injection stays DRY:
+
+```
+--- SCRUM HIERARCHY ---
+Sprint (SP[N])               = Scrum Epic — business theme, not deployable alone
+Task (SP[N]-T[NNN])          = Scrum Story — vertical slice (FE+BE+data), user-facing, deployable
+Scope Overview bullet        = feature-area summary inside the story (not a story)
+Implementation Plan row      = Scrum engineering task — layer-level work, NOT user-facing
+Implementation Plan checkbox = Scrum Subtask — atomic 2–5 min action
+You are implementing engineering tasks inside a Story that already has defined ACs. Do NOT expand scope beyond the ACs. Do NOT treat Implementation Plan rows as stories. Do NOT ask the user mid-layer — follow the plan.
+---
+```
+
+Store as `SCRUM_HIERARCHY`. Inject into every sub-agent prompt in Step 2 and Step 3.
+
+---
+
 ## Step 2 — Write failing tests
 
 **If `SHARED_TYPES`:** write shared type/interface files first, then proceed.
@@ -135,6 +154,9 @@ Key dimensions:
 **If `HAS_FE` AND `HAS_BE`:** launch 2 parallel sub-agents:
 
 > **Agent A — FE Tests**
+> --- SCRUM HIERARCHY ---
+> [inject SCRUM_HIERARCHY]
+> ---
 > --- REQUIREMENT: ACCEPTANCE CRITERIA (apply section extraction rule) ---
 > [inject `## Acceptance Criteria` section from DOC_REQ]
 > ---
@@ -150,6 +172,9 @@ Key dimensions:
 > Run FE tests — confirm every new test **fails** (red). Do NOT write implementation code.
 
 > **Agent B — BE Tests**
+> --- SCRUM HIERARCHY ---
+> [inject SCRUM_HIERARCHY]
+> ---
 > --- REQUIREMENT: ACCEPTANCE CRITERIA (apply section extraction rule) ---
 > [inject `## Acceptance Criteria` section from DOC_REQ]
 > ---
@@ -179,6 +204,9 @@ This is the normal path for FE-only and BE-only tasks — no error, no missing-d
 **If `HAS_FE` AND `HAS_BE`:** launch 2 parallel sub-agents:
 
 > **Agent C — FE Implementation**
+> --- SCRUM HIERARCHY ---
+> [inject SCRUM_HIERARCHY]
+> ---
 > --- REQUIREMENT: ACCEPTANCE CRITERIA (apply section extraction rule) ---
 > [inject `## Acceptance Criteria` section from DOC_REQ]
 > ---
@@ -196,6 +224,9 @@ This is the normal path for FE-only and BE-only tasks — no error, no missing-d
 > Final state: all FE tests green.
 
 > **Agent D — BE Implementation**
+> --- SCRUM HIERARCHY ---
+> [inject SCRUM_HIERARCHY]
+> ---
 > --- REQUIREMENT: ACCEPTANCE CRITERIA (apply section extraction rule) ---
 > [inject `## Acceptance Criteria` section from DOC_REQ]
 > ---

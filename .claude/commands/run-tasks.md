@@ -46,6 +46,20 @@ Read and store as `CODEBASE_MANIFEST`:
 
 Inject in implementation agents (Steps 6+) as a `--- CODEBASE MANIFEST ---` block. Agents must NOT explore the codebase independently — everything they need is pre-loaded.
 
+### Scrum Hierarchy
+Inject `SCRUM_HIERARCHY` into every agent prompt below — verbatim, as a `--- SCRUM HIERARCHY ---` block right after `--- SPRINT CONTEXT ---`. Fresh sub-agents have no memory of the template's vocabulary; without this block, "task" is ambiguous.
+
+```
+--- SCRUM HIERARCHY ---
+Sprint (SP[N])               = Scrum Epic — business theme, not deployable alone
+Task (SP[N]-T[NNN])          = Scrum Story — vertical slice (FE+BE+data), user-facing, deployable
+Scope Overview bullet        = feature-area summary inside the story (not a story)
+Implementation Plan row      = Scrum engineering task — layer-level work, NOT user-facing
+Implementation Plan checkbox = Scrum Subtask — atomic 2–5 min action
+You are working on a Story. Never expand scope beyond the ACs. Never treat Implementation Plan rows as stories.
+---
+```
+
 ### Section Extraction Rule (size guard)
 Before injecting any task doc into an agent prompt:
 - ≤ 6000 chars → inject full doc
@@ -58,7 +72,7 @@ Extract from the heading `## Section Name` to the next `##` heading.
 | Requirement | — | — | — |
 | FE Design | `## Acceptance Criteria` | — | — |
 | BE Design | `## Acceptance Criteria` | `## API Contracts` + `## Endpoints` | — |
-| Implementer | `## Acceptance Criteria` | `## Implementation Plan` | `## Implementation Plan` |
+| Implementer | `## Acceptance Criteria` | `## Scope Overview` + `## Implementation Plan` | `## Scope Overview` + `## Implementation Plan` |
 | Spec Reviewer | `## Acceptance Criteria` | `## API Contracts` | `## API Contracts` |
 | Quality Reviewer | `## Acceptance Criteria` | — | — |
 
@@ -98,6 +112,9 @@ Phase 2 — Implement: implement → code-review → testing → retro-task
 ## Step 2 — Requirement (parallel per tier)
 
 Launch agents in batches of MAX_PARALLEL. For each task, launch `Agent [task-id] — Requirement` (run_in_background: true):
+> --- SCRUM HIERARCHY ---
+> [inject SCRUM_HIERARCHY]
+> ---
 > --- SPRINT CONTEXT (pre-loaded — do NOT re-read these files) ---
 > [inject SPRINT_SNAPSHOT]
 > ---
@@ -132,6 +149,9 @@ Rules: be specific (vague notes are useless to sub-agents). If tasks are fully i
 ## Step 3 — FE Design (parallel per tier)
 
 Launch agents in batches of MAX_PARALLEL. For each task, launch `Agent [task-id] — FE Design` (run_in_background: true):
+> --- SCRUM HIERARCHY ---
+> [inject SCRUM_HIERARCHY]
+> ---
 > --- SPRINT CONTEXT ---
 > [inject SPRINT_SNAPSHOT]
 > ---
@@ -165,6 +185,9 @@ If two tasks define conflicting shapes for the same endpoint → resolve now. Pr
 ## Step 4 — BE Design (parallel per tier)
 
 Launch agents in batches of MAX_PARALLEL. For each task, launch `Agent [task-id] — BE Design` (run_in_background: true):
+> --- SCRUM HIERARCHY ---
+> [inject SCRUM_HIERARCHY]
+> ---
 > --- SPRINT CONTEXT ---
 > [inject SPRINT_SNAPSHOT]
 > ---
@@ -244,6 +267,9 @@ For each task, use a **3-agent pipeline** per task:
 
 ### Agent 1: Implementer
 Launch `Agent [task-id] — Implement` (run_in_background: true):
+> --- SCRUM HIERARCHY ---
+> [inject SCRUM_HIERARCHY]
+> ---
 > --- SPRINT CONTEXT ---
 > [inject SPRINT_SNAPSHOT]
 > ---
@@ -253,8 +279,14 @@ Launch `Agent [task-id] — Implement` (run_in_background: true):
 > --- REQUIREMENT: ACCEPTANCE CRITERIA (apply section extraction rule) ---
 > [inject `## Acceptance Criteria` section from REQ doc]
 > ---
+> --- FE DESIGN: SCOPE OVERVIEW (apply section extraction rule) ---
+> [inject `## Scope Overview` section from FE doc]
+> ---
 > --- FE DESIGN: IMPLEMENTATION PLAN (apply section extraction rule) ---
 > [inject `## Implementation Plan` section from FE doc]
+> ---
+> --- BE DESIGN: SCOPE OVERVIEW (apply section extraction rule) ---
+> [inject `## Scope Overview` section from BE doc]
 > ---
 > --- BE DESIGN: IMPLEMENTATION PLAN (apply section extraction rule) ---
 > [inject `## Implementation Plan` section from BE doc]
@@ -271,6 +303,9 @@ Launch `Agent [task-id] — Implement` (run_in_background: true):
 
 ### Agent 2: Spec Reviewer
 After implementer completes, launch `Agent [task-id] — Spec Review` (foreground — wait for result):
+> --- SCRUM HIERARCHY ---
+> [inject SCRUM_HIERARCHY]
+> ---
 > --- REQUIREMENT: ACCEPTANCE CRITERIA ---
 > [inject `## Acceptance Criteria` section from REQ doc]
 > ---
@@ -288,6 +323,9 @@ If FAIL → send gaps back to Implementer agent to fix → re-review (foreground
 
 ### Agent 3: Quality Reviewer
 After spec review passes, launch `Agent [task-id] — Quality Review` (foreground — wait for result):
+> --- SCRUM HIERARCHY ---
+> [inject SCRUM_HIERARCHY]
+> ---
 > --- REQUIREMENT: ACCEPTANCE CRITERIA ---
 > [inject `## Acceptance Criteria` section from REQ doc]
 > ---

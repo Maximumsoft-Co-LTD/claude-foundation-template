@@ -68,10 +68,15 @@ Key dimensions:
 ## Step 3 — Fill the doc
 
 1. Fill every section from user's answers. Write `TBD — needs input` for anything unanswered.
-2. Section 8 (Approaches): structure at least 2 options. If only one mentioned, add placeholder Option B.
+2. Proposed Approaches section: structure at least 2 options. If only one mentioned, add placeholder Option B.
    Each option must have: **Description**, **Pros**, **Cons**, **Recommended** (yes/no with reason).
-3. Section 10 (Unknowns): mark each as `- [ ]` checkbox.
-4. Section 13 (Next Steps): always include "When ready → `/new-sprint [sprint-id] \"[epic description]\"`".
+3. Unknowns & Open Questions section: mark each as `- [ ]` checkbox.
+4. **Epic Breakdown section**: inspect Scope Estimate → `Estimated sprints`.
+   - **= 1 sprint** → leave the Epic Breakdown table empty.
+   - **> 1 sprint** → enumerate each epic as a row (E1, E2, ...). Each row: title, one-line scope, `Depends On` (another epic's ID or `—`), priority. Order by dependency (E1 has no epic deps; E2 may depend on E1, etc.). Also fill **Shared entities / cross-epic concerns** with anything used by more than one epic (e.g. user model, auth layer, shared component).
+5. Next Steps section:
+   - **Single-epic** → `"/new-sprint [sprint-id] \"[epic description]\""`.
+   - **Multi-epic** → one line per epic row in Epic Breakdown, in dependency order, with sequential `[sprint-id]`s (SP[N], SP[N+1], ...).
 
 ---
 
@@ -119,7 +124,8 @@ Before reporting output, re-read `docs/discovery/[disc-id]-[name].md` in full an
 - [ ] At least 2 options exist in Approaches section, each with Description / Pros / Cons / Recommended.
 - [ ] One approach is marked `✓ SELECTED` — approach approval gate was completed.
 - [ ] All open questions are formatted as `- [ ]` checkboxes.
-- [ ] Next Steps section includes the `/new-sprint` instruction.
+- [ ] If Scope Estimate > 1 sprint → Epic Breakdown has ≥ 2 rows and Next Steps lists one `/new-sprint` per epic in dependency order.
+- [ ] If Scope Estimate = 1 sprint → Epic Breakdown is empty and Next Steps has a single `/new-sprint` invocation.
 
 Fix any issue found. Re-read the affected section to confirm the fix before proceeding.
 

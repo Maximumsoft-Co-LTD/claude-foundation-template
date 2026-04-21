@@ -19,6 +19,12 @@
 ## Overview
 <!-- 1pt+ — One paragraph. -->
 
+## Value
+<!-- 1pt+ — Why this story matters. 1–3 bullets. Concrete; include metric if known. -->
+- **User impact:** [what the user gains]
+- **Business outcome:** [metric or strategic outcome — e.g. "-20% support tickets", "unlocks premium tier"]
+- **Why now:** [optional — urgency or dependency trigger]
+
 ## Feature Flow
 <!-- 3pt+ -->
 <!-- mermaid flowchart of main user flow -->
