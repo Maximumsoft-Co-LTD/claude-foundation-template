@@ -22,7 +22,7 @@ git diff main...HEAD --name-only
 
 If no files matching `*.tsx`, `*.jsx`, `*.ts` (UI components), `*.html`, `*.vue`, `*.svelte` → print `✓ No frontend changes — accessibility review skipped.` and exit.
 
-Read `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md` — identify components added or modified.
+Read `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` (Section 3 · Frontend Design) — identify components added or modified.
 
 ---
 

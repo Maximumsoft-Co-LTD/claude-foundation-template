@@ -16,8 +16,7 @@ Classify severity:
 - **minor** — cosmetic, performance, or edge case not in ACs
 
 Read:
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — which AC does this violate?
-- Relevant design doc (`[task-id]-frontend.md` or `[task-id]-backend.md`) — expected behavior?
+- `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — unified doc: which AC does this violate? Expected behavior from the relevant FE / BE Design section?
 
 
 ---

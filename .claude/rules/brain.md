@@ -5,7 +5,7 @@
 ## When to read the brain
 
 Read `brain/BRAIN-INDEX.md` only when:
-- Running a workflow command (`/discovery`, `/implement`, `/design fe`, `/design be`, `/retro-task`)
+- Running a workflow command (`/discovery`, `/requirement`, `/implement`, `/retro-task`)
 - About to finalize an architectural decision
 - Explicitly asked to check past patterns or lessons
 

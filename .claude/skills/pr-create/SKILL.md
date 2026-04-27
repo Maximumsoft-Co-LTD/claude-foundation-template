@@ -63,9 +63,7 @@ If push fails due to upstream divergence → stop and report; do not force-push 
 
 ## Docs
 
-- Requirement: docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md
-- Frontend design: docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md *(if exists)*
-- Backend design: docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md *(if exists)*
+- Requirement: docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md *(unified — includes story, FE design, BE design, Implementation Plan, tests)*
 
 ## Test plan
 

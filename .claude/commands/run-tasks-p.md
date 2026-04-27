@@ -148,7 +148,7 @@ Print plan:
 run-id : [run-id]
 Tasks  : [N] | Tier 1 (parallel): T001, T002 | Tier 2: T003 (depends: T001)
 Logs   : .claude/rtp/[run-id]/
-Phase 1 — Plan     : requirement → design fe → design be → ⏸ review gate
+Phase 1 — Plan     : requirement (unified: story + FE design + BE design + Implementation Plan) → ⏸ review gate
 Phase 2 — Implement: implement → code-review → testing → retro-task
 ```
 
@@ -211,180 +211,53 @@ Tasks with `BLOCKED` status are dropped from all remaining phases. Update `docs/
 
 ---
 
-## Step 2b — Alignment: After Requirement
+## Step 2b — Cross-task alignment (unified)
 
 (Parent session — not subprocess.)
 
 **Guard:** if zero tasks have `DONE` status → print "All requirement tasks blocked — stopping." and exit.
 
-Read all completed requirement docs. Write `.claude/rtp/[run-id]/cross-task-context.md` with:
+Read all completed requirement docs (the unified doc contains story + FE design + BE design + Implementation Plan). Write `.claude/rtp/[run-id]/cross-task-context.md` with:
 - **Shared Terminology** — agreed names for shared entities/roles
 - **Shared Components / Screens** — which task owns each
+- **API Contracts** — every endpoint either FE consumes or BE exposes (method, path, request/response shape, errors). If two tasks touch the same endpoint, note the owner.
+- **Shared Data Models** — entity field names agreed across tasks
+- **Auth Requirements** — which endpoints require auth and what roles
 - **Scope Boundaries** — explicit lines between tasks to prevent overlap
 - **Conflicts resolved** — any contradictions found and their resolution
 
-If tasks are fully independent, write that and proceed.
+If tasks are fully independent, write that and proceed. If two tasks define conflicting shapes for the same endpoint → resolve now by editing the relevant requirement doc(s).
 
 ---
 
-## Step 3 — FE Design (parallel per tier)
-
-Each prompt includes `cross-task-context.md` content injected inline after the command file:
-
-```bash
-CROSS=$(cat .claude/rtp/$RUN_ID/cross-task-context.md)
-
-run_fe_design() {
-  local TASK_ID=$1
-  local REQ_FILE="docs/sprints/[sprint-id]/$TASK_ID/$TASK_ID-requirement.md"
-  local REQ_AC=$(extract_section "$REQ_FILE" "Acceptance Criteria")
-  PROMPT="TASK_ID=$TASK_ID
-SPRINT_ID=[sprint-id]
-RUN_DIR=.claude/rtp/$RUN_ID
-HEADLESS=true
-
-$(cat $HIERARCHY_FILE)
-
---- SPRINT CONTEXT ---
-$(cat $SNAPSHOT_FILE)
----
---- REQUIREMENT: ACCEPTANCE CRITERIA ---
-$REQ_AC
----
---- CROSS-TASK CONTEXT ---
-$CROSS
----
-$(cat .claude/commands/design.md)
-
---- HEADLESS RULES ---
-Run design for: fe $TASK_ID
-All context is pre-loaded above — do NOT read requirement or codebase files independently.
-Use exact names for any shared component listed in cross-task context.
-HARD-GATEs suspended: auto-save after self-check passes.
-On success: write DONE to .claude/rtp/$RUN_ID/$TASK_ID-fe.status
-On error: write BLOCKED: [reason] to that file."
-
-  claude -p "$PROMPT" > .claude/rtp/$RUN_ID/$TASK_ID-fe.log 2>&1
-}
-
-ACTIVE=0
-for TASK_ID in [active-tier-1-tasks]; do
-  run_fe_design "$TASK_ID" &
-  ACTIVE=$((ACTIVE+1))
-  if [ $ACTIVE -ge $MAX_PARALLEL ]; then
-    wait
-    ACTIVE=0
-  fi
-done
-wait
-```
-
-Print checkpoint.
-
----
-
-## Step 3b — Alignment: After FE Design
+## Step 2c — Final Cross-Plan Consistency Check
 
 (Parent session.)
 
-Read all completed FE design docs. Update `cross-task-context.md` with:
-- **API Contracts** — every endpoint FE expects (method, path, request/response shape, errors)
-- **Shared Data Models** — entity field names as FE defined (BE must match exactly)
-- **Auth Requirements** — which endpoints require auth and what roles
-
-Resolve any conflicts between tasks before proceeding.
-
----
-
-## Step 4 — BE Design (parallel per tier)
-
-```bash
-CROSS=$(cat .claude/rtp/$RUN_ID/cross-task-context.md)
-
-run_be_design() {
-  local TASK_ID=$1
-  local REQ_FILE="docs/sprints/[sprint-id]/$TASK_ID/$TASK_ID-requirement.md"
-  local FE_FILE="docs/sprints/[sprint-id]/$TASK_ID/$TASK_ID-frontend.md"
-  local REQ_AC=$(extract_section "$REQ_FILE" "Acceptance Criteria")
-  local FE_CONTRACTS=$(extract_section "$FE_FILE" "API Contracts")
-  local FE_ENDPOINTS=$(extract_section "$FE_FILE" "Endpoints")
-  PROMPT="TASK_ID=$TASK_ID
-SPRINT_ID=[sprint-id]
-RUN_DIR=.claude/rtp/$RUN_ID
-HEADLESS=true
-
-$(cat $HIERARCHY_FILE)
-
---- SPRINT CONTEXT ---
-$(cat $SNAPSHOT_FILE)
----
---- REQUIREMENT: ACCEPTANCE CRITERIA ---
-$REQ_AC
----
---- FE DESIGN: API CONTRACTS ---
-$FE_CONTRACTS
----
---- FE DESIGN: ENDPOINTS ---
-$FE_ENDPOINTS
----
---- CROSS-TASK CONTEXT ---
-$CROSS
----
-$(cat .claude/commands/design.md)
-
---- HEADLESS RULES ---
-Run design for: be $TASK_ID
-All context is pre-loaded above — do NOT read FE design or codebase files independently.
-Implement API contracts exactly as FE expects. If endpoint owned by another task, reference cross-task context instead of re-implementing.
-HARD-GATEs suspended: auto-save after self-check passes.
-On success: write DONE to .claude/rtp/$RUN_ID/$TASK_ID-be.status
-On error: write BLOCKED: [reason] to that file."
-
-  claude -p "$PROMPT" > .claude/rtp/$RUN_ID/$TASK_ID-be.log 2>&1
-}
-
-ACTIVE=0
-for TASK_ID in [active-tier-1-tasks]; do
-  run_be_design "$TASK_ID" &
-  ACTIVE=$((ACTIVE+1))
-  if [ $ACTIVE -ge $MAX_PARALLEL ]; then
-    wait
-    ACTIVE=0
-  fi
-done
-wait
-```
-
-Print checkpoint.
-
----
-
-## Step 4b — Final Cross-Plan Consistency Check
-
-(Parent session.)
-
-Read all completed docs + `cross-task-context.md`. Check:
+Read all completed requirement docs + `cross-task-context.md`. Check:
 
 | Check | Pass condition |
-|-------|---------------|
-| **API contract match** | Every FE-called endpoint exists in BE with matching method, path, shape |
+|-------|----------------|
+| **API contract match (intra-task)** | Every FE `## API Contracts Consumed` row has a matching endpoint in the same doc's `## API Endpoints` (method, path, shape) |
+| **API contract match (cross-task)** | Shared endpoints across tasks are defined by exactly one owner, matched by consumers |
 | **No component duplication** | Each shared component owned by exactly one task |
 | **No scope overlap** | No two tasks implement the same functionality |
-| **No scope gap** | Every AC in every requirement is addressed by FE or BE design |
+| **No scope gap** | Every AC in every requirement is addressed in the doc's FE or BE design and Implementation Plan |
 | **Naming consistency** | Same entity uses the same name across all docs |
+| **Story point depth** | Each requirement doc contains the sections required for its point level (per /requirement Step 1 table) |
 
 Print `✅` or `⚠️ CONFLICT — [detail] → Resolved: [action]`. Fix conflicts now. Re-check until all ✅.
 
 ---
 
-## ⏸ Step 5 — PLAN REVIEW GATE
+## ⏸ Step 3 — PLAN REVIEW GATE
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 PHASE 1 COMPLETE — Review before implementing
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✓ SP1-T001 — [User Story] ([N]pt)
-    docs/sprints/SP1/SP1-T001/{requirement,frontend,backend}.md
+✓ SP1-T001 — [User Story] ([N]pt, [fullstack/fe-only/be-only/infra])
+    docs/sprints/SP1/SP1-T001/SP1-T001-requirement.md
 ✓ SP1-T002 — [User Story] ([N]pt)  ...
 ✗ SP1-T003 — BLOCKED at [phase]: [reason]
 
@@ -405,7 +278,7 @@ Reply:
 
 # ━━━ PHASE 2: IMPLEMENT ━━━━━━━━━━━━━━━━━━
 
-## Step 6 — Implement (parallel per tier)
+## Step 4 — Implement (parallel per tier)
 
 3-subprocess pipeline per task. For multi-task tiers, each pipeline runs as a group in background.
 
@@ -416,18 +289,16 @@ run_pipeline() {
   local RUN_ID=$3
   local RUN_DIR=".claude/rtp/$RUN_ID"
   local REQ_DOC="docs/sprints/$SPRINT_ID/$TASK_ID/$TASK_ID-requirement.md"
-  local FE_DOC="docs/sprints/$SPRINT_ID/$TASK_ID/$TASK_ID-frontend.md"
-  local BE_DOC="docs/sprints/$SPRINT_ID/$TASK_ID/$TASK_ID-backend.md"
   local CROSS="$RUN_DIR/cross-task-context.md"
 
-  # Extract only needed sections per agent type — reduces context size
+  # Extract only needed sections per agent type — all from the ONE unified requirement doc
   local REQ_AC=$(extract_section "$REQ_DOC" "Acceptance Criteria")
-  local FE_SCOPE=$(extract_section "$FE_DOC" "Scope Overview")
-  local BE_SCOPE=$(extract_section "$BE_DOC" "Scope Overview")
-  local FE_IMPL=$(extract_section "$FE_DOC" "Implementation Plan")
-  local BE_IMPL=$(extract_section "$BE_DOC" "Implementation Plan")
-  local FE_CONTRACTS=$(extract_section "$FE_DOC" "API Contracts")
-  local BE_CONTRACTS=$(extract_section "$BE_DOC" "API Contracts")
+  local REQ_SCOPE=$(extract_section "$REQ_DOC" "Scope Overview")
+  local REQ_IMPL=$(extract_section "$REQ_DOC" "Implementation Plan")
+  local REQ_FE_DESIGN=$(extract_section "$REQ_DOC" "Frontend Design" || extract_section "$REQ_DOC" "3 · Frontend Design")
+  local REQ_BE_DESIGN=$(extract_section "$REQ_DOC" "Backend Design" || extract_section "$REQ_DOC" "4 · Backend Design")
+  local REQ_FE_CONTRACTS=$(extract_section "$REQ_DOC" "API Contracts Consumed")
+  local REQ_BE_ENDPOINTS=$(extract_section "$REQ_DOC" "API Endpoints")
   local REQ_CONTENT=$(cat $REQ_DOC 2>/dev/null)   # kept for spec reviewer fix prompt (small)
   local CROSS_CONTENT=$(cat $CROSS 2>/dev/null)
 
@@ -445,20 +316,20 @@ $(cat $SNAPSHOT_FILE)
 --- CODEBASE MANIFEST ---
 $(cat $MANIFEST_FILE 2>/dev/null)
 ---
---- REQUIREMENT: ACCEPTANCE CRITERIA ---
+--- REQUIREMENT DOC: ACCEPTANCE CRITERIA ---
 $REQ_AC
 ---
---- FE DESIGN: SCOPE OVERVIEW ---
-$FE_SCOPE
+--- REQUIREMENT DOC: FRONTEND DESIGN ---
+$REQ_FE_DESIGN
 ---
---- FE DESIGN: IMPLEMENTATION PLAN ---
-$FE_IMPL
+--- REQUIREMENT DOC: BACKEND DESIGN ---
+$REQ_BE_DESIGN
 ---
---- BE DESIGN: SCOPE OVERVIEW ---
-$BE_SCOPE
+--- REQUIREMENT DOC: SCOPE OVERVIEW ---
+$REQ_SCOPE
 ---
---- BE DESIGN: IMPLEMENTATION PLAN ---
-$BE_IMPL
+--- REQUIREMENT DOC: IMPLEMENTATION PLAN ---
+$REQ_IMPL
 ---
 --- CROSS-TASK CONTEXT ---
 $CROSS_CONTENT
@@ -466,7 +337,7 @@ $CROSS_CONTENT
 $(cat .claude/commands/implement.md)
 
 --- HEADLESS RULES ---
-All context pre-loaded above — do NOT read design docs or explore codebase independently.
+All context pre-loaded above — do NOT read the requirement doc again or explore codebase independently.
 HARD-GATEs suspended: run tests, verify all ACs, then save directly.
 Reuse shared components in cross-task context — no duplicate implementations.
 On success: write DONE to $RUN_DIR/$TASK_ID-impl.status
@@ -494,14 +365,14 @@ Check:
 - API contracts matched exactly (method, path, request/response shape)?
 - No extra features added beyond ACs?
 
---- REQUIREMENT: ACCEPTANCE CRITERIA ---
+--- REQUIREMENT DOC: ACCEPTANCE CRITERIA ---
 $REQ_AC
 
---- FE DESIGN: API CONTRACTS ---
-$FE_CONTRACTS
+--- REQUIREMENT DOC: FE API CONTRACTS CONSUMED ---
+$REQ_FE_CONTRACTS
 
---- BE DESIGN: API CONTRACTS ---
-$BE_CONTRACTS
+--- REQUIREMENT DOC: BE API ENDPOINTS ---
+$REQ_BE_ENDPOINTS
 
 Write PASS or FAIL: [list specific gaps] to $RUN_DIR/$TASK_ID-spec.status and stop."
 
@@ -598,7 +469,7 @@ Print checkpoint after all pipelines + test suite complete.
 
 ---
 
-## Step 7 — Retro Task (parallel per tier)
+## Step 5 — Retro Task (parallel per tier)
 
 ```bash
 for TASK_ID in [completed-tasks]; do
@@ -615,7 +486,7 @@ wait
 
 ---
 
-## Step 8 — Final summary
+## Step 6 — Final summary
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

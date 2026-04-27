@@ -1,7 +1,7 @@
 # /implement
-Workflow position: **/design be → START → /issue (loop) → /code-review**
+Workflow position: **/requirement → START → /issue (loop) → /code-review**
 
-Implement the task following FE and BE design docs. Write failing tests first, then implement until all pass.
+Implement the task following the unified requirement doc (which contains story + FE design + BE design + implementation plan with subtasks). Write failing tests first, then implement until all pass.
 Arguments: `[task-id]`  — e.g. `SP1-T002`
 
 ---
@@ -62,38 +62,35 @@ Print: `Worktree ready: .worktrees/[task-id] on branch [branch-name]`
 
 Parse `[task-id]`, extract `[sprint-id]`.
 
-Read **in parallel** and store content in memory as `DOC_OVERVIEW`, `DOC_REQ`, `DOC_FE`, `DOC_BE`:
+Read **in parallel** and store content in memory as `DOC_OVERVIEW`, `DOC_REQ`:
 - `docs/sprints/[sprint-id]/[sprint-id]-overview.md`
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md`
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md`
 
-These are injected into every sub-agent prompt — agents must NOT re-read these files.
+`DOC_REQ` is the **single source of truth** — it contains the story, FE design (if any), BE design (if any), Implementation Plan, and TDD Test Plan all in one file. It is injected into every sub-agent prompt — agents must NOT re-read this file.
 
 **Section extraction rule (size guard):** Before injecting into a sub-agent, check character count:
-- ≤ 6000 chars → inject full doc
-- \> 6000 chars → extract only the section that agent needs (from `## Section Name` to the next `##`)
+- ≤ 6000 chars → inject full `DOC_REQ`
+- \> 6000 chars → extract only the section(s) that agent needs (from the matching `##` heading to the next heading at the same level)
 
-| Agent | From DOC_REQ | From DOC_FE | From DOC_BE |
-|-------|-------------|-------------|-------------|
-| A — FE Tests | `## Acceptance Criteria` | `## TDD Test Plan` | — |
-| B — BE Tests | `## Acceptance Criteria` | — | `## TDD Test Plan` |
-| C — FE Impl | `## Acceptance Criteria` | `## Implementation Plan` | — |
-| D — BE Impl | `## Acceptance Criteria` | — | `## Implementation Plan` |
+| Agent | Sections to extract from `DOC_REQ` |
+|-------|-----------------------------------|
+| A — FE Tests | `## Acceptance Criteria` + `### [FE] TDD Tests` + `## E2E Test Plan` + `# 3 · Frontend Design` (State Inventory, Fail Case Matrix) |
+| B — BE Tests | `## Acceptance Criteria` + `### [BE] TDD Tests` + `# 4 · Backend Design` (API Endpoints, Input Validation, Error Handling) |
+| C — FE Impl | `## Acceptance Criteria` + `### [FE] Plan` + `### [FE] Subtasks` + `# 3 · Frontend Design` (Component Breakdown, State Inventory, API Contracts Consumed) + `## [FE] Scope` |
+| D — BE Impl | `## Acceptance Criteria` + `### [BE] Plan` + `### [BE] Subtasks` + `# 4 · Backend Design` (API Endpoints, Data Models, Service/Layer Breakdown, Business Logic) + `## [BE] Scope` |
 
 Validate:
 - Missing requirement or empty ACs → stop: "Run `/requirement [task-id]` first."
-- BOTH FE and BE design docs missing → stop: "Run `/design fe [task-id]` and `/design be [task-id]` first."
-- ONE design doc missing → warn: "No `[task-id]-[frontend/backend].md` found. That layer will be skipped (HAS_FE/HAS_BE=false). Continue? (yes/no)"
+- Implementation Plan empty AND Task Type ≠ infra → stop: "Fill Implementation Plan in `[task-id]-requirement.md` first."
 
-Assess parallelization flags:
-- `HAS_FE`: FE design doc exists and has test plan items
-- `HAS_BE`: BE design doc exists and has test plan items
-- `SHARED_TYPES`: FE and BE share type/interface definitions
-- `HAS_MIGRATION`: BE includes DB migrations
+Read `Task Type` from Metadata. Assess parallelization flags:
+- `HAS_FE`: Task Type ∈ {fullstack, fe-only} AND `### [FE] TDD Tests` has rows
+- `HAS_BE`: Task Type ∈ {fullstack, be-only} AND `### [BE] TDD Tests` has rows
+- `SHARED_TYPES`: `HAS_FE` AND `HAS_BE` AND FE API Contracts Consumed references shared types
+- `HAS_MIGRATION`: `DOC_REQ` `## Database Migrations` section is filled (not `N/A`)
 
 **Context7 — fetch current library docs (if available):**
-From the design docs loaded above, identify the key libraries the implementation will use (max 3 — e.g. test framework, UI component library, ORM/query builder).
+From the design sections in `DOC_REQ`, identify the key libraries the implementation will use (max 3 — e.g. test framework, UI component library, ORM/query builder).
 For each library:
 1. `mcp__plugin_context7_context7__resolve-library-id` — resolve the library name to a context7 ID.
 2. `mcp__plugin_context7_context7__query-docs` — query for the specific patterns needed (test utilities, component API, query syntax, etc.).
@@ -107,7 +104,7 @@ If context7 is not available, proceed using design doc patterns and existing kno
 
 **Iron Law:** if any implementation code for this task already exists that was written before its tests — **delete it now**. Do not keep it as reference. Rewrite from tests. See `rules/testing.md`.
 
-For each AC in requirement: is there at least one test row in FE or BE TDD Test Plan? Flag any AC with no test → **stop**, fix design doc first.
+For each AC in requirement: is there at least one test row in `### [FE] TDD Tests` or `### [BE] TDD Tests`? Flag any AC with no test → **stop**, fix `[task-id]-requirement.md` first.
 
 
 ---
@@ -157,36 +154,30 @@ Store as `SCRUM_HIERARCHY`. Inject into every sub-agent prompt in Step 2 and Ste
 > --- SCRUM HIERARCHY ---
 > [inject SCRUM_HIERARCHY]
 > ---
-> --- REQUIREMENT: ACCEPTANCE CRITERIA (apply section extraction rule) ---
-> [inject `## Acceptance Criteria` section from DOC_REQ]
-> ---
-> --- FE DESIGN: TDD TEST PLAN (apply section extraction rule) ---
-> [inject `## TDD Test Plan` section from DOC_FE]
+> --- REQUIREMENT DOC: FE-RELEVANT SECTIONS (apply section extraction rule) ---
+> [inject from DOC_REQ: `## Acceptance Criteria` + `### [FE] TDD Tests` + `## E2E Test Plan` + `# 3 · Frontend Design` (State Inventory, Fail Case Matrix)]
 > ---
 > --- CONTEXT7 FE LIBRARY DOCS ---
 > [inject fetched FE library docs from Step 1]
 > ---
 > WORKTREE PATH: [inject absolute worktree path from Step 0b]
 > ---
-> Write all test files from the TDD Test Plan above.
+> Write all test files from the [FE] TDD Test Plan above.
 > Run FE tests — confirm every new test **fails** (red). Do NOT write implementation code.
 
 > **Agent B — BE Tests**
 > --- SCRUM HIERARCHY ---
 > [inject SCRUM_HIERARCHY]
 > ---
-> --- REQUIREMENT: ACCEPTANCE CRITERIA (apply section extraction rule) ---
-> [inject `## Acceptance Criteria` section from DOC_REQ]
-> ---
-> --- BE DESIGN: TDD TEST PLAN (apply section extraction rule) ---
-> [inject `## TDD Test Plan` section from DOC_BE]
+> --- REQUIREMENT DOC: BE-RELEVANT SECTIONS (apply section extraction rule) ---
+> [inject from DOC_REQ: `## Acceptance Criteria` + `### [BE] TDD Tests` + `# 4 · Backend Design` (API Endpoints, Input Validation, Error Handling)]
 > ---
 > --- CONTEXT7 BE LIBRARY DOCS ---
 > [inject fetched BE library docs from Step 1]
 > ---
 > WORKTREE PATH: [inject absolute worktree path from Step 0b]
 > ---
-> Write all test files from the TDD Test Plan above.
+> Write all test files from the [BE] TDD Test Plan above.
 > Run BE tests — confirm every new test **fails** (red). Do NOT write implementation code.
 
 Wait for both agents. Collect red-test confirmation.
@@ -207,18 +198,15 @@ This is the normal path for FE-only and BE-only tasks — no error, no missing-d
 > --- SCRUM HIERARCHY ---
 > [inject SCRUM_HIERARCHY]
 > ---
-> --- REQUIREMENT: ACCEPTANCE CRITERIA (apply section extraction rule) ---
-> [inject `## Acceptance Criteria` section from DOC_REQ]
-> ---
-> --- FE DESIGN: IMPLEMENTATION PLAN (apply section extraction rule) ---
-> [inject `## Implementation Plan` section from DOC_FE]
+> --- REQUIREMENT DOC: FE-RELEVANT SECTIONS (apply section extraction rule) ---
+> [inject from DOC_REQ: `## Acceptance Criteria` + `### [FE] Plan` + `### [FE] Subtasks` + `# 3 · Frontend Design` (Component Breakdown, State Inventory, API Contracts Consumed) + `## [FE] Scope`]
 > ---
 > --- CONTEXT7 FE LIBRARY DOCS ---
 > [inject fetched FE library docs from Step 1]
 > ---
 > WORKTREE PATH: [inject absolute worktree path from Step 0b]
 > ---
-> Implement components, routing, state, API calls, loading/error states, analytics, responsive, accessibility per the Implementation Plan above.
+> Implement components, routing, state, API calls, loading/error states, analytics, responsive, accessibility per the [FE] Plan and [FE] Subtasks above.
 > Tests are already written — implement until they pass. No extras, no shortcuts.
 > Run FE tests after each logical unit. Log any bugs found (do NOT run /issue — report in output).
 > Final state: all FE tests green.
@@ -227,18 +215,15 @@ This is the normal path for FE-only and BE-only tasks — no error, no missing-d
 > --- SCRUM HIERARCHY ---
 > [inject SCRUM_HIERARCHY]
 > ---
-> --- REQUIREMENT: ACCEPTANCE CRITERIA (apply section extraction rule) ---
-> [inject `## Acceptance Criteria` section from DOC_REQ]
-> ---
-> --- BE DESIGN: IMPLEMENTATION PLAN (apply section extraction rule) ---
-> [inject `## Implementation Plan` section from DOC_BE]
+> --- REQUIREMENT DOC: BE-RELEVANT SECTIONS (apply section extraction rule) ---
+> [inject from DOC_REQ: `## Acceptance Criteria` + `### [BE] Plan` + `### [BE] Subtasks` + `# 4 · Backend Design` (API Endpoints, Data Models, Service/Layer Breakdown, Business Logic) + `## [BE] Scope`]
 > ---
 > --- CONTEXT7 BE LIBRARY DOCS ---
 > [inject fetched BE library docs from Step 1]
 > ---
 > WORKTREE PATH: [inject absolute worktree path from Step 0b]
 > ---
-> Implement endpoints, validation, service logic, repository, event publishing, caching, logging, security per the Implementation Plan above.
+> Implement endpoints, validation, service logic, repository, event publishing, caching, logging, security per the [BE] Plan and [BE] Subtasks above.
 > Tests are already written — implement until they pass. No extras, no shortcuts.
 > Run BE tests after each logical unit. Log any bugs found (do NOT run /issue — report in output).
 > Final state: all BE tests green.

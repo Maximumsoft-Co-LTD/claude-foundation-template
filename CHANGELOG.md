@@ -4,6 +4,69 @@ All notable changes to claude-foundation-template are documented here.
 
 ---
 
+## [0.14.1] — 2026-04-23
+
+### Changed (breaking)
+- **Unified requirement doc — one file per task.** Merged `REQUIREMENT-TEMPLATE.md` + `FRONTEND-DESIGN-TEMPLATE.md` + `BACKEND-DESIGN-TEMPLATE.md` into a single `REQUIREMENT-TEMPLATE.md` that contains story, ACs, FE design (Section 3), BE design (Section 4), Scope Overview, Implementation Plan with subtask checkboxes, and TDD + E2E test plans.
+  - New `Task Type` field in Metadata: `fullstack / fe-only / be-only / infra`. FE design sections are skipped (marked `N/A — BE-only task`) for be-only tasks; BE design sections skipped for fe-only; both skipped for infra.
+  - One doc per task: `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`. No more `*-frontend.md` / `*-backend.md` files.
+
+### Removed
+- **`/design` command deleted** — its logic now lives inside `/requirement`. Users should not run `/design fe` or `/design be` anymore.
+- **`FRONTEND-DESIGN-TEMPLATE.md` and `BACKEND-DESIGN-TEMPLATE.md` deleted** — their content is absorbed into the unified `REQUIREMENT-TEMPLATE.md` with `[FE]` / `[BE]` tagging.
+- Workflow chain simplified: `/discovery → /new-sprint → /requirement → /implement → ...` (was `/discovery → /new-sprint → /requirement → /design fe → /design be → /implement → ...`).
+
+### Updated
+- `/requirement` command rewritten to produce the unified doc: detects `Task Type`, explores FE and/or BE codebase accordingly, fetches context7 docs for relevant libraries, fills all sections (FE design, BE design, Implementation Plan with subtasks, TDD + E2E) in one pass, one confirmation gate at the end.
+- `/implement` now reads **one** `DOC_REQ` instead of three. Section-extraction map updated to point at unified sections (`# 3 · Frontend Design`, `# 4 · Backend Design`, `### [FE] Plan`, `### [BE] Plan`, etc.). Sub-agent spawning still runs FE/BE in parallel via `HAS_FE`/`HAS_BE` flags derived from `Task Type` and the TDD Test Plan rows.
+- `/run-tasks` + `/run-tasks-p` Phase 1 collapsed from three steps (requirement → design fe → design be) to one (requirement with FE+BE design baked in). Cross-task alignment now reads API Contracts/Endpoints from the unified doc sections.
+- `/code-review`, `/testing`, `/retro-task`, `/issue`, `/write-plan`, `/execute-plan`, `/next-task`, `/status`, `/git-commit` updated to reference only the unified `[task-id]-requirement.md`.
+- `_WORKFLOW-REF.md`, `CLAUDE.md`, `README.md`: workflow chain, docs structure, points tiers, skill integration points, confidence-gate list, and quickstart examples all updated for the unified model.
+- Skills that referenced design docs (`/adr`, `/db-schema-review`, `/accessibility-review`, `/test-coverage`, `/pr-create`, `/session-handoff`) now point at the unified requirement doc's relevant section.
+
+### Rationale
+Three separate files for every task produced sprawl without benefit: a story is a vertical slice, so its design is one design. The unified template still uses `[FE]` / `[BE]` tags and point-scoped sections so FE-only and BE-only stories don't carry dead sections, but the *document boundary* matches the *story boundary*. Sub-agent parallelization (separate FE/BE agents in `/implement`, `/run-tasks`) is unchanged — they now slice the one doc by section instead of reading different files.
+
+---
+
+## [0.14.0] — 2026-04-22
+
+### Added
+- **`install.sh` bootstrap script** — one-step install of the workflow into a target repo. Replaces the prior `/plugin install` flow. Default mode clones from GitHub; `--local [src]` uses a local clone.
+  - Runs **before** Claude Code knows about the target repo, so it is a shell script — not a slash command.
+  - One-liner: `curl -fsSL .../install.sh | bash -s -- ~/path/to/target-repo`.
+  - Scans target stack (Node/Python/Go/Rust/PHP/Ruby/JVM), FE/BE/tests roots, git branch & commit conventions, README content.
+  - Diff preview per category — for each of `.claude/commands/`, `rules/`, `hooks/`, `skills/`, `brain/`, `docs/templates/`, lists `+new`, `~changed`, `=same`, and `·custom-kept` counts (with filenames) before any write.
+  - Safe merge — `cp -rn` policy; never overwrites existing `brain/` notes, `BACKLOG.md`, or `CLAUDE.md`.
+  - **JSON-aware `settings.json` merge** — parses your existing `settings.json` and appends only missing template hooks. Preserves your custom hooks (matched by matcher + command), entries, and any top-level keys. Saves a timestamped backup (`settings.json.bak-<ts>`) before any write.
+  - Stack-aware `CLAUDE.md` — first-install only — pre-filled with detected stack and `TBD` placeholders.
+  - Path-scoped globs in `.claude/rules/{frontend,backend}.md` adapted to detected FE/BE roots.
+  - **Version marker** — `.claude/.foundation-version` records `version`, `source_sha`, `installed_at`, `previous_version` so re-runs show `old → new`.
+  - **Re-install safety** — interactive prompt for `[m]erge` (default — add missing only), `[r]einstall` (overwrite template files, keep custom), or `[a]bort`. `--yes` and `--dry-run` default to merge. `settings.json`, `CLAUDE.md`, `BACKLOG.md`, brain notes are protected even in reinstall mode.
+  - Flags: `--local [src]`, `--remote`, `--yes/-y`, `--dry-run`.
+
+- **State Inventory promoted from 5pt+ to 2pt+ in FE design** — every interactive component must now enumerate all 5 states in a table (Loading / Empty / Error / Success / Partial-Stale) and pair with a `stateDiagram-v2` when it has > 2 states or async actions.
+  - State Inventory rewritten: 5-column table with `N/A — [reason]` cell convention, plus a `### State Transitions` subsection with mermaid example.
+  - 2pt tier — adds "State Inventory (5-state table + transition diagram)" to required sections. Moved out of 5pt tier's residual list.
+  - Fill logic — new bullet describing the state enumeration rules (no blank cells; mark `N/A — [reason]` only if the state cannot occur).
+  - Self-check — two new FE-specific checks: all state cells filled, transitions diagram present for components with > 2 states.
+  - `_WORKFLOW-REF.md` points table — "State Inventory" moved from 5pt to 2pt row.
+
+- **Step 6a-smoke in `/testing` — mandatory FE manual smoke walkthrough** regardless of E2E status.
+  - `testing.md` — new Step 6a-smoke after Step 6a: browser walkthrough per AC via `mcp__claude-in-chrome__*`, checking visual correctness, all 5 State Inventory states, and transition smoothness. Screenshot per AC. BLOCKED on any visual / continuity / transition defect.
+  - Skip rule: 6a-smoke skipped only for BE-only / infra / non-interactive tasks.
+  - `testing.md` self-check — adds "FE tasks: Step 6a-smoke ran for every AC, screenshots captured, no `READY` without smoke evidence."
+
+### Removed
+- **Plugin model retired** — `.claude-plugin/marketplace.json` and `.claude-plugin/plugin.json` deleted. The `/plugin marketplace add` + `/plugin install` flow is replaced by `install.sh`. Existing installs are unaffected; new installs use the script.
+
+### Rationale
+- **`install.sh` over slash command:** Bootstrap must run before Claude Code is configured for the target repo — a slash command can't do that. A shell script with diff preview, JSON-aware settings merge, and a version marker handles the cold-start cost (clone, copy, fill four CLAUDE.md sections, adapt path globs) that users routinely skipped under the manual flow.
+- **State Inventory at 2pt+:** Most FE tasks are 2–3 points. Restricting the 5-state inventory to 5pt+ meant the majority of interactive work shipped without explicit Loading / Empty / Error / Partial-Stale handling planned up front — which is where the real bugs live.
+- **Mandatory smoke walkthrough:** E2E tests assert logic but miss wrong copy, broken layout at default viewport, state flashes, and stuck spinners. A 5-minute manual walkthrough catches every one of those before `/retro-task`.
+
+---
+
 ## [0.13.0] — 2026-04-22
 
 ### Added

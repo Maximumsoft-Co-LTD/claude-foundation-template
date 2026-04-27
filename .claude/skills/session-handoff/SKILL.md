@@ -29,11 +29,10 @@ git stash list
 ## Step 2 — Identify stopping point
 
 Read:
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — ACs, what's done vs pending
-- Any design docs that exist for this task
+- `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — single unified doc with ACs, FE/BE design, Implementation Plan, test plans
 
 From the context of this session, identify:
-- **Last completed step** in the workflow (e.g. "completed `/design fe`, starting `/design be`")
+- **Last completed step** in the workflow (e.g. "completed `/requirement`, starting `/implement`")
 - **Current step** — exactly where execution stopped
 - **Next action** — the specific next thing to do, not just the command
 

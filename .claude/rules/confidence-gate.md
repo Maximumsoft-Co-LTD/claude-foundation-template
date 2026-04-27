@@ -4,7 +4,7 @@
 
 ## When this applies
 
-Every workflow command: `/discovery`, `/requirement`, `/design fe`, `/design be`, `/implement`, `/issue`, `/code-review`, `/testing`, `/retro-task`, `/debug`, `/refactor`
+Every workflow command: `/discovery`, `/requirement`, `/implement`, `/issue`, `/code-review`, `/testing`, `/retro-task`, `/debug`, `/refactor`
 
 Also applies to: any freeform request that involves writing or modifying code, docs, or configuration.
 

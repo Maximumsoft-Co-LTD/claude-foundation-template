@@ -11,20 +11,18 @@ Arguments: `[task-id]`  — e.g. `SP1-T002`
 Parse `[task-id]`, extract `[sprint-id]`.
 
 Read:
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — ACs and success metrics
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md` — TDD + E2E Test Plan tables
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md` — TDD Test Plan table
+- `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — single unified doc with ACs, TDD + E2E Test Plans (FE and BE), success metrics
 
 
 ---
 
 ## Step 2 — Verify test environment
 
-Confirm test DB/services are available and seeded if needed. Check env vars in `[task-id]-backend.md` Environment Variables section.
+Confirm test DB/services are available and seeded if needed. Check env vars in the `## BE Environment Variables` section of the requirement doc.
 If environment not ready → stop and tell the user what is missing.
 
 **Context7 — fetch test framework docs (if available):**
-Identify the project's test runner and E2E framework from the design docs or codebase (e.g. Jest, Vitest, Playwright, Cypress, pytest, go test).
+Identify the project's test runner and E2E framework from the requirement doc's design sections or codebase (e.g. Jest, Vitest, Playwright, Cypress, pytest, go test).
 If unfamiliar setup patterns or E2E configuration are involved:
 1. `mcp__plugin_context7_context7__resolve-library-id` → `mcp__plugin_context7_context7__query-docs` — query for setup, teardown, assertion patterns, and E2E configuration for the detected framework.
 2. Use returned docs to validate test environment configuration before running.
@@ -103,6 +101,20 @@ Check if the project has an E2E framework configured (Playwright, Cypress, etc.)
 3. If any AC cannot be verified because the feature is broken → **BLOCKED**. Fix code, re-verify.
 4. Record each AC result with screenshot evidence in the output.
 
+### 6a-smoke — Manual smoke walkthrough (FE tasks, MANDATORY regardless of E2E status)
+
+E2E asserts logic; it does not catch wrong copy, broken layout, or state transitions that *feel* discontinuous. This step closes that gap. **Required for every task that touches the UI, even when 6a E2E passed.**
+
+1. Ask user for the running dev server URL. If not provided, stop and request it.
+2. For each AC, walk through the flow in a real browser using `mcp__claude-in-chrome__*`:
+   - **Visual correctness:** copy/labels match the requirement doc, no overflow, no layout breaks at default viewport.
+   - **State continuity:** every state in the FE design's State Inventory (Loading / Empty / Error / Success / Partial-Stale) renders correctly when triggered. No flash of wrong state, no stuck spinners, no orphaned stale data after success.
+   - **Transition smoothness:** clicking through the user journey end-to-end — every transition lands on the expected next state. No dead-end, no missing back-navigation, no double-click bugs.
+3. Capture a screenshot per AC showing the final visible outcome.
+4. Any visual / continuity / transition defect → **BLOCKED**. Fix code, re-walk.
+
+Skip 6a-smoke only for: BE-only tasks, infra/docs-only tasks, or non-interactive surfaces (cron, migrations, internal scripts).
+
 ### 6b — Journey tracing (both paths)
 
 After running tests or manual verification, trace each result against the Feature Flow in the requirement doc:
@@ -131,7 +143,8 @@ Re-read the Production Readiness output just written and verify:
 - [ ] Every AC from `[task-id]-requirement.md` appears in the output — none silently skipped.
 - [ ] Every `BLOCKED` entry has a specific reason stated.
 - [ ] No AC is marked `READY` if its E2E / Manual verification used mocked or stubbed data.
-- [ ] Step numbers in this command file are sequential (1→2→3→4→5→6a/6b/6c→7→8) — no gaps.
+- [ ] **FE tasks:** Step 6a-smoke ran for every AC — visual correctness, all 5 State Inventory states, transition smoothness verified. Screenshots captured. No AC marked `READY` without smoke walkthrough evidence.
+- [ ] Step numbers in this command file are sequential (1→2→3→4→5→6a/6a-smoke/6b/6c→7→8) — no gaps.
 
 Fix any issue found before proceeding.
 

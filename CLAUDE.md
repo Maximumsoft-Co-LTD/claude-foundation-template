@@ -75,7 +75,7 @@ Agents that run template commands inherit this vocabulary. "Task" in this repo A
 
 ### Command chain
 
-Single task: `/discovery → /new-sprint → /requirement → /design fe → /design be → /implement → /issue (loop) → /code-review → /testing → /retro-task → /git-commit → /next-task (repeat per task) → /retro-sprint (once ALL tasks done, includes brain update)`
+Single task: `/discovery → /new-sprint → /requirement (unified story + FE design + BE design + Implementation Plan + tests) → /implement → /issue (loop) → /code-review → /testing → /retro-task → /git-commit → /next-task (repeat per task) → /retro-sprint (once ALL tasks done, includes brain update)`
 
 Multiple tasks in parallel: `/run-tasks [task-id] [task-id] ...` (Agent tool) or `/run-tasks-p [task-id] [task-id] ...` (headless `claude -p` — leaner parent context)
 
@@ -108,8 +108,8 @@ This template uses the [context7](https://github.com/upstash/context7-mcp) MCP p
 
 | Command | Where | What it fetches |
 |---------|-------|----------------|
-| `/design fe` / `/design be` | Step 1 — after codebase exploration | Framework/library patterns for the detected stack |
-| `/implement` | Step 1 — after loading design docs | API syntax for libraries the implementation plan references |
+| `/requirement` | Step 1 — after codebase exploration | Framework/library patterns for the detected stack (both FE and BE as applicable) |
+| `/implement` | Step 1 — after loading the unified requirement doc | API syntax for libraries the Implementation Plan references |
 | `/debug` | Phase 2 — pattern analysis | Current API behavior of the library involved in the bug |
 | `/issue` | Step 2 — investigate | Expected behavior of the library API in question |
 | `/code-review` | Step 2b — code quality review | Correct usage patterns for libraries appearing in the diff |

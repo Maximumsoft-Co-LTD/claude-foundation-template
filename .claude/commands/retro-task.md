@@ -12,9 +12,7 @@ Arguments: `[task-id]`  — e.g. `SP1-T002`
 Parse `[task-id]`, extract `[sprint-id]`.
 
 Read:
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — original estimate, ACs
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md` — TDD test plan
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md` — TDD test plan
+- `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — single unified doc with estimate, ACs, TDD test plans (FE and BE)
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-issues.md` (if exists) — bugs encountered
 
 Run `git log --oneline` and identify commits for this task.

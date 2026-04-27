@@ -41,8 +41,7 @@ If no coverage tool is configured → document the gap and suggest setup. Do not
 
 ## Step 2 — Load task context
 
-Read `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — list all ACs.
-Read `[task-id]-frontend.md` and `[task-id]-backend.md` — TDD Test Plan tables.
+Read `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — list all ACs and the TDD Test Plan tables (both `### [FE] TDD Tests` and `### [BE] TDD Tests`). There is only one unified doc per task.
 
 ---
 

@@ -33,11 +33,9 @@ Proceeding to static review...
 Parse `[task-id]`, extract `[sprint-id]`.
 
 Read:
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — ACs and success metrics
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md` — FE spec and TDD test plan
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md` — BE spec and TDD test plan
+- `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — single unified doc containing ACs, FE design, BE design, TDD test plans, Implementation Plan
 
-Validate: missing requirement, empty ACs, or missing design docs → stop with specific message.
+Validate: missing requirement, empty ACs, or empty Implementation Plan → stop with specific message.
 
 Run `git diff main...HEAD` to identify all changed files.
 
@@ -49,7 +47,7 @@ Assess confidence that you can perform a thorough, accurate code review based on
 
 Key dimensions:
 - ACs loaded and understood — every AC clear enough to verify?
-- Design docs available — FE/BE specs to check implementation against?
+- Design sections loaded — FE/BE design inside the unified requirement doc to check implementation against?
 - Changed files identified — diff scope understood?
 - Codebase conventions understood — can you spot deviations?
 - Security and performance patterns known for this stack?

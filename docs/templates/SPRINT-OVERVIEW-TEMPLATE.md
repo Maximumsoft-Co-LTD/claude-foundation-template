@@ -63,7 +63,7 @@
 ## Architecture Overview
 <!-- mermaid graph showing how sprint components fit together -->
 
-<!-- Lightweight planning ADRs only. For full ADRs use the /adr skill after /design. -->
+<!-- Lightweight planning ADRs only. For full ADRs use the /adr skill during /requirement. -->
 ## Architecture Decision Records
 ### ADR-1: [Title]
 - **Status:** proposed / accepted

@@ -22,10 +22,8 @@ Read the plan file. Confirm it has at least one task step and no `TBD` sections.
 
 ## Step 1 — Load context
 
-Read **in parallel**:
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md` (if exists)
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md` (if exists)
+Read:
+- `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — single unified doc (ACs + FE/BE design + Implementation Plan)
 
 ---
 
@@ -74,8 +72,7 @@ Skill("superpowers:subagent-driven-development")
 Pass as context:
 - The plan file path: `docs/sprints/[sprint-id]/[task-id]/[task-id]-plan.md`
 - The worktree absolute path (all subagents must work inside this worktree)
-- The requirement doc (ACs to verify against)
-- The design docs (FE + BE — for spec compliance review)
+- The unified requirement doc `[task-id]-requirement.md` — contains ACs (spec compliance), FE + BE design sections, Implementation Plan
 
 **Template overrides during execution:**
 - After each task step completes, the spec reviewer must cross-check against `[task-id]-requirement.md` ACs — not a generic spec review.

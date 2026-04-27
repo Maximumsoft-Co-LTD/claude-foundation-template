@@ -1,7 +1,7 @@
 # /write-plan
-Workflow position: **after /design be → START → /execute-plan or /implement**
+Workflow position: **after /requirement → START → /execute-plan or /implement**
 
-Produce a detailed bite-sized implementation plan for a task using the superpowers:writing-plans skill. Use this when you want a standalone plan file that an agent can execute step-by-step, in addition to or instead of the implementation plan embedded in the design docs.
+Produce a detailed bite-sized implementation plan for a task using the superpowers:writing-plans skill. Use this when you want a standalone plan file that an agent can execute step-by-step, in addition to or instead of the Implementation Plan already embedded in the unified requirement doc.
 
 Arguments: `[task-id]`  — e.g. `SP1-T002`
 
@@ -11,10 +11,8 @@ Arguments: `[task-id]`  — e.g. `SP1-T002`
 
 Parse `[task-id]`, extract `[sprint-id]`.
 
-Read **in parallel**:
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — ACs and problem statement
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md` — FE design and implementation plan (if exists)
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md` — BE design and implementation plan (if exists)
+Read:
+- `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — single unified doc with ACs, FE/BE design, Implementation Plan
 
 Validate: missing requirement or empty ACs → stop: "Run `/requirement [task-id]` first."
 
@@ -44,8 +42,7 @@ Skill("superpowers:writing-plans")
 ```
 
 Pass as context:
-- The full requirement doc (ACs, problem statement, constraints)
-- The FE and BE design docs (architecture, components, API contracts, implementation plan sections)
+- The full unified requirement doc (ACs, problem statement, constraints, FE design sections, BE design sections, architecture, components, API contracts, Implementation Plan)
 - The sprint ID and task ID for file naming
 
 **Template overrides to apply during the skill:**

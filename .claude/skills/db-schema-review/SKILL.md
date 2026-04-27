@@ -5,7 +5,7 @@ disable-model-invocation: false
 ---
 
 # /db-schema-review
-Workflow position: **/design be → START → /implement**
+Workflow position: **during /requirement (BE design section filled) → START → /implement**
 
 Review the database schema design from the BE design doc before any code is written. Catches structural issues, naming problems, missing indexes, and migration risks while the cost to fix is zero.
 Arguments: `[task-id]`  — e.g. `SP1-T002`
@@ -16,7 +16,7 @@ Arguments: `[task-id]`  — e.g. `SP1-T002`
 
 Parse `[task-id]`, extract `[sprint-id]`.
 
-Read `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md`:
+Read `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md (Section 4 · Backend Design)`:
 - Data Models / Schema section
 - Migration plan (if present)
 - API contracts (to cross-check field names)
@@ -133,7 +133,7 @@ API contract alignment: ✓ / [N] mismatches
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-If APPROVED → update `[task-id]-backend.md` with any agreed naming corrections.
+If APPROVED → update `[task-id]-requirement.md (Section 4 · Backend Design)` with any agreed naming corrections.
 
 ---
 
@@ -143,6 +143,6 @@ If APPROVED → update `[task-id]-backend.md` with any agreed naming corrections
 Result: APPROVED / CHANGES REQUESTED  ([N] critical / [N] advisory)
 
 Next:
-  Changes requested → update [task-id]-backend.md, re-run /db-schema-review
+  Changes requested → update [task-id]-requirement.md (Section 4 · Backend Design), re-run /db-schema-review
   Approved          → /implement [task-id]
 ```

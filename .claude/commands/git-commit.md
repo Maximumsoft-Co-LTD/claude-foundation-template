@@ -157,7 +157,7 @@ Sprint [sprint-id] complete — run /retro-sprint [sprint-id]
      ☐ AC-1: ...
      ☐ AC-2: ...
 
-   Readiness: Requirement [filled/empty] | FE design [filled/empty] | BE design [filled/empty]
+   Readiness: Requirement [filled/empty] | Implementation Plan [filled/empty]
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    ```
-   Suggest ONE next step (same table as `/next-task`): requirement empty → `/requirement`, FE empty → `/design fe`, etc.
+   Suggest ONE next step (same table as `/next-task`): requirement missing or empty → `/requirement`, requirement complete → `/implement`.

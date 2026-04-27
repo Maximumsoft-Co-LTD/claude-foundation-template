@@ -4,7 +4,7 @@ Workflow position: **/new-sprint → START → /git-commit (per task)**
 Arguments: `[task-id] [task-id] ...`  — e.g. `SP1-T001 SP1-T002 SP1-T003`
 
 Two gated phases:
-- **Phase 1 — Plan**: requirement → design fe → design be (all tasks in parallel, with cross-task alignment between steps) → consistency check → **user review gate**
+- **Phase 1 — Plan**: requirement (unified doc per task — includes FE + BE design + Implementation Plan, written in parallel with cross-task alignment) → consistency check → **user review gate**
 - **Phase 2 — Implement**: implement → code-review → testing → retro-task (only after user approves all plans)
 
 **Execution rules that apply to every phase:**
@@ -44,7 +44,7 @@ Read and store as `CODEBASE_MANIFEST`:
 - DB schema: `schema.*`, or latest file in `migrations/`
 - Test config: `jest.config.*`, `pytest.ini`, `vitest.config.*` (whichever exists)
 
-Inject in implementation agents (Steps 6+) as a `--- CODEBASE MANIFEST ---` block. Agents must NOT explore the codebase independently — everything they need is pre-loaded.
+Inject in implementation agents (Steps 4+) as a `--- CODEBASE MANIFEST ---` block. Agents must NOT explore the codebase independently — everything they need is pre-loaded.
 
 ### Scrum Hierarchy
 Inject `SCRUM_HIERARCHY` into every agent prompt below — verbatim, as a `--- SCRUM HIERARCHY ---` block right after `--- SPRINT CONTEXT ---`. Fresh sub-agents have no memory of the template's vocabulary; without this block, "task" is ambiguous.
@@ -65,31 +65,25 @@ Before injecting any task doc into an agent prompt:
 - ≤ 6000 chars → inject full doc
 - > 6000 chars → extract only the sections that agent type needs (see table)
 
-Extract from the heading `## Section Name` to the next `##` heading.
+Extract from the heading `## Section Name` to the next heading at the same level.
 
-| Agent | From REQ | From FE doc | From BE doc |
-|-------|----------|-------------|-------------|
-| Requirement | — | — | — |
-| FE Design | `## Acceptance Criteria` | — | — |
-| BE Design | `## Acceptance Criteria` | `## API Contracts` + `## Endpoints` | — |
-| Implementer | `## Acceptance Criteria` | `## Scope Overview` + `## Implementation Plan` | `## Scope Overview` + `## Implementation Plan` |
-| Spec Reviewer | `## Acceptance Criteria` | `## API Contracts` | `## API Contracts` |
-| Quality Reviewer | `## Acceptance Criteria` | — | — |
+| Agent | Sections to extract from `[task-id]-requirement.md` |
+|-------|---------------------------------------------------|
+| Requirement writer | — (writes the doc from scratch) |
+| Implementer | `## Acceptance Criteria` + `## Scope Overview` + `## Implementation Plan` + `# 3 · Frontend Design` (if FE) + `# 4 · Backend Design` (if BE) |
+| Spec Reviewer | `## Acceptance Criteria` + `## API Contracts Consumed` + `## API Endpoints` |
+| Quality Reviewer | `## Acceptance Criteria` |
 
 **Register all phase tasks:**
 ```
 For each [task-id]:
-  p_req   = TaskCreate("[task-id] — requirement")
-  p_fe    = TaskCreate("[task-id] — design-fe")
-  p_be    = TaskCreate("[task-id] — design-be")
+  p_req   = TaskCreate("[task-id] — requirement (unified)")
   p_impl  = TaskCreate("[task-id] — implement")
   p_rev   = TaskCreate("[task-id] — code-review")
   p_test  = TaskCreate("[task-id] — testing")
   p_retro = TaskCreate("[task-id] — retro-task")
 
-  TaskUpdate(p_fe,    addBlockedBy: [p_req])
-  TaskUpdate(p_be,    addBlockedBy: [p_fe])
-  TaskUpdate(p_impl,  addBlockedBy: [p_be])
+  TaskUpdate(p_impl,  addBlockedBy: [p_req])
   TaskUpdate(p_rev,   addBlockedBy: [p_impl])
   TaskUpdate(p_test,  addBlockedBy: [p_rev])
   TaskUpdate(p_retro, addBlockedBy: [p_test])
@@ -101,7 +95,7 @@ For each Tier 2 [task-id] depending on Tier 1 [dep-id]:
 **Print plan:**
 ```
 Tasks: [N] | Tier 1 (parallel): T001, T002 | Tier 2: T003 (depends: T001)
-Phase 1 — Plan:      requirement → design fe → design be → ⏸ review gate
+Phase 1 — Plan:      requirement (unified: story + FE design + BE design + Implementation Plan) → ⏸ review gate
 Phase 2 — Implement: implement → code-review → testing → retro-task
 ```
 
@@ -119,6 +113,7 @@ Launch agents in batches of MAX_PARALLEL. For each task, launch `Agent [task-id]
 > [inject SPRINT_SNAPSHOT]
 > ---
 > Read `.claude/commands/requirement.md`, follow every step for `[task-id]`.
+> The command produces ONE unified doc that contains: story, ACs, FE design (if applicable), BE design (if applicable), Scope Overview, Implementation Plan with subtask checkboxes, TDD + E2E test plans.
 > Save to `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`.
 > Return: DONE or BLOCKED (reason).
 
@@ -134,107 +129,47 @@ Launch agents in batches of MAX_PARALLEL. For each task, launch `Agent [task-id]
 
 ---
 
-## Step 2b — Alignment: After Requirement
+## Step 2b — Cross-task alignment
 
 Read all completed requirement docs. Write `docs/sprints/[sprint-id]/cross-task-context.md` with:
 - **Shared Terminology** — agreed names for shared entities/roles
 - **Shared Components / Screens** — which task owns each
+- **API Contracts** — every endpoint either FE consumes or BE exposes. Which task owns each shared endpoint (method, path, request/response shape, errors).
+- **Shared Data Models** — entity field names agreed across tasks
+- **Auth Requirements** — which endpoints require auth and what roles
 - **Scope Boundaries** — explicit lines between tasks to prevent overlap
 - **Conflicts resolved** — any contradictions found and their resolution
 
-Rules: be specific (vague notes are useless to sub-agents). If tasks are fully independent, write that and proceed. Print one alignment note per task.
+Rules: be specific (vague notes are useless to sub-agents). If tasks are fully independent, write that and proceed. If two tasks define conflicting shapes for the same endpoint → resolve now by editing the relevant requirement doc(s). Print one alignment note per task.
 
 ---
 
-## Step 3 — FE Design (parallel per tier)
+## Step 2c — Final Cross-Plan Consistency Check
 
-Launch agents in batches of MAX_PARALLEL. For each task, launch `Agent [task-id] — FE Design` (run_in_background: true):
-> --- SCRUM HIERARCHY ---
-> [inject SCRUM_HIERARCHY]
-> ---
-> --- SPRINT CONTEXT ---
-> [inject SPRINT_SNAPSHOT]
-> ---
-> --- REQUIREMENT: ACCEPTANCE CRITERIA (pre-loaded — apply section extraction rule) ---
-> [inject `## Acceptance Criteria` section from REQ doc]
-> ---
-> --- CROSS-TASK CONTEXT ---
-> [inject cross-task-context.md content]
-> ---
-> Read `.claude/commands/design.md`, follow every step for `fe [task-id]`.
-> The Acceptance Criteria above are the source of truth — no file reading needed.
-> Use exact names/structure for any shared component listed in cross-task context above.
-> Save to `docs/sprints/[sprint-id]/[task-id]/[task-id]-frontend.md`.
-> Return: DONE or BLOCKED (reason).
-
-Print checkpoint.
-
----
-
-## Step 3b — Alignment: After FE Design
-
-Read all completed FE design docs. Update `cross-task-context.md` with:
-- **API Contracts** — every endpoint the FE expects (method, path, request/response shape, errors). If two tasks call the same endpoint, one task owns it — note which.
-- **Shared Data Models** — entity field names as FE defined (BE must match exactly)
-- **Auth Requirements** — which endpoints require auth and what roles
-
-If two tasks define conflicting shapes for the same endpoint → resolve now. Print one-line summary per task (e.g. "T001 — 3 endpoints, 1 shared with T002: GET /users").
-
----
-
-## Step 4 — BE Design (parallel per tier)
-
-Launch agents in batches of MAX_PARALLEL. For each task, launch `Agent [task-id] — BE Design` (run_in_background: true):
-> --- SCRUM HIERARCHY ---
-> [inject SCRUM_HIERARCHY]
-> ---
-> --- SPRINT CONTEXT ---
-> [inject SPRINT_SNAPSHOT]
-> ---
-> --- REQUIREMENT: ACCEPTANCE CRITERIA (pre-loaded — apply section extraction rule) ---
-> [inject `## Acceptance Criteria` section from REQ doc]
-> ---
-> --- FE DESIGN: API CONTRACTS + ENDPOINTS (pre-loaded — apply section extraction rule) ---
-> [inject `## API Contracts` and `## Endpoints` sections from FE doc]
-> ---
-> --- CROSS-TASK CONTEXT ---
-> [inject cross-task-context.md content]
-> ---
-> Read `.claude/commands/design.md`, follow every step for `be [task-id]`.
-> Implement API contracts exactly as defined in the FE design above — no file reading needed.
-> If an endpoint is owned by another task, reference cross-task context above instead of re-implementing.
-> Save to `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md`.
-> Return: DONE or BLOCKED (reason).
-
-Print checkpoint.
-
----
-
-## Step 4b — Final Cross-Plan Consistency Check
-
-Read all completed docs for all tasks + `cross-task-context.md`. Check:
+Read all completed requirement docs + `cross-task-context.md`. Check:
 
 | Check | Pass condition |
-|-------|---------------|
-| **API contract match** | Every FE-called endpoint exists in BE with matching method, path, shape |
+|-------|----------------|
+| **API contract match (intra-task)** | Every FE `## API Contracts Consumed` row has a matching endpoint in the same doc's `## API Endpoints` (method, path, shape) |
+| **API contract match (cross-task)** | Shared endpoints across tasks are defined by exactly one owner, matched by consumers |
 | **No component duplication** | Each shared component owned by exactly one task |
 | **No scope overlap** | No two tasks implement the same functionality |
-| **No scope gap** | Every AC in every requirement is addressed by FE or BE design |
+| **No scope gap** | Every AC in every requirement is addressed in the doc's FE or BE design and Implementation Plan |
 | **Naming consistency** | Same entity uses the same name across all docs |
-| **Story point depth** | Each design doc contains the sections required for its point level |
+| **Story point depth** | Each requirement doc contains the sections required for its point level (per /requirement Step 1 table) |
 
-Print results as `✅` (pass) or `⚠️ CONFLICT — [detail] → Resolved: [action]`. Resolve every conflict now by updating the relevant docs + `cross-task-context.md`. Re-check until all ✅.
+Print results as `✅` (pass) or `⚠️ CONFLICT — [detail] → Resolved: [action]`. Resolve every conflict now by updating the relevant requirement docs + `cross-task-context.md`. Re-check until all ✅.
 
 ---
 
-## ⏸ Step 5 — PLAN REVIEW GATE
+## ⏸ Step 3 — PLAN REVIEW GATE
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 PHASE 1 COMPLETE — Review before implementing
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✓ SP1-T001 — [User Story] ([N]pt)
-    docs/sprints/SP1/SP1-T001/{requirement,frontend,backend}.md
+✓ SP1-T001 — [User Story] ([N]pt, [fullstack/fe-only/be-only/infra])
+    docs/sprints/SP1/SP1-T001/SP1-T001-requirement.md
 ✓ SP1-T002 — [User Story] ([N]pt)  ...
 ✗ SP1-T003 — BLOCKED at [phase]: [reason]
 
@@ -261,7 +196,7 @@ Reply:
 >
 > Do NOT also run `/code-review` or `/testing` manually for tasks processed by `/run-tasks`.
 
-## Step 6 — Subagent-driven implementation (parallel per tier)
+## Step 4 — Subagent-driven implementation (parallel per tier)
 
 For each task, use a **3-agent pipeline** per task:
 
@@ -276,26 +211,14 @@ Launch `Agent [task-id] — Implement` (run_in_background: true):
 > --- CODEBASE MANIFEST ---
 > [inject CODEBASE_MANIFEST]
 > ---
-> --- REQUIREMENT: ACCEPTANCE CRITERIA (apply section extraction rule) ---
-> [inject `## Acceptance Criteria` section from REQ doc]
-> ---
-> --- FE DESIGN: SCOPE OVERVIEW (apply section extraction rule) ---
-> [inject `## Scope Overview` section from FE doc]
-> ---
-> --- FE DESIGN: IMPLEMENTATION PLAN (apply section extraction rule) ---
-> [inject `## Implementation Plan` section from FE doc]
-> ---
-> --- BE DESIGN: SCOPE OVERVIEW (apply section extraction rule) ---
-> [inject `## Scope Overview` section from BE doc]
-> ---
-> --- BE DESIGN: IMPLEMENTATION PLAN (apply section extraction rule) ---
-> [inject `## Implementation Plan` section from BE doc]
+> --- REQUIREMENT DOC: IMPLEMENTATION SECTIONS (apply section extraction rule) ---
+> [inject from `[task-id]-requirement.md`: `## Acceptance Criteria` + `## Scope Overview` + `## Implementation Plan` + `# 3 · Frontend Design` (if Task Type includes FE) + `# 4 · Backend Design` (if Task Type includes BE)]
 > ---
 > --- CROSS-TASK CONTEXT ---
 > [inject cross-task-context.md content]
 > ---
 > Read `.claude/commands/implement.md` — follow every step for `[task-id]`.
-> All context is pre-loaded above — do NOT read design docs or explore codebase independently.
+> All context is pre-loaded above — do NOT read the requirement doc again or explore codebase independently.
 > Reuse shared components listed in cross-task context. No duplicate implementations.
 > For any issues found → follow `/debug` process inline — Iron Law applies inside agents.
 > Self-review before completing: verify all ACs above are covered.
@@ -306,14 +229,8 @@ After implementer completes, launch `Agent [task-id] — Spec Review` (foregroun
 > --- SCRUM HIERARCHY ---
 > [inject SCRUM_HIERARCHY]
 > ---
-> --- REQUIREMENT: ACCEPTANCE CRITERIA ---
-> [inject `## Acceptance Criteria` section from REQ doc]
-> ---
-> --- FE DESIGN: API CONTRACTS (apply section extraction rule) ---
-> [inject `## API Contracts` section from FE doc]
-> ---
-> --- BE DESIGN: API CONTRACTS (apply section extraction rule) ---
-> [inject `## API Contracts` section from BE doc]
+> --- REQUIREMENT DOC: CONTRACT SECTIONS (apply section extraction rule) ---
+> [inject from `[task-id]-requirement.md`: `## Acceptance Criteria` + `## API Contracts Consumed` (FE) + `## API Endpoints` (BE)]
 > ---
 > Review all git changes against the ACs and API contracts above.
 > Check: every AC has working code? Contracts matched exactly? No extras, no gaps?
@@ -326,8 +243,8 @@ After spec review passes, launch `Agent [task-id] — Quality Review` (foregroun
 > --- SCRUM HIERARCHY ---
 > [inject SCRUM_HIERARCHY]
 > ---
-> --- REQUIREMENT: ACCEPTANCE CRITERIA ---
-> [inject `## Acceptance Criteria` section from REQ doc]
+> --- REQUIREMENT DOC: ACCEPTANCE CRITERIA ---
+> [inject `## Acceptance Criteria` section from `[task-id]-requirement.md`]
 > ---
 > Read `.claude/commands/testing.md` — follow every step for `[task-id]`.
 > Review all changes for performance, security, code quality, edge cases.
@@ -348,7 +265,7 @@ If REQUEST_CHANGES with Critical issues → send back to Implementer → re-revi
 
 ---
 
-## Step 7 — Retro Task (parallel per tier)
+## Step 5 — Retro Task (parallel per tier)
 
 For each task, launch `Agent [task-id] — Retro` (run_in_background: true):
 > Read `.claude/commands/retro-task.md`, follow every step for `[task-id]`.
@@ -357,7 +274,7 @@ For each task, launch `Agent [task-id] — Retro` (run_in_background: true):
 
 ---
 
-## Step 8 — Final summary
+## Step 6 — Final summary
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

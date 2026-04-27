@@ -4,14 +4,67 @@ A full-lifecycle development workflow plugin for Claude Code. Brings sprint mana
 
 > **Why use this?** Claude Code is powerful but opinionated in no particular direction. This template gives it a complete development methodology: discover → plan → design → implement → review → ship → reflect — enforced through hooks, rules, and structured commands so the workflow is mechanical, not aspirational.
 
-## Install as Plugin
+## Install
+
+Bootstrap is a shell script (`install.sh`), **not** a slash command — it runs before Claude Code knows about the target repo.
+
+### One-liner (remote)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Maximumsoft-Co-LTD/claude-foundation-template/main/install.sh | bash -s -- ~/path/to/target-repo
+```
+
+### Clone + run (local)
+
+```bash
+git clone https://github.com/Maximumsoft-Co-LTD/claude-foundation-template
+cd claude-foundation-template
+./install.sh ~/path/to/target-repo --local
+```
+
+### Options
 
 ```
-/plugin marketplace add Maximumsoft-Co-LTD/claude-foundation-template
-/plugin install claude-foundation@claude-foundation-marketplace
+./install.sh [target-path] [--local [source]] [--remote] [--yes] [--dry-run]
+
+  target-path      Where to install (default: current directory)
+  --local [src]    Use a local clone as source (cwd if omitted)
+  --remote         Force git clone from GitHub (default when --local not used)
+  --yes, -y        Skip interactive prompts (for CI)
+  --dry-run        Show diff preview and safety rules, then exit without writing
 ```
 
-Or adopt manually into an existing project — see [Manual Adoption](#manual-adoption) below.
+Requirements: `bash`, `git`, `python3 >= 3.10`.
+
+### What it does
+
+1. **Scans** target stack (Node/Python/Go/Rust/PHP/Ruby/JVM), FE/BE/tests roots, git branch & commit style.
+2. **Shows a diff preview per category** — for each of `.claude/commands/`, `rules/`, `hooks/`, `skills/`, `brain/`, `docs/templates/`, counts how many files are new, changed, identical, or user-custom (and lists filenames).
+3. **Copies / merges** with a safe policy — never overwrites existing brain notes, `BACKLOG.md`, or `CLAUDE.md`.
+4. **JSON-merges `.claude/settings.json`** — appends missing template hooks into your existing config; preserves your custom hooks, matchers, and top-level keys. Backs up the original before writing.
+5. **Writes a stack-aware `CLAUDE.md`** (first install only) with detected stack as starting hints and `TBD` placeholders.
+6. **Adapts** the `paths:` frontmatter in `.claude/rules/{frontend,backend}.md` to detected FE/BE roots.
+7. **Records the installed version** in `.claude/.foundation-version` so re-runs can show `old → new` on upgrade.
+
+After install, open Claude Code in the target and run `/discovery disc-001 <first-feature>` — Claude will help fill the `TBD` sections from your README.
+
+### Safety on re-install
+
+Re-running `install.sh` on an existing foundation prompts for **[m]erge** (default, add missing only), **[r]einstall** (overwrite template files, still keep your custom ones), or **[a]bort**. `--yes` and `--dry-run` default to merge. Even in reinstall mode, `settings.json`, `CLAUDE.md`, `BACKLOG.md`, and brain notes remain protected.
+
+### Install safety features
+
+The installer has three layers of protection for re-runs:
+
+| Feature | What it does |
+|---------|--------------|
+| **Diff preview per category** | Before copying, lists `+new`, `~changed`, `=same`, and `·custom-kept` counts (with filenames) for `.claude/commands/`, `rules/`, `hooks/`, `skills/`, `brain/`, `docs/templates/` — so you see exactly what will change before you say yes. |
+| **JSON-aware `settings.json` merge** | Instead of skip-or-overwrite, the installer parses your `settings.json` and **appends missing template hooks** into your config. Your custom hooks (by matcher + command), existing entries, and any top-level keys like `permissions` are preserved. A timestamped backup (`settings.json.bak-<ts>`) is saved before any change. |
+| **Version marker** (`.claude/.foundation-version`) | Records `version`, `source_sha`, `installed_at`, and `previous_version`. On re-run, the installer shows `v0.13.0 → v0.14.0` so you know what changed. |
+
+Use `--dry-run` to see the diff preview and safety rules for your specific target without writing any files.
+
+Or adopt manually — see [Manual Adoption](#manual-adoption) below.
 
 ## What's Included
 
@@ -32,6 +85,8 @@ Or adopt manually into an existing project — see [Manual Adoption](#manual-ado
 ---
 
 ## Manual Adoption
+
+> **TL;DR:** prefer `install.sh` (see [Install](#install) above) — it automates Options A/B + Steps 1–2 below, scanning your repo to pre-fill `CLAUDE.md` and path rules. Keep reading only if you want to do it by hand or need to understand what the script does.
 
 ### Option A — New project (clone as base)
 
@@ -123,10 +178,10 @@ The brain fills up naturally as you run `/retro-sprint` — brain update is buil
 /discovery disc-001 my-feature   # Understand the problem first
 /new-sprint SP1 "My first sprint"
 
-# Work a single task
+# Work a single task — /requirement produces ONE unified doc
+# that includes story + FE design + BE design + Implementation Plan + tests.
+# Sections tagged [FE] are skipped for BE-only tasks (and vice versa) via Task Type.
 /requirement SP1-T001
-/design fe SP1-T001    # skip if BE-only
-/design be SP1-T001    # skip if FE-only
 /implement SP1-T001
 /code-review SP1-T001
 /testing SP1-T001
@@ -147,7 +202,7 @@ The brain fills up naturally as you run `/retro-sprint` — brain update is buil
 
 **Single task (sequential):**
 ```
-/discovery → /new-sprint → /requirement → /design fe → /design be → /implement
+/discovery → /new-sprint → /requirement (unified story + FE design + BE design + Implementation Plan + tests) → /implement
     → /issue (loop) → /code-review → /testing
     → /retro-task → /git-commit → /next-task (repeat per task)
     → /retro-sprint (once ALL tasks done)
@@ -157,12 +212,12 @@ The brain fills up naturally as you run `/retro-sprint` — brain update is buil
 ```
 /new-sprint → /run-tasks [task-id] [task-id] ...        # Agent tool (rich context)
          or → /run-tasks-p [task-id] [task-id] ...      # claude -p (lean parent context)
-    Phase 1: requirement → design fe → design be (parallel, MAX 4 at once) → ⏸ user reviews
+    Phase 1: requirement (unified doc per task, parallel, MAX 4 at once) → ⏸ user reviews
     Phase 2: implement → spec review → quality review → retro-task (parallel, MAX 4 at once)
     → /git-commit per task → /retro-sprint
 ```
 
-**Context optimization (both variants):** The parent session pre-loads sprint overview, backlog rows, discovery doc, and a codebase manifest **once** — injected into every agent. Each agent type receives only the doc sections it needs (AC list, TDD Test Plan, or Implementation Plan) rather than full design docs. File paths are never passed to agents, preventing redundant reads.
+**Context optimization (both variants):** The parent session pre-loads sprint overview, backlog rows, discovery doc, and a codebase manifest **once** — injected into every agent. Each agent type receives only the sections of the unified requirement doc it needs (ACs, Implementation Plan, FE or BE design) rather than the full file. File paths are never passed to agents, preventing redundant reads.
 
 Full quick reference (flow diagram, hard gates, escape hatches): `docs/WORKFLOW-QUICKREF.md`
 
@@ -173,11 +228,10 @@ Full quick reference (flow diagram, hard gates, escape hatches): `docs/WORKFLOW-
 | `/discovery` | `[disc-id] [name]` | Understand problem before planning |
 | `/brainstorm` | `[disc-id] [name]` | Open-ended ideation — superpowers bridge, alternative to `/discovery` |
 | `/new-sprint` | `[SP[N]] [epic description]` | Create sprint, scaffold tasks as user stories with E2E validation scenarios |
-| `/requirement` | `[task-id]` | Draft ACs + requirement doc |
+| `/requirement` | `[task-id]` | Unified story doc: requirement + FE design + BE design + Scope Overview + Implementation Plan (with subtasks) + TDD & E2E test plans |
 | `/run-tasks` | `[task-id] [task-id] ...` | Run multiple tasks in parallel (2-phase pipeline); MAX_PARALLEL cap + context pre-loading |
 | `/run-tasks-p` | `[task-id] [task-id] ...` | Headless variant — spawns `claude -p` subprocesses; parent context stays lean; file-based context injection |
-| `/design` | `[fe\|be] [task-id]` | Frontend or backend design + TDD test plan |
-| `/write-plan` | `[task-id]` | Bite-sized implementation plan — superpowers bridge, use after `/design be` |
+| `/write-plan` | `[task-id]` | Standalone bite-sized implementation plan — superpowers bridge, use after `/requirement` |
 | `/implement` | `[task-id]` | Write failing tests → implement → verify |
 | `/execute-plan` | `[task-id]` | Execute plan via subagents with worktree isolation — superpowers bridge |
 | `/issue` | `[task-id] [desc]` | TDD bug fix + log (known root cause during active sprint task) |
@@ -272,14 +326,14 @@ Skills extend the core workflow with optional steps — insert them where they a
 
 | Skill | Insert after | What it does |
 |-------|-------------|--------------|
-| `frontend-design` | `/design fe` Step 2 | Production-grade, visually distinctive UI components, pages, and dashboards |
+| `frontend-design` | during `/requirement` FE design section | Production-grade, visually distinctive UI components, pages, and dashboards |
 | `ui-ux-pro-max` | `frontend-design` | Design QA — 161 palettes, 50+ styles, 99 UX guidelines, 57 font pairings across 10 stacks |
 
 **Quality & Review**
 
 | Skill | Insert after | What it does |
 |-------|-------------|--------------|
-| `/db-schema-review [task-id]` | `/design be` | Review schema before coding — naming, indexes, migration safety, API contract alignment |
+| `/db-schema-review [task-id]` | during `/requirement` BE design section | Review schema before coding — naming, indexes, migration safety, API contract alignment |
 | `/security-review [task-id]` | `/implement` | Secrets scan, injection checks, insecure defaults, new dependency risk |
 | `/accessibility-review [task-id]` | `/testing` | WCAG 2.1 AA — ARIA, keyboard nav, color contrast, screen reader |
 | `/test-coverage [task-id]` | `/testing` | Coverage gaps mapped to ACs, prioritised list of missing tests |
@@ -303,7 +357,7 @@ Skills extend the core workflow with optional steps — insert them where they a
 
 | Skill | Insert after | What it does |
 |-------|-------------|--------------|
-| `/pr-create [task-id]` | `/git-commit` | Push branch + open PR with pre-filled title, AC checklist, doc links |
+| `/pr-create [task-id]` | `/git-commit` | Push branch + open GitHub PR pre-filled from the unified requirement doc |
 | `/changelog [sprint-id] [version]` | `/retro-sprint` | Convert sprint commits + retros into user-facing release notes |
 
 **Session Management**
@@ -418,8 +472,8 @@ Uses the [context7](https://github.com/upstash/context7-mcp) MCP plugin to fetch
 
 | Command | Integration point | What it fetches |
 |---------|------------------|----------------|
-| `/design fe` / `/design be` | Step 1 — after codebase exploration | Framework patterns for the detected stack |
-| `/implement` | Step 1 — after loading design docs | API syntax for libraries the plan references |
+| `/requirement` | Step 1 — after codebase exploration | Framework patterns for the detected stack (both FE and BE as applicable) |
+| `/implement` | Step 1 — after loading the unified requirement doc | API syntax for libraries the plan references |
 | `/debug` | Phase 2 — pattern analysis | Current API behavior of the library involved in the bug |
 | `/issue` | Step 2 — via `/debug` Phase 2 | Inherited automatically |
 | `/code-review` | Step 2b — code quality review | Correct usage patterns, deprecated APIs |
@@ -452,7 +506,7 @@ brain/
 
 **How it grows:** `/retro-sprint` Step 6 extracts learnings and writes them as atomic notes — no separate command needed. Over time the brain becomes the authoritative source for non-obvious project knowledge that can't be derived from the code alone.
 
-**How it's read:** Claude reads `BRAIN-INDEX.md` only when the task requires it — before workflow commands like `/discovery`, `/implement`, or `/design`. Navigation is always MOC → targeted notes — never the whole vault. Full access protocol: `.claude/rules/brain.md`.
+**How it's read:** Claude reads `BRAIN-INDEX.md` only when the task requires it — before workflow commands like `/discovery`, `/requirement`, or `/implement`. Navigation is always MOC → targeted notes — never the whole vault. Full access protocol: `.claude/rules/brain.md`.
 
 ---
 
@@ -460,11 +514,11 @@ brain/
 
 Every workflow command includes a **confidence gate** — before starting the main work, the AI assesses whether it has enough context to succeed. If confidence is below **90%**, it stops and asks targeted questions instead of guessing.
 
-The gate checks 5 dimensions: requirement clarity, codebase familiarity, AC coverage, dependency awareness, and approach clarity. Each command's gate is **command-specific** — `/implement` checks TDD plan readiness, `/debug` checks bug reproducibility, `/design` checks stack understanding, etc.
+The gate checks 5 dimensions: requirement clarity, codebase familiarity, AC coverage, dependency awareness, and approach clarity. Each command's gate is **command-specific** — `/implement` checks TDD plan readiness, `/debug` checks bug reproducibility, `/requirement` checks codebase/stack understanding, etc.
 
 Anti-gaming rules prevent confidence inflation: the score must be backed by evidence (files actually read, context actually received), not assumptions. "I think I know" is not 90%.
 
-**11 commands gated:** `/discovery`, `/requirement`, `/design`, `/implement`, `/execute-plan`, `/write-plan`, `/new-sprint`, `/code-review`, `/testing`, `/debug`, `/issue`
+**10 commands gated:** `/discovery`, `/requirement`, `/implement`, `/execute-plan`, `/write-plan`, `/new-sprint`, `/code-review`, `/testing`, `/debug`, `/issue`
 
 **Not gated (by design):** `/status` (read-only), `/next-task` (navigation), `/git-commit` (mechanical), `/retro-task`/`/retro-sprint` (reflection), `/brainstorm` (already has approach HARD-GATE)
 
@@ -493,8 +547,8 @@ Common real-world deviations from the standard flow — see `docs/WORKFLOW-QUICK
 | Scenario | Short path |
 |----------|-----------|
 | **Hotfix** | `/debug` → TDD fix → `/git-commit` → PR (skip sprint flow) |
-| **FE-only task** | Skip `/design be`; `/implement` sets `HAS_BE=false` automatically |
-| **BE-only task** | Skip `/design fe`; `/implement` sets `HAS_FE=false` automatically |
+| **FE-only task** | Set `Task Type: fe-only` in the requirement doc; BE design sections mark `N/A — FE-only task`; `/implement` sets `HAS_BE=false` |
+| **BE-only task** | Set `Task Type: be-only` in the requirement doc; FE design sections mark `N/A — BE-only task`; `/implement` sets `HAS_FE=false` |
 | **Exploratory spike** | `/requirement` (questions as ACs) → research → write discovery/brain doc → `/retro-task` |
 | **Blocked task** | `/issue` → mark `blocked` → `/next-task` → resume when unblocked |
 | **Multi-sprint epic** | One `/discovery` → one `/new-sprint` per deployable slice; task IDs never reset |
@@ -512,9 +566,7 @@ docs/
 │       ├── SP1-overview.md
 │       ├── SP1-retro.md
 │       └── SP1-T001/
-│           ├── SP1-T001-requirement.md
-│           ├── SP1-T001-frontend.md
-│           ├── SP1-T001-backend.md
+│           ├── SP1-T001-requirement.md   # unified: story + FE design + BE design + Implementation Plan + tests
 │           ├── SP1-T001-issues.md
 │           └── SP1-T001-retro.md
 ├── templates/
@@ -539,8 +591,7 @@ discovery → backlog → todo → in-progress → review → testing → done
 - Each lint hook self-filters by file extension, so it is safe to include all hooks regardless of your stack.
 
 **`/design fe` or `/design be` not found**
-- Confirm `.claude/commands/design.md` exists in your project.
-- If you adopted from an older version, you may have the old `fe-design.md` / `be-design.md` files. Delete them and copy `design.md` from the latest template.
+- As of the unified-doc refactor, `/design` was removed. Design now lives inside `/requirement` — one doc per task. If you're upgrading from an earlier version, merge any existing `*-frontend.md` / `*-backend.md` content into `*-requirement.md` sections 3 and 4 and delete the old files.
 
 **Brain vault feels stale**
 - The brain is updated automatically at Step 6 of `/retro-sprint`. If you ran retros before the brain step was added, run `/retro-sprint` again — it is idempotent.

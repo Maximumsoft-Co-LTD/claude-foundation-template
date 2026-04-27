@@ -6,25 +6,25 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/hooks/lint_go.py",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/lint_go.py\"",
             "timeout": 60,
             "statusMessage": "Running golangci-lint..."
           },
           {
             "type": "command",
-            "command": "python3 .claude/hooks/lint_ts.py",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/lint_ts.py\"",
             "timeout": 60,
             "statusMessage": "Running tsc lint..."
           },
           {
             "type": "command",
-            "command": "python3 .claude/hooks/lint_js.py",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/lint_js.py\"",
             "timeout": 30,
             "statusMessage": "Running ESLint..."
           },
           {
             "type": "command",
-            "command": "python3 .claude/hooks/run_tests.py",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/run_tests.py\"",
             "timeout": 120,
             "statusMessage": "Running tests..."
           }

@@ -47,9 +47,8 @@ For every task that is NOT `done`, check which doc files exist under `docs/sprin
 | Condition | Last completed step | Suggested next action |
 |-----------|--------------------|-----------------------|
 | Directory does not exist OR no `[task-id]-requirement.md` | Sprint planning | `/requirement [task-id]` |
-| `[task-id]-requirement.md` exists, no `[task-id]-frontend.md` AND no `[task-id]-backend.md` | `/requirement` | `/design fe [task-id]` |
-| `[task-id]-frontend.md` exists, no `[task-id]-backend.md` | `/design fe` | `/design be [task-id]` |
-| `[task-id]-backend.md` exists, no `[task-id]-retro.md` and no `[task-id]-implement` evidence | `/design be` | `/implement [task-id]` |
+| `[task-id]-requirement.md` exists but ACs empty OR Implementation Plan empty (and Task Type ≠ infra) | `/requirement` (incomplete) | Continue `/requirement [task-id]` |
+| `[task-id]-requirement.md` fully filled, no `[task-id]-retro.md` and no `[task-id]-implement` evidence | `/requirement` | `/implement [task-id]` |
 | `[task-id]-issues.md` exists — count lines matching open issue pattern (lines starting with `- [ ]` or status `open`) | (show alongside step) | Resolve open issues first |
 
 "Implement evidence" means any file whose name contains `-implement` in the task directory.

@@ -5,7 +5,7 @@ disable-model-invocation: false
 ---
 
 # /adr
-Workflow position: **during /design fe or /design be → START → continue design**
+Workflow position: **during /requirement (FE or BE design section) → START → continue requirement**
 
 Capture a non-trivial architectural decision as an immutable record. Run when a design doc contains a decision that future engineers will question — "why X and not Y?"
 Arguments: `[task-id] [short-title]`  — e.g. `SP1-T002 use-event-sourcing-for-orders`
@@ -20,7 +20,7 @@ ls docs/decisions/ 2>/dev/null | grep "^ADR-" | sort | tail -1
 
 If `docs/decisions/` doesn't exist → create it. Next number = last ADR number + 1, starting at `ADR-001`.
 
-Read `docs/sprints/[sprint-id]/[task-id]/[task-id]-backend.md` and `[task-id]-frontend.md` — identify the decision to record from context.
+Read `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` (Sections 3 and 4 — FE Design and BE Design) — identify the decision to record from context.
 
 ---
 
@@ -94,22 +94,20 @@ and any time/complexity/risk factors that influenced the choice.]
 
 ## References
 
-- [task-id]-backend.md / [task-id]-frontend.md
+- [task-id]-requirement.md (Sections 3 · Frontend Design / 4 · Backend Design)
 - [Any external references, RFCs, articles that informed the decision]
 ```
 
 ---
 
-## Step 4 — Link from design doc
+## Step 4 — Link from requirement doc
 
-In the relevant design doc (`[task-id]-backend.md` or `[task-id]-frontend.md`), add or update the **Design Decisions** section:
+In `[task-id]-requirement.md`, under the relevant `FE Design Decisions` or `BE Design Decisions` table (Sections 3 or 4), add a row:
 
 ```markdown
-## Design Decisions
-
-| Decision | ADR |
-|----------|-----|
-| [Short title] | [ADR-NNN](../../../decisions/ADR-NNN-short-title.md) |
+| Decision | Why | Alternatives Rejected |
+|----------|-----|-----------------------|
+| [Short title] | see [ADR-NNN](../../../decisions/ADR-NNN-short-title.md) | [one-line summary] |
 ```
 
 ---
@@ -118,10 +116,10 @@ In the relevant design doc (`[task-id]-backend.md` or `[task-id]-frontend.md`), 
 
 ```
 ✓ docs/decisions/ADR-[NNN]-[short-title].md
-✓ [task-id]-[backend/frontend].md — Design Decisions section updated
+✓ [task-id]-requirement.md — Design Decisions row added in Section 3 or 4
 
 Status: Accepted
-Next: continue /[design fe|design be] [task-id]
+Next: continue /requirement [task-id]
 ```
 
 To supersede an existing ADR: update its `Status:` to `Superseded by ADR-[NNN]` and link to the new one.
