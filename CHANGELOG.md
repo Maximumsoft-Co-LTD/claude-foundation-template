@@ -4,6 +4,29 @@ All notable changes to claude-foundation-template are documented here.
 
 ---
 
+## [0.15.0] — 2026-04-29
+
+### Added
+- **Brain citation meter — read-only dashboard for measuring brain ROI.**
+  - New slash command `/brain-meter` shows how many times each brain note has been cited inside workflow output docs (`docs/sprints/`, `docs/discovery/`). Runs in dashboard mode by default; pass a prefix (`/brain-meter CON`) to drill into the full uncited list for that type.
+  - New PostToolUse hook `.claude/hooks/brain_citation_meter.py` registered in `.claude/settings.json` — runs on every Write/Edit, scans the doc for brain note references (`CON-foo`, `PAT-001`, `DEC-003`, etc.), and increments per (note_id, doc_path) pairs at most once so re-edits don't inflate the metric. `lastCitedAt` refreshes on every edit that still contains the reference.
+  - State persists in `brain/.metrics/citations.json` (gitignored via `brain/.metrics/.gitignore` — only the `.gitignore` itself is tracked, so the directory exists in fresh checkouts but per-project counts stay local).
+  - The dashboard surfaces ONE actionable insight per run, prioritised: stale high-value DEC/PAT/LES notes never cited → bloated CON/GLO with low coverage → "brain used effectively, no action" → empty meter recommends running `/discovery` to seed citations.
+  - Failures in the hook are swallowed silently — the meter must never block a tool call.
+- **27 orphan brain notes brought under version control.** These were referenced from `BRAIN-INDEX.md` and several MOCs (Workflow, Data, Developer, DevOps, Infrastructure, Patterns) but had never been `git add`-ed. Adding them now closes every dangling `[[CON-…]]` / `[[PAT-…]]` link the audit pass surfaced.
+  - Workflow concepts (9): `CON-bite-sized-tasks`, `CON-brain-access-protocol`, `CON-claude-code-hooks`, `CON-claude-code-skills`, `CON-confidence-gate`, `CON-mcp-integration`, `CON-self-check-rule`, `CON-two-stage-review`, `CON-verification-before-completion`.
+  - Data deep-dives (5): `CON-cap-acid-base`, `CON-database-indexing`, `CON-database-types`, `CON-distributed-transactions`, `CON-replication-sharding`.
+  - Developer paradigms (3): `CON-concurrency-parallelism`, `CON-functional-programming`, `CON-oop-fundamentals`.
+  - DevOps (3): `CON-feature-flags`, `CON-secrets-management`, `CON-trunk-based-development`.
+  - Infrastructure (2): `CON-load-balancing`, `CON-storage-types`.
+  - Patterns (3): `PAT-005-subagent-driven-development`, `PAT-006-worktree-isolation`, `PAT-007-headless-parallel-agents`.
+
+### Rationale
+- **Brain-meter:** a knowledge vault is only useful if anyone actually consults it during work. Without a citation meter, there's no signal whether `/discovery`, `/requirement`, `/implement` are pulling on brain notes — or whether the vault is dead weight. The hook records citations passively (zero workflow change), the dashboard surfaces them on demand, and the single-insight rule prevents the meter from becoming yet another noisy report.
+- **Orphan brain notes:** the 0.14.2 audit found that BRAIN-INDEX listed many notes as `[[CON-…]]` links pointing at files that existed on disk but were untracked in git. New clones of the template were missing 25%+ of the brain content the index advertised. Tracking them resolves every dangling link.
+
+---
+
 ## [0.14.2] — 2026-04-29
 
 ### Added
