@@ -58,7 +58,7 @@ Use `/run-tasks-p` when running many tasks and parent context size is a concern.
 | `/issue` | `[task-id] [description]` | Write failing test → fix → log during implementation |
 | `/code-review` | `[task-id]` | Two-stage review: spec compliance → code quality |
 | `/testing` | `[task-id]` | Run full suite, cross-check every AC has a test |
-| `/retro-task` | `[task-id]` | Write retrospective for one task, mark it done |
+| `/retro-task` | `[task-id]` | Write retrospective for one task, mark it done, capture brain entries (high-bar) |
 | `/git-commit` | `[task-id]` | Stage, commit, then choose: merge / PR / keep / discard |
 | `/next-task` | `[task-id]` _(optional)_ | Load next todo task; auto-reconcile stale BACKLOG statuses; show task context card |
 | `/status` | _(none)_ | Read-only sprint progress card — current task, last step, suggested next action |

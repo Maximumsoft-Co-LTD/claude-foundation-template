@@ -55,7 +55,7 @@ This project has a **living knowledge base** in `brain/` — an Obsidian-style v
 - `brain/05-sprints/` — Per-sprint knowledge summaries
 - `brain/06-glossary/` — Project vocabulary (GLO-xxx)
 
-**The brain grows after every sprint:** `/retro-sprint` includes a brain update step (Step 6) — no separate command needed.
+**The brain grows continuously:** `/retro-task` Step 4 captures task-level entries (high-bar, optional — most tasks produce zero) and `/retro-sprint` Step 6 consolidates sprint-level entries with dedup against task captures, then reviews CLAUDE.md rule promotions. No separate brain-update command needed.
 
 ---
 

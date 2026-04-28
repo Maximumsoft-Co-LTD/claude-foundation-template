@@ -41,6 +41,12 @@
 <!-- Things learned that the team should know or that should go into CLAUDE.md -->
 -
 
+## Brain Entries Written
+<!-- Populated by /retro-task Step 4 when atomic notes are written. Empty if nothing met the bar. -->
+| ID | Type | Title | Link |
+|----|------|-------|------|
+| — | — | — | — |
+
 ## Action items for next sprint
 <!-- Concrete, specific items — not generic advice -->
 -
