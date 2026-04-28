@@ -61,6 +61,7 @@ Use `/run-tasks-p` when running many tasks and parent context size is a concern.
 | `/retro-task` | `[task-id]` | Write retrospective for one task, mark it done |
 | `/git-commit` | `[task-id]` | Stage, commit, then choose: merge / PR / keep / discard |
 | `/next-task` | `[task-id]` _(optional)_ | Load next todo task; auto-reconcile stale BACKLOG statuses; show task context card |
+| `/status` | _(none)_ | Read-only sprint progress card — current task, last step, suggested next action |
 | `/retro-sprint` | `[sprint-id]` | Aggregate all task retros → sprint retro, evaluate goals + extract brain knowledge |
 | `/debug` | `[description]` | 4-phase systematic debugging — for standalone incidents outside sprint context |
 | `/run-tasks` | `[task-id] [task-id] ...` | Run multiple tasks in parallel through the full flow (Agent tool) |
@@ -68,7 +69,6 @@ Use `/run-tasks-p` when running many tasks and parent context size is a concern.
 | `/brainstorm` | `[disc-id] [name]` | Conversational discovery via superpowers:brainstorming — alternative to `/discovery` |
 | `/write-plan` | `[task-id]` | Standalone bite-sized implementation plan via superpowers:writing-plans — after `/requirement` |
 | `/execute-plan` | `[task-id]` | Subagent-driven plan execution via superpowers:subagent-driven-development — after `/write-plan` |
-| `/create-pr` | `[task-id]` | Push branch + open GitHub PR pre-filled from the unified requirement doc — after `/git-commit` |
 
 ## /issue vs /debug — Which to use?
 
@@ -109,8 +109,7 @@ Use `/run-tasks-p` when running many tasks and parent context size is a concern.
 ### Delivery
 | Skill | Args | Insert after |
 |-------|------|--------------|
-| `/create-pr` | `[task-id]` | `/git-commit` — push branch + open GitHub PR pre-filled from the unified requirement doc (workflow-aware wrapper around the `pr-create` skill) |
-| `/pr-create` | `[task-id]` | `/git-commit` — same PR creation flow without the preconditions / confirmation gate / backlog update — use when you want the raw skill |
+| `/pr-create` | `[task-id]` | `/git-commit` — push branch + open GitHub PR pre-filled from the unified requirement doc |
 | `/changelog` | `[sprint-id] [version]` | `/retro-sprint` — user-facing release notes from commits + retros |
 
 ### Session Management
