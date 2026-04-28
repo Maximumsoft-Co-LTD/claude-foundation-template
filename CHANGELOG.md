@@ -7,12 +7,18 @@ All notable changes to claude-foundation-template are documented here.
 ## [0.14.2] — 2026-04-29
 
 ### Added
+- **Task-level brain capture in `/retro-task` with sprint-level dedup.** `/retro-task` now captures brain entries while task context is fresh instead of waiting for `/retro-sprint`. The bar is intentionally high — most tasks produce zero entries; only genuinely reusable lessons / decisions / patterns / glossary terms get captured.
+  - Notes written by `/retro-task` carry `source: retro-task <task-id>` in their frontmatter.
+  - `/retro-sprint` Step 6 reads those entries first, dedupes against them, and consolidates the full sprint summary plus CLAUDE.md rule promotions in one pass — no separate brain-update command needed.
+  - `RETRO-TASK-TEMPLATE.md` gained a **Brain Entries Written** table so the dedup pass at sprint end is readable at a glance.
+  - `/retro-task` was simultaneously revised: confidence gate added, computed metrics block (estimated vs actual story points, variance %, AC coverage %, TDD adherence), explicit self-check step, one-line metrics summary in the output.
 - **Three new backend concept notes filling identified gaps in the brain.**
   - `brain/01-concepts/backend/CON-message-brokers.md` — technology comparison (Kafka vs RabbitMQ vs SQS vs NATS vs Redis Streams), log-vs-queue mental model, outbox pattern, partition key design, anti-patterns. Complements `CON-async-patterns` (which stays at the pattern level).
   - `brain/01-concepts/backend/CON-graphql.md` — schema/resolvers, the N+1 problem and DataLoader fix, Relay cursor pagination, mutations with payload errors, federation, performance/security hardening (depth limit, cost analysis, persisted queries).
   - `brain/01-concepts/backend/CON-grpc.md` — Protobuf, the four RPC types (unary, server-stream, client-stream, bidi), schema-evolution rules (tag numbers are forever, reserve removed tags), deadlines and cancellation, gRPC-Web, operational concerns (load balancing, health checks, observability).
 
 ### Fixed
+- **`_WORKFLOW-REF.md` synced with actual commands.** Added `/status` (its command file existed but the reference table didn't list it) and removed `/create-pr` (listed twice in the table but no command file ever existed — only the `pr-create` skill is real). All entries now map 1:1 to `.claude/commands/` or `.claude/skills/`.
 - **Stale references across MOCs.**
   - `MOC-Workflow.md` — removed obsolete `/design fe` and `/design be` commands (folded into `/requirement` since 0.14.1) from Core Flow and Command Reference; added missing `/run-tasks-p`; fixed `/write-plan` description to point at `/requirement` instead of `/design be`.
   - `MOC-Frontend.md` — workflow tip rewritten to point at the FE Design section of `/requirement`.
@@ -22,10 +28,12 @@ All notable changes to claude-foundation-template are documented here.
   - `MOC-SDLC.md` — corrected "6 phases" → "7 phases" (the phase list was already 7).
 
 ### Changed
+- `CLAUDE.md` — Brain section updated to describe the new dual-layer capture flow: "`/retro-task` Step 4 captures task-level entries (high-bar, optional — most tasks produce zero) and `/retro-sprint` Step 6 consolidates sprint-level entries with dedup against task captures."
 - `BRAIN-INDEX.md` — Backend section reorganized to include the three new notes and call out CON-async-patterns as pattern-level vs CON-message-brokers as technology-level. Cross-Domain Link Map gained three new entries (`graphql`, `grpc`, `message-brokers`). Total concept-note count corrected from `98 → 109` (the prior count had drifted from the actual file tree).
 
 ### Rationale
-A pre-flight audit found three classes of decay: (1) stale workflow references — `/design fe` and `/design be` were removed in 0.14.1 but several MOCs still mentioned them; (2) "to be added" placeholders pointing at notes that had since been created; (3) MOCs missing links to notes that already lived in their domain folder. The fix was mechanical (rewrite the references) plus three deep-dive notes for queue technology, GraphQL, and gRPC — three topics that other notes referenced repeatedly but had no canonical home. No template / command / hook behavior changed; this is brain content only.
+- **Task-level brain capture:** waiting for `/retro-sprint` to write everything meant context was 1–3 weeks stale for early-sprint tasks; capturing at task time uses fresh memory while the dedup mechanism (`source: retro-task <id>`) prevents the sprint-level pass from double-writing.
+- **Brain audit:** a pre-flight pass found three classes of decay — stale workflow references (`/design fe` / `/design be` were removed in 0.14.1 but several MOCs still mentioned them); "to be added" placeholders pointing at notes that had since been created; MOCs missing links to notes that already lived in their domain folder. The fix was mechanical (rewrite the references) plus three deep-dive notes for queue technology, GraphQL, and gRPC — three topics that other notes referenced repeatedly but had no canonical home.
 
 ---
 
