@@ -13,7 +13,7 @@ updated: 2026-03-25
 
 ## Core Concepts
 
-- [[../01-concepts/sdlc/CON-sdlc-phases]] — 6 phases: Planning → Analysis → Design → Implementation → Testing → Deployment → Maintenance
+- [[../01-concepts/sdlc/CON-sdlc-phases]] — 7 phases: Planning → Requirements → Design → Implementation → Testing → Deployment → Maintenance
 - [[../01-concepts/sdlc/CON-sdlc-models]] — Waterfall vs Agile vs Spiral vs V-Model
 - [[../01-concepts/sdlc/CON-definition-of-done]] — เงื่อนไข "เสร็จจริง" ในแต่ละ phase
 - [[../01-concepts/sdlc/CON-definition-of-ready]] — เงื่อนไขก่อน task จะเข้า sprint ได้

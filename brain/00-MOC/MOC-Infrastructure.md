@@ -13,12 +13,19 @@ updated: 2026-03-25
 
 ## Core Concepts
 
+### Foundations
 - [[../01-concepts/infra/CON-cloud-fundamentals]] — IaaS/PaaS/SaaS, AWS/GCP/Azure core services
 - [[../01-concepts/infra/CON-networking-basics]] — DNS, Load Balancer, VPC, CDN, SSL/TLS
 - [[../01-concepts/infra/CON-security-fundamentals]] — Least privilege, defense in depth, secrets management
+
+### Scale & reliability
 - [[../01-concepts/infra/CON-scalability-patterns]] — Horizontal vs vertical, stateless, caching, sharding
 - [[../01-concepts/infra/CON-sre-fundamentals]] — SLI, SLO, SLA, error budget, incident response
 - [[../01-concepts/infra/CON-disaster-recovery]] — RTO, RPO, backup strategies, failover
+
+### Components (deep dives)
+- [[../01-concepts/infra/CON-load-balancing]] — L4 vs L7, algorithms, sticky sessions, health checks
+- [[../01-concepts/infra/CON-storage-types]] — Block (EBS) vs File (EFS) vs Object (S3); decision tree
 
 ## Cloud Service Model
 

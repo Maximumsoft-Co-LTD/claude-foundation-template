@@ -4,6 +4,31 @@ All notable changes to claude-foundation-template are documented here.
 
 ---
 
+## [0.14.2] — 2026-04-29
+
+### Added
+- **Three new backend concept notes filling identified gaps in the brain.**
+  - `brain/01-concepts/backend/CON-message-brokers.md` — technology comparison (Kafka vs RabbitMQ vs SQS vs NATS vs Redis Streams), log-vs-queue mental model, outbox pattern, partition key design, anti-patterns. Complements `CON-async-patterns` (which stays at the pattern level).
+  - `brain/01-concepts/backend/CON-graphql.md` — schema/resolvers, the N+1 problem and DataLoader fix, Relay cursor pagination, mutations with payload errors, federation, performance/security hardening (depth limit, cost analysis, persisted queries).
+  - `brain/01-concepts/backend/CON-grpc.md` — Protobuf, the four RPC types (unary, server-stream, client-stream, bidi), schema-evolution rules (tag numbers are forever, reserve removed tags), deadlines and cancellation, gRPC-Web, operational concerns (load balancing, health checks, observability).
+
+### Fixed
+- **Stale references across MOCs.**
+  - `MOC-Workflow.md` — removed obsolete `/design fe` and `/design be` commands (folded into `/requirement` since 0.14.1) from Core Flow and Command Reference; added missing `/run-tasks-p`; fixed `/write-plan` description to point at `/requirement` instead of `/design be`.
+  - `MOC-Frontend.md` — workflow tip rewritten to point at the FE Design section of `/requirement`.
+  - `MOC-Data.md` — removed `(when added)` / `(future)` markers for notes that already exist (`CON-database-patterns`, `CON-scalability-patterns`, `CON-caching-strategies`, `CON-backend-layers`); added pointer to new `CON-message-brokers`.
+  - `MOC-Backend.md` — restructured into four sub-sections (API & Layering, Data & Persistence, Async & Real-time, Security & Limits) and added missing links to existing notes (`CON-api-security`, `CON-rate-limiting`, `CON-websockets-realtime`, plus the three new backend notes).
+  - `MOC-Patterns.md` — added `PAT-005-subagent-driven-development`, `PAT-006-worktree-isolation`, `PAT-007-headless-parallel-agents` to the table and Workflow Patterns category (previously listed in BRAIN-INDEX but missing from this MOC).
+  - `MOC-SDLC.md` — corrected "6 phases" → "7 phases" (the phase list was already 7).
+
+### Changed
+- `BRAIN-INDEX.md` — Backend section reorganized to include the three new notes and call out CON-async-patterns as pattern-level vs CON-message-brokers as technology-level. Cross-Domain Link Map gained three new entries (`graphql`, `grpc`, `message-brokers`). Total concept-note count corrected from `98 → 109` (the prior count had drifted from the actual file tree).
+
+### Rationale
+A pre-flight audit found three classes of decay: (1) stale workflow references — `/design fe` and `/design be` were removed in 0.14.1 but several MOCs still mentioned them; (2) "to be added" placeholders pointing at notes that had since been created; (3) MOCs missing links to notes that already lived in their domain folder. The fix was mechanical (rewrite the references) plus three deep-dive notes for queue technology, GraphQL, and gRPC — three topics that other notes referenced repeatedly but had no canonical home. No template / command / hook behavior changed; this is brain content only.
+
+---
+
 ## [0.14.1] — 2026-04-23
 
 ### Changed (breaking)

@@ -68,7 +68,7 @@ Use these skills when building UI — invoke with `/skill-name` or via the Skill
 | `frontend-design` | Building web components, pages, dashboards, landing pages — generates production-grade, visually distinctive UI |
 | `ui-ux-pro-max` | Deep UX review, polished interaction design, accessibility + visual hierarchy audit *(install if not present)* |
 
-**Workflow tip:** For any `/design fe` task, invoke `frontend-design` to scaffold the component, then `ui-ux-pro-max` for design QA before implementation.
+**Workflow tip:** During the FE Design section of `/requirement` (or before `/implement`), invoke `frontend-design` to scaffold the component, then `ui-ux-pro-max` for design QA before implementation.
 
 > **Skill names are exact** — `fe-design`, `frontend`, etc. will fail. Use the full name as shown above.
 

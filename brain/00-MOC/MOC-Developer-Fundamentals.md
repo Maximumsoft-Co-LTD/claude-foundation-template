@@ -13,12 +13,21 @@ updated: 2026-03-25
 
 ## Core Concepts
 
+### Principles & quality
 - [[../01-concepts/developer/CON-solid-principles]] — Single Responsibility, Open/Closed, Liskov, Interface Segregation, Dependency Inversion
 - [[../01-concepts/developer/CON-clean-code]] — Naming, functions, comments, formatting, DRY, KISS, YAGNI
 - [[../01-concepts/developer/CON-design-patterns]] — Creational, Structural, Behavioral patterns (Gang of Four)
 - [[../01-concepts/developer/CON-refactoring]] — Safe code improvement without behavior change
 - [[../01-concepts/developer/CON-code-review-checklist]] — What to look for when reviewing
+
+### Paradigms (how to think)
+- [[../01-concepts/developer/CON-oop-fundamentals]] — Encapsulation, Inheritance, Polymorphism, Abstraction; composition over inheritance
+- [[../01-concepts/developer/CON-functional-programming]] — Pure functions, immutability, higher-order, monads, functional core / imperative shell
+- [[../01-concepts/developer/CON-concurrency-parallelism]] — Threads, async, mutex, deadlock, race conditions, actor model
+
+### Tooling & CS basics
 - [[../01-concepts/developer/CON-version-control-git]] — Branching strategies, commit best practices, rebase vs merge
+- [[../01-concepts/developer/CON-algorithms-data-structures]] — Big O, DS cheat sheet, sorting, searching
 
 ## Core Principles Summary
 

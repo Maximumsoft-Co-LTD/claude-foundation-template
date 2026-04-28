@@ -59,6 +59,17 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 - [[01-concepts/CON-branch-commit-format]] — Branch & commit naming
 - [[01-concepts/CON-task-id-format]] — Global IDs that never reset
 - [[01-concepts/CON-document-structure]] — Where docs live & why
+- [[01-concepts/CON-confidence-gate]] — 90% threshold before any action
+- [[01-concepts/CON-self-check-rule]] — Re-read after every Write/Edit
+- [[01-concepts/CON-verification-before-completion]] — Evidence gate, no claims without test output
+- [[01-concepts/CON-bite-sized-tasks]] — 2–5 min subtask granularity
+- [[01-concepts/CON-two-stage-review]] — Spec compliance then code quality
+- [[01-concepts/CON-brain-access-protocol]] — MOC navigation discipline (no full reads)
+
+### Claude Code Platform
+- [[01-concepts/CON-claude-code-skills]] — Skills primitive (vs commands vs subagents)
+- [[01-concepts/CON-claude-code-hooks]] — Lifecycle event handlers (12+ events, 4 handler types)
+- [[01-concepts/CON-mcp-integration]] — MCP servers (context7, claude-in-chrome)
 
 ### SDLC & Agile
 - [[01-concepts/sdlc/CON-sdlc-phases]] — 7 phases of software development
@@ -82,6 +93,9 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 - [[01-concepts/developer/CON-version-control-git]] — Branching, merging, rebase, workflows
 - [[01-concepts/developer/CON-refactoring]] — Code smells, safe refactoring, when/how
 - [[01-concepts/developer/CON-algorithms-data-structures]] — Big O, DS cheat sheet, sorting, searching
+- [[01-concepts/developer/CON-oop-fundamentals]] — Encapsulation, Inheritance, Polymorphism, Abstraction; composition over inheritance
+- [[01-concepts/developer/CON-functional-programming]] — Pure functions, immutability, higher-order, monads, functional core / imperative shell
+- [[01-concepts/developer/CON-concurrency-parallelism]] — Threads, async, mutex, deadlock, race conditions, actor model
 
 ### Architecture Patterns
 - [[01-concepts/architecture/CON-clean-architecture]] — Clean/Hexagonal/Onion, Dependency Rule, folder structure
@@ -91,11 +105,14 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 
 ### Backend
 - [[01-concepts/backend/CON-api-design-principles]] — REST, HTTP codes, pagination, versioning
+- [[01-concepts/backend/CON-graphql]] — Schema, resolvers, DataLoader (N+1), Relay pagination, federation
+- [[01-concepts/backend/CON-grpc]] — Protobuf, HTTP/2, 4 RPC types, deadlines, schema evolution
 - [[01-concepts/backend/CON-backend-layers]] — Handler → Service → Repository → DB
 - [[01-concepts/backend/CON-authentication-authorization]] — JWT, OAuth2, RBAC
 - [[01-concepts/backend/CON-database-patterns]] — Migrations, indexing, N+1, transactions
 - [[01-concepts/backend/CON-caching-strategies]] — Cache-aside, write-through, TTL, Redis
-- [[01-concepts/backend/CON-async-patterns]] — Message queues, async/await, event-driven
+- [[01-concepts/backend/CON-async-patterns]] — Patterns: queue, pub/sub, event-driven, idempotency
+- [[01-concepts/backend/CON-message-brokers]] — Tech choice: Kafka vs RabbitMQ vs SQS vs NATS, outbox
 - [[01-concepts/backend/CON-error-handling]] — Error types, HTTP codes, logging patterns
 - [[01-concepts/backend/CON-rate-limiting]] — Token Bucket, Sliding Window, Redis, 429 headers
 - [[01-concepts/backend/CON-api-security]] — OAuth flows, CORS, CSRF, JWT security, API keys
@@ -104,6 +121,11 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 ### Data
 - [[01-concepts/data/CON-sql-fundamentals]] — JOINs, CTEs, Window functions, indexes, ACID, anti-patterns
 - [[01-concepts/data/CON-data-modeling]] — ER diagrams, normalization 1NF→3NF, NoSQL patterns, Star schema
+- [[01-concepts/data/CON-cap-acid-base]] — CAP, ACID vs BASE, PACELC, consistency spectrum
+- [[01-concepts/data/CON-database-types]] — 8 categories: relational, document, KV, graph, columnar, time-series, NewSQL, vector
+- [[01-concepts/data/CON-replication-sharding]] — Read scale (replication) vs write scale (sharding), shard-key design
+- [[01-concepts/data/CON-database-indexing]] — B-tree, hash, GIN, BRIN, covering, partial, EXPLAIN ANALYZE
+- [[01-concepts/data/CON-distributed-transactions]] — 2PC vs Saga, choreography vs orchestration, outbox, idempotency
 
 ### Frontend
 - [[01-concepts/frontend/CON-component-architecture]] — Atomic design, composability
@@ -122,6 +144,9 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 - [[01-concepts/devops/CON-infrastructure-as-code]] — Terraform, IaC principles, state management
 - [[01-concepts/devops/CON-container-orchestration]] — Kubernetes, Helm, HPA, namespaces
 - [[01-concepts/devops/CON-gitops]] — Git as source of truth, ArgoCD, Flux, pull model
+- [[01-concepts/devops/CON-trunk-based-development]] — Single trunk, daily commits, fast CI; foundation for CD
+- [[01-concepts/devops/CON-feature-flags]] — Decouple deploy from release; types, targeting, lifecycle, debt
+- [[01-concepts/devops/CON-secrets-management]] — Static vs dynamic secrets, Vault/KMS, identity-bound zero-trust access
 
 ### QA
 - [[01-concepts/qa/CON-testing-pyramid]] — Unit / Integration / E2E ratios and examples
@@ -150,6 +175,8 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 - [[01-concepts/infra/CON-networking-basics]] — DNS, TCP/IP, load balancers, CDN, firewalls
 - [[01-concepts/infra/CON-disaster-recovery]] — RTO/RPO, backup strategies, runbooks
 - [[01-concepts/infra/CON-security-fundamentals]] — OWASP Top 10, defense-in-depth, zero-trust
+- [[01-concepts/infra/CON-load-balancing]] — L4 vs L7, algorithms (round-robin, least-conn, consistent hash), sticky sessions, health checks
+- [[01-concepts/infra/CON-storage-types]] — Block (EBS) vs File (EFS) vs Object (S3); decision tree, lifecycle, cost
 
 ### Solution Engineering
 - [[01-concepts/solution-engineer/CON-system-integration-patterns]] — REST, Webhook, Queue, Kafka, ETL
@@ -181,6 +208,9 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 - [[03-patterns/PAT-002-parallel-agent-implementation]] — FE + BE agents in parallel
 - [[03-patterns/PAT-003-discovery-before-sprint]] — Always discover before planning
 - [[03-patterns/PAT-004-superpowers-workflow-integration]] — Superpowers skills layered into template workflow
+- [[03-patterns/PAT-005-subagent-driven-development]] — 3-agent pipeline: implementer → spec reviewer → quality reviewer
+- [[03-patterns/PAT-006-worktree-isolation]] — Git worktrees for parallel-agent file isolation
+- [[03-patterns/PAT-007-headless-parallel-agents]] — `claude -p` subprocesses for context-light parallel runs
 
 ---
 
@@ -261,9 +291,31 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 | [[CON-sql-fundamentals]] | [[CON-data-modeling]], [[CON-database-patterns]] | Data layer |
 | [[CON-rate-limiting]] | [[CON-api-security]], [[CON-scalability-patterns]] | API protection |
 | [[CON-websockets-realtime]] | [[CON-async-patterns]], [[CON-scalability-patterns]] | Real-time arch |
+| [[CON-graphql]] | [[CON-api-design-principles]], [[CON-database-patterns]] | Typed API alt to REST; N+1 origin |
+| [[CON-grpc]] | [[CON-microservices-patterns]], [[CON-async-patterns]] | Service-to-service RPC + streaming |
+| [[CON-message-brokers]] | [[CON-async-patterns]], [[CON-event-driven-architecture]], [[CON-distributed-transactions]] | Pattern → tech choice → outbox |
 | [[CON-team-topologies]] | [[CON-domain-driven-design]], [[CON-microservices-patterns]] | Org → Architecture |
 | [[CON-llm-integration]] | [[CON-api-design-principles]], [[CON-async-patterns]] | AI feature design |
 | [[CON-algorithms-data-structures]] | [[CON-clean-code]], [[CON-database-patterns]] | CS fundamentals |
+| [[CON-confidence-gate]] | [[CON-self-check-rule]], [[CON-verification-before-completion]] | Three gates: pre-action, post-write, end-of-task |
+| [[CON-bite-sized-tasks]] | [[PAT-005-subagent-driven-development]], [[CON-vertical-slice]] | Plan granularity → subagent reliability |
+| [[CON-two-stage-review]] | [[PAT-005-subagent-driven-development]], [[CON-code-review-checklist]] | Spec then quality, separate stages |
+| [[PAT-005-subagent-driven-development]] | [[PAT-006-worktree-isolation]], [[PAT-007-headless-parallel-agents]] | Pipeline + isolation + transport |
+| [[CON-claude-code-skills]] | [[CON-claude-code-hooks]], [[CON-mcp-integration]] | Three Claude Code primitives |
+| [[CON-brain-access-protocol]] | [[CON-document-structure]], [[CON-sprint-lifecycle]] | Navigate brain via MOC, not full reads |
+| [[CON-oop-fundamentals]] | [[CON-functional-programming]], [[CON-solid-principles]], [[CON-design-patterns]] | Paradigm + design rules + reusable patterns |
+| [[CON-functional-programming]] | [[CON-concurrency-parallelism]], [[CON-clean-code]] | Immutability eliminates concurrency bugs |
+| [[CON-concurrency-parallelism]] | [[CON-async-patterns]], [[CON-rate-limiting]] | Concurrency models map to backend scaling |
+| [[CON-cap-acid-base]] | [[CON-database-types]], [[CON-distributed-transactions]] | Tradeoff theory → DB choice → transaction strategy |
+| [[CON-database-types]] | [[CON-data-modeling]], [[CON-replication-sharding]], [[CON-database-indexing]] | Pick DB → model → scale → index |
+| [[CON-replication-sharding]] | [[CON-cap-acid-base]], [[CON-scalability-patterns]] | Distribution mechanics |
+| [[CON-database-indexing]] | [[CON-sql-fundamentals]], [[CON-database-patterns]] | Performance fundamentals |
+| [[CON-distributed-transactions]] | [[CON-event-driven-architecture]], [[CON-microservices-patterns]] | Saga is the modern answer |
+| [[CON-load-balancing]] | [[CON-networking-basics]], [[CON-scalability-patterns]], [[CON-deployment-strategies]] | Front door for horizontal scale |
+| [[CON-storage-types]] | [[CON-cloud-fundamentals]], [[CON-disaster-recovery]] | Cloud storage decisions |
+| [[CON-trunk-based-development]] | [[CON-feature-flags]], [[CON-cicd-pipeline]] | TBD + flags + fast CI = continuous delivery |
+| [[CON-feature-flags]] | [[CON-deployment-strategies]], [[CON-metrics-product]] | Decouple deploy from release |
+| [[CON-secrets-management]] | [[CON-security-fundamentals]], [[CON-api-security]] | Identity-bound, dynamic, short-lived secrets |
 
 ---
 
@@ -287,6 +339,6 @@ Notes in this brain carry a `source` field in their frontmatter to indicate orig
 
 ---
 
-*Brain initialized: 2026-03-25 · Framework: Obsidian-style atomic notes + MOC*
-*Domains covered: Workflow · SDLC · Agile/Scrum · Developer · Architecture · Backend · Data · Frontend · DevOps · QA · Product Owner · Product Manager · Infrastructure · Solution Engineer · Team · AI*
-*Total notes: 21 MOCs · 76 concept notes · 3 decisions · 4 patterns · 10 glossary entries*
+*Brain initialized: 2026-03-25 · Last extended: 2026-04-29 · Framework: Obsidian-style atomic notes + MOC*
+*Domains covered: Workflow · SDLC · Agile/Scrum · Developer · Architecture · Backend · Data · Frontend · DevOps · QA · Product Owner · Product Manager · Infrastructure · Solution Engineer · Team · AI · Claude Code Platform*
+*Total notes: 21 MOCs · 109 concept notes · 3 decisions · 7 patterns · 10 glossary entries*

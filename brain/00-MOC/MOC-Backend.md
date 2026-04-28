@@ -13,13 +13,26 @@ updated: 2026-03-25
 
 ## Core Concepts
 
-- [[../01-concepts/backend/CON-api-design-principles]] — REST, GraphQL, gRPC — ออกแบบ API อย่างไร
+### API & Layering
+- [[../01-concepts/backend/CON-api-design-principles]] — REST overview, HTTP codes, pagination, versioning
+- [[../01-concepts/backend/CON-graphql]] — Schema, queries, mutations, N+1 problem, federation
+- [[../01-concepts/backend/CON-grpc]] — Protobuf, streaming, service definitions, when to use vs REST
 - [[../01-concepts/backend/CON-backend-layers]] — Handler → Service → Repository → DB
-- [[../01-concepts/backend/CON-database-patterns]] — CRUD, transactions, migrations, indexing
-- [[../01-concepts/backend/CON-authentication-authorization]] — JWT, OAuth2, RBAC, session
 - [[../01-concepts/backend/CON-error-handling]] — Error types, HTTP codes, structured errors
-- [[../01-concepts/backend/CON-caching-strategies]] — In-memory, Redis, CDN, cache invalidation
-- [[../01-concepts/backend/CON-async-patterns]] — Queue, pub/sub, event-driven, webhook
+
+### Data & Persistence
+- [[../01-concepts/backend/CON-database-patterns]] — CRUD, transactions, migrations, indexing
+- [[../01-concepts/backend/CON-caching-strategies]] — Cache-aside, write-through, TTL, Redis
+
+### Async & Real-time
+- [[../01-concepts/backend/CON-async-patterns]] — Queue, pub/sub, event-driven, webhook (pattern level)
+- [[../01-concepts/backend/CON-message-brokers]] — Kafka vs RabbitMQ vs SQS vs NATS (technology comparison)
+- [[../01-concepts/backend/CON-websockets-realtime]] — WebSockets, SSE, polling, horizontal scaling
+
+### Security & Limits
+- [[../01-concepts/backend/CON-authentication-authorization]] — JWT, OAuth2, RBAC, session
+- [[../01-concepts/backend/CON-api-security]] — OAuth flows, CORS, CSRF, JWT pitfalls, API keys
+- [[../01-concepts/backend/CON-rate-limiting]] — Token Bucket, Sliding Window, Redis backend, 429 headers
 
 ## REST API Design Cheatsheet
 

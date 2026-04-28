@@ -12,6 +12,7 @@ Your entry point to data-related knowledge. Navigate by task:
 
 ## Core Knowledge
 
+### Foundations
 - **[[CON-sql-fundamentals]]** — Queries, JOINs, indexes, transactions, anti-patterns
   - When: Writing SQL, debugging slow queries, understanding query plans
   - Key topics: SELECT/WHERE/GROUP BY, JOIN types, window functions, indexes, ACID
@@ -20,19 +21,44 @@ Your entry point to data-related knowledge. Navigate by task:
   - When: Designing new schemas, choosing between SQL/NoSQL, star vs snowflake schemas
   - Key topics: ER diagrams, 1NF-3NF, denormalization, document vs key-value vs graph
 
+### Distributed-systems theory
+- **[[CON-cap-acid-base]]** — CAP, ACID vs BASE, PACELC, consistency spectrum
+  - When: Choosing a DB; defending the choice; reasoning about replication tradeoffs
+  - Key topics: CP/AP, eventual consistency, linearizability, tunable consistency
+
+### Choosing & scaling a database
+- **[[CON-database-types]]** — 8 categories: relational, document, KV, graph, columnar, time-series, NewSQL, vector
+  - When: Picking the right DB; defending the choice; polyglot persistence design
+  - Key topics: per-category strengths, pgvector, Postgres-for-everything
+
+- **[[CON-replication-sharding]]** — Read scale (replication) vs write scale (sharding)
+  - When: Vertical scaling hit limits; multi-region; designing shard keys
+  - Key topics: failover, replication lag, consistent hashing, hot shards
+
+- **[[CON-database-indexing]]** — B-tree, hash, GIN, BRIN, covering, partial, EXPLAIN ANALYZE
+  - When: Slow query investigation; designing for performance; cleaning up unused indexes
+  - Key topics: leftmost-prefix, covering indexes, when indexes hurt
+
+- **[[CON-distributed-transactions]]** — 2PC vs Saga, choreography vs orchestration, outbox, idempotency
+  - When: Operation spans multiple services or DBs; cross-service consistency
+  - Key topics: compensating actions, idempotency keys, transactional outbox
+
 ## Related Concepts
 
-- **[[CON-database-patterns]]** — Caching, replication, sharding (when added)
-  - When: Scaling database, handling duplicates, improving read performance
+- **[[CON-database-patterns]]** — Migrations, indexing strategy, N+1, transactions, soft delete
+  - When: Building the data-access layer, writing migrations, handling transactions
 
-- **[[CON-scalability-patterns]]** — Partitioning, horizontal growth, distribution (when added)
+- **[[CON-scalability-patterns]]** — Horizontal/vertical scale, statelessness, caching
   - When: Database reaches limits, need to split data, multi-region setup
 
-- **[[CON-caching-strategies]]** — Cache types, TTL, invalidation (when added)
+- **[[CON-caching-strategies]]** — Cache patterns (cache-aside, write-through), TTL, Redis
   - When: Optimizing query performance, reducing DB load
 
-- **[[CON-backend-layers]]** — Architecture, persistence layer patterns (when added)
+- **[[CON-backend-layers]]** — Handler → Service → Repository → DB
   - When: Structuring your data access layer, repository patterns
+
+- **[[CON-message-brokers]]** — Kafka, RabbitMQ, SQS comparison
+  - When: Outbox pattern, event sourcing, change data capture (CDC)
 
 ## Quick Reference
 
@@ -72,5 +98,6 @@ Your entry point to data-related knowledge. Navigate by task:
 - **Designing new schema?** → Start at [[CON-data-modeling]]
 - **Performance problem?** → [[CON-sql-fundamentals]] (EXPLAIN section)
 - **Choosing a database?** → [[CON-data-modeling]] (comparison table)
-- **Need caching?** → (future) [[CON-caching-strategies]]
-- **Scaling the DB?** → (future) [[CON-scalability-patterns]]
+- **Need caching?** → [[CON-caching-strategies]]
+- **Scaling the DB?** → [[CON-replication-sharding]] + [[CON-scalability-patterns]]
+- **Choosing a queue/broker?** → [[CON-message-brokers]]

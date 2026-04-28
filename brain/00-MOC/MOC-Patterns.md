@@ -19,6 +19,9 @@ updated: 2026-03-25
 | [[../03-patterns/PAT-002-parallel-agent-implementation]] | FE + BE agents in parallel | Architecture | 2026-03-25 |
 | [[../03-patterns/PAT-003-discovery-before-sprint]] | Always discover before planning | Process | 2026-03-25 |
 | [[../03-patterns/PAT-004-superpowers-workflow-integration]] | Superpowers skills layered into template workflow | Workflow | 2026-04-03 |
+| [[../03-patterns/PAT-005-subagent-driven-development]] | 3-agent pipeline: implementer → spec reviewer → quality reviewer | Workflow | 2026-04-15 |
+| [[../03-patterns/PAT-006-worktree-isolation]] | Git worktrees for parallel-agent file isolation | Workflow | 2026-04-15 |
+| [[../03-patterns/PAT-007-headless-parallel-agents]] | `claude -p` subprocesses for context-light parallel runs | Workflow | 2026-04-15 |
 
 ---
 
@@ -35,6 +38,9 @@ updated: 2026-03-25
 
 ### Workflow Patterns
 - [[../03-patterns/PAT-004-superpowers-workflow-integration]]
+- [[../03-patterns/PAT-005-subagent-driven-development]]
+- [[../03-patterns/PAT-006-worktree-isolation]]
+- [[../03-patterns/PAT-007-headless-parallel-agents]]
 
 ---
 

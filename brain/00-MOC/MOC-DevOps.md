@@ -13,13 +13,21 @@ updated: 2026-03-25
 
 ## Core Concepts
 
+### Pipeline & deployment
 - [[../01-concepts/devops/CON-cicd-pipeline]] — CI/CD stages, gates, rollback strategies
+- [[../01-concepts/devops/CON-deployment-strategies]] — Blue/Green, Canary, Rolling, Feature flags
+- [[../01-concepts/devops/CON-trunk-based-development]] — Single trunk, daily commits, fast CI; foundation for CD
+- [[../01-concepts/devops/CON-feature-flags]] — Decouple deploy from release; types, targeting, lifecycle
+
+### Containers & infrastructure
 - [[../01-concepts/devops/CON-containerization]] — Docker, images, containers, Dockerfile best practices
 - [[../01-concepts/devops/CON-container-orchestration]] — Kubernetes fundamentals, pods, services, deployments
 - [[../01-concepts/devops/CON-infrastructure-as-code]] — Terraform, Pulumi, CloudFormation
 - [[../01-concepts/devops/CON-gitops]] — Git as single source of truth for infra state
+
+### Operate & secure
 - [[../01-concepts/devops/CON-monitoring-observability]] — Metrics, logs, traces (the 3 pillars)
-- [[../01-concepts/devops/CON-deployment-strategies]] — Blue/Green, Canary, Rolling, Feature flags
+- [[../01-concepts/devops/CON-secrets-management]] — Static vs dynamic secrets, Vault/KMS, identity-bound zero-trust access
 
 ## CI/CD Pipeline Stages
 
