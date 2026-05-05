@@ -35,3 +35,36 @@ CREATE TABLE IF NOT EXISTS audit_log (
 );
 CREATE INDEX IF NOT EXISTS idx_audit_log_entity_created
   ON audit_log(entity_type, entity_id, created_at DESC);
+
+-- SP1-T002: purchase orders
+CREATE TABLE IF NOT EXISTS purchase_order (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  status        TEXT NOT NULL,
+  total_thb     INTEGER NOT NULL,
+  supplier_name TEXT NOT NULL,
+  requested_by  TEXT NOT NULL,
+  created_at    TEXT NOT NULL,
+  updated_at    TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_purchase_order_status_created
+  ON purchase_order(status, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS po_line (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  po_id           INTEGER NOT NULL REFERENCES purchase_order(id),
+  stock_item_id   INTEGER NOT NULL REFERENCES stock_item(id),
+  qty             INTEGER NOT NULL,
+  unit_price_thb  INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_po_line_po ON po_line(po_id);
+
+CREATE TABLE IF NOT EXISTS po_approval (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  po_id       INTEGER NOT NULL REFERENCES purchase_order(id),
+  decision    TEXT NOT NULL,
+  approver_id TEXT NOT NULL,
+  note        TEXT,
+  approved_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_po_approval_po
+  ON po_approval(po_id, approved_at DESC);
