@@ -9,20 +9,32 @@ Arguments: `[disc-id] [name]`  — e.g. `disc-001 user-authentication`
 
 ---
 
-## Step 0 — Check brain for past lessons
+> **See worked example:** `.claude/examples/example-discovery.md` — a filled-in single-epic OAuth integration discovery, useful as a sanity check when filling the template.
 
-If `brain/BRAIN-INDEX.md` exists:
-- Read `brain/00-MOC/MOC-Lessons.md` — any lesson tagged with keywords from `[name]`? Note it.
-- Read `brain/00-MOC/MOC-Decisions.md` — any decision already made in this problem domain? Note it.
-- These inform Step 2 questions: don't re-ask what's already decided; do surface past failure modes.
+## Step 0 — Check brain for past lessons (scoped)
 
-Skip if brain doesn't exist yet.
+Skip entirely if `brain/BRAIN-INDEX.md` does not exist.
+
+Otherwise, follow the access protocol in `.claude/rules/brain.md` — open MOCs **only** when relevant to `[name]`:
+
+- Search `brain/BRAIN-INDEX.md` for entries whose title or tags overlap with the keywords in `[name]`.
+- If a match points to `MOC-Lessons.md` → open it; otherwise skip Lessons.
+- If a match points to `MOC-Decisions.md` → open it; otherwise skip Decisions.
+- Never open both MOCs unconditionally.
+
+These inform Step 2 questions: don't re-ask what's already decided; do surface past failure modes.
 
 ---
 
-## Step 1 — Create doc immediately
+## Step 1 — Pick scenario + create doc
 
-Create `docs/discovery/[disc-id]-[name].md` from `docs/templates/DISCOVERY-TEMPLATE.md` with all sections set to `TBD`.
+1. **Detect scenario type** from the user's input. Default to `new-feature` when unclear; ask only if the choice would change the prompts materially.
+   - `new-feature` — a user-facing capability that doesn't exist yet
+   - `refactor` — restructuring code with behavior preserved
+   - `bug-investigation` — recurring or multi-system bug worth its own epic
+   - `integration` — connecting to an external system / vendor / API
+2. Create `docs/discovery/[disc-id]-[name].md` from `docs/templates/DISCOVERY-TEMPLATE.md` with all sections set to `TBD`. Set the doc metadata `Scenario: [type]`.
+3. Read the matching scenario prompt template — `docs/templates/discovery-scenarios/[NEW-FEATURE|REFACTOR|BUG-INVESTIGATION|INTEGRATION].md` — and use its scenario-specific prompts when running Step 2 (gap-asking) and Step 3 (filling). The 10 topic structure stays the same; the prompts inside each topic come from the scenario template.
 
 ---
 
@@ -71,9 +83,9 @@ Key dimensions:
 2. Proposed Approaches section: structure at least 2 options. If only one mentioned, add placeholder Option B.
    Each option must have: **Description**, **Pros**, **Cons**, **Recommended** (yes/no with reason).
 3. Unknowns & Open Questions section: mark each as `- [ ]` checkbox.
-4. **Epic Breakdown section**: inspect Scope Estimate → `Estimated sprints`.
+4. **Epic Breakdown section** (apply `.claude/rules/discovery-epic-mapping.md`): inspect Scope Estimate → `Estimated sprints`.
    - **= 1 sprint** → leave the Epic Breakdown table empty.
-   - **> 1 sprint** → enumerate each epic as a row (E1, E2, ...). Each row: title, one-line scope, `Depends On` (another epic's ID or `—`), priority. Order by dependency (E1 has no epic deps; E2 may depend on E1, etc.). Also fill **Shared entities / cross-epic concerns** with anything used by more than one epic (e.g. user model, auth layer, shared component).
+   - **> 1 sprint** → enumerate each epic as a row (E1, E2, ...). Each row: title, one-line scope, `Depends On` (another epic's ID or `—`), priority. Order by dependency (E1 has no epic deps; E2 may depend on E1, etc.). Also fill **Shared entities / cross-epic concerns** with anything used by more than one epic — ownership goes to the first epic that introduces each.
 5. Next Steps section:
    - **Single-epic** → `"/new-sprint [sprint-id] \"[epic description]\""`.
    - **Multi-epic** → one line per epic row in Epic Breakdown, in dependency order, with sequential `[sprint-id]`s (SP[N], SP[N+1], ...).

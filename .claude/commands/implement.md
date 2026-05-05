@@ -6,16 +6,18 @@ Arguments: `[task-id]`  — e.g. `SP1-T002`
 
 ---
 
-## Step 0 — Check brain for reusable patterns
+## Step 0 — Check brain for reusable patterns (scoped)
 
-If `brain/BRAIN-INDEX.md` exists:
-- Read `brain/00-MOC/MOC-Patterns.md` — scan for PAT notes matching this task's domain.
-- For each matching PAT: read "Solution" and "Example from sprint" sections only.
-- Read `brain/00-MOC/MOC-Lessons.md` — any LES note with "early warning signs" for this domain? These are bugs to actively avoid during implementation.
+Skip entirely if `brain/BRAIN-INDEX.md` does not exist.
+
+Otherwise, follow the access protocol in `.claude/rules/brain.md`:
+
+- Open `MOC-Patterns.md` **only** if the Implementation Plan in `[task-id]-requirement.md` references a known pattern keyword (auth, schema, api-client, state, retry, idempotency, etc.). If no Implementation Plan section calls out a pattern, skip entirely.
+- Open `MOC-Lessons.md` **only** if `Points >= 5`, or if the requirement doc's Existing Code Context cites a past failure mode by note ID. Otherwise skip.
+- For each matching PAT/LES, read "Solution" + "Example from sprint" only — never the full note.
 - **Apply patterns found here** — cite the PAT-NNN in code comments where used.
 
-Print: `Brain: reusing [PAT-NNN], avoiding [LES-NNN warning]`
-Skip if brain doesn't exist yet.
+Print: `Brain: reusing [PAT-NNN], avoiding [LES-NNN warning]` (or `Brain: skipped — no pattern keywords`).
 
 ---
 
@@ -76,8 +78,8 @@ Read **in parallel** and store content in memory as `DOC_OVERVIEW`, `DOC_REQ`:
 |-------|-----------------------------------|
 | A — FE Tests | `## Acceptance Criteria` + `### [FE] TDD Tests` + `## E2E Test Plan` + `# 3 · Frontend Design` (State Inventory, Fail Case Matrix) |
 | B — BE Tests | `## Acceptance Criteria` + `### [BE] TDD Tests` + `# 4 · Backend Design` (API Endpoints, Input Validation, Error Handling) |
-| C — FE Impl | `## Acceptance Criteria` + `### [FE] Plan` + `### [FE] Subtasks` + `# 3 · Frontend Design` (Component Breakdown, State Inventory, API Contracts Consumed) + `## [FE] Scope` |
-| D — BE Impl | `## Acceptance Criteria` + `### [BE] Plan` + `### [BE] Subtasks` + `# 4 · Backend Design` (API Endpoints, Data Models, Service/Layer Breakdown, Business Logic) + `## [BE] Scope` |
+| C — FE Impl | `## Acceptance Criteria` + `### [FE] Plan` (includes its subtasks) + `# 3 · Frontend Design` (Component Breakdown, State Inventory, API Contracts Consumed) + `### [FE] Scope` |
+| D — BE Impl | `## Acceptance Criteria` + `### [BE] Plan` (includes its subtasks) + `# 4 · Backend Design` (API Endpoints, Data Models, Service/Layer Breakdown, Business Logic) + `### [BE] Scope` |
 
 Validate:
 - Missing requirement or empty ACs → stop: "Run `/requirement [task-id]` first."
@@ -91,9 +93,11 @@ Read `Task Type` from Metadata. Assess parallelization flags:
 
 **Context7 — fetch current library docs (if available):**
 From the design sections in `DOC_REQ`, identify the key libraries the implementation will use (max 3 — e.g. test framework, UI component library, ORM/query builder).
-For each library:
-1. `mcp__plugin_context7_context7__resolve-library-id` — resolve the library name to a context7 ID.
-2. `mcp__plugin_context7_context7__query-docs` — query for the specific patterns needed (test utilities, component API, query syntax, etc.).
+For each library, follow `.claude/rules/context7-cache.md`:
+1. **Cache check** — read `docs/sprints/[sprint-id]/.context7-cache.json`; on hit, reuse and skip both MCP calls below.
+2. `mcp__plugin_context7_context7__resolve-library-id` — resolve the library name to a context7 ID.
+3. `mcp__plugin_context7_context7__query-docs` — query for the specific patterns needed (test utilities, component API, query syntax, etc.).
+4. Append `{libraryId, result, fetchedAt}` to the cache file.
 
 Pass the fetched docs as context to sub-agents in Step 2 and Step 3 so they write code against current APIs.
 If context7 is not available, proceed using design doc patterns and existing knowledge.

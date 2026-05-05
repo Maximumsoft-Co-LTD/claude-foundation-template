@@ -16,14 +16,18 @@ Arguments: `[disc-id] [name]`  — e.g. `disc-001 payment-notifications`
 
 ---
 
-## Step 0 — Check brain for past lessons
+## Step 0 — Check brain for past lessons (scoped)
 
-If `brain/BRAIN-INDEX.md` exists:
-- Read `brain/00-MOC/MOC-Lessons.md` — any lesson tagged with keywords from `[name]`? Note it.
-- Read `brain/00-MOC/MOC-Decisions.md` — any decision already made in this problem domain? Note it.
-- Surface past failure modes and prior decisions upfront — they inform the brainstorming questions.
+Skip entirely if `brain/BRAIN-INDEX.md` does not exist.
 
-Skip if brain doesn't exist yet.
+Otherwise, follow the access protocol in `.claude/rules/brain.md` — open MOCs **only** when relevant to `[name]`:
+
+- Search `brain/BRAIN-INDEX.md` for entries whose title or tags overlap with `[name]` keywords.
+- If a match points to `MOC-Lessons.md` → open it; otherwise skip Lessons.
+- If a match points to `MOC-Decisions.md` → open it; otherwise skip Decisions.
+- Never open both MOCs unconditionally.
+
+Surface past failure modes and prior decisions upfront — they inform the brainstorming questions.
 
 ---
 

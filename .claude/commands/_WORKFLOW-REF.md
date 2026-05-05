@@ -47,6 +47,8 @@ Copies `.claude/`, `brain/`, `docs/`, and a new stack-aware `CLAUDE.md` into the
 ```
 Use `/run-tasks-p` when running many tasks and parent context size is a concern.
 
+**Note on `rtk` (Rust Token Killer):** if the contributor has installed `rtk` at the user / harness level, common shell operations (`git status`, `grep -r`, etc.) are transparently rewritten and produce 60–90% fewer tokens. No template changes are needed — commands keep using plain `git` / `grep` and the harness hook does the rewriting. `rtk gain` shows the savings analytics.
+
 ## Commands
 
 | Command | Args | When to use |

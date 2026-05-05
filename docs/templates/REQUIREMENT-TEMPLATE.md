@@ -12,7 +12,7 @@
 | **Priority** | critical / high / medium / low |
 | **Assignee** | - |
 | **Requester** | - |
-| **Status** | todo / in-progress / in-review / done |
+| **Status** | todo / in-progress / review / testing / done |
 
 <!-- Section scope by points: see /requirement command. Sections tagged [FE] only fill for fullstack/fe-only. Sections tagged [BE] only fill for fullstack/be-only. -->
 

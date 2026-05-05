@@ -1,5 +1,5 @@
 # /code-review
-Workflow position: **/issue (loop) → START → /testing**
+Workflow position: **/implement (or /issue from prior loop) → START → /testing**
 
 Review all code changes for this task against the design docs and ACs.
 Arguments: `[task-id]`  — e.g. `SP1-T002`
@@ -92,9 +92,11 @@ If FAIL → stop. Fix spec gaps before proceeding to Stage 2.
 
 **Context7 — verify library usage (if available):**
 From `git diff main...HEAD`, identify any external library APIs used in changed files (especially any new packages added).
-For each library that appears in the diff (max 3):
-1. `mcp__plugin_context7_context7__resolve-library-id` → `mcp__plugin_context7_context7__query-docs` — query for correct usage patterns, deprecated APIs, and security best practices.
-2. Flag any usage in the diff that contradicts current docs.
+For each library that appears in the diff (max 3), follow `.claude/rules/context7-cache.md`:
+1. **Cache check** — read `docs/sprints/[sprint-id]/.context7-cache.json`; on hit, reuse and skip both MCP calls below.
+2. `mcp__plugin_context7_context7__resolve-library-id` → `mcp__plugin_context7_context7__query-docs` — query for correct usage patterns, deprecated APIs, and security best practices.
+3. Append `{libraryId, result, fetchedAt}` to the cache file.
+4. Flag any usage in the diff that contradicts current docs.
 
 If context7 is not available, proceed using codebase patterns and existing knowledge.
 
@@ -185,6 +187,18 @@ If the review found Critical or Minor issues, follow this protocol when fixing:
 
 ---
 
+## Step 3d — Auto-handoff to /issue on critical findings
+
+If the review report in Step 3 lists **any** issues under "Critical (must fix before merge)", do not finish here — open them as tracked issues before proceeding:
+
+1. For each Critical line, invoke `/issue [task-id] "[critical issue description]"` (one invocation per item). This runs investigation + TDD fix + appends to `[task-id]-issues.md` per the existing `/issue` flow.
+2. After all `/issue` runs return, re-run Step 0 (build + tests) and re-evaluate the AC table — fixes may have changed the verdict.
+3. If the result flips to `APPROVED`, update Step 3's report block accordingly. If new Critical issues surfaced from the fixes, loop again — don't proceed with critical issues outstanding.
+
+Major and Minor findings stay logged inline (Step 3) and are surfaced in the output below — they don't auto-trigger `/issue` but the user can elect to `/issue` them manually.
+
+---
+
 ## Step 4 — Update requirement doc and status
 
 Update `[task-id]-requirement.md`:
@@ -201,8 +215,9 @@ Update BACKLOG.md status to `review`.
 Result: APPROVED / REQUEST CHANGES
 
 ACs: ✓ AC-1  ✗ AC-2 ← [reason]  ✓ AC-3
+Critical issues filed: [N] (auto via /issue)
 
 Next:
-  Critical issues → /issue [task-id] [description]  (per issue)
-  No critical issues → /testing [task-id]
+  Major/Minor issues → /issue [task-id] [description]  (per issue, optional)
+  No outstanding issues → /testing [task-id]
 ```

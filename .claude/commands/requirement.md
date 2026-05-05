@@ -9,16 +9,24 @@ Arguments: `[task-id]`  — e.g. `SP1-T001`
 
 ---
 
-## Step 0 — Check brain for relevant lessons, patterns, and decisions
+> **See worked example:** `.claude/examples/example-requirement.md` — a filled-in 3-pt fullstack story showing AC structure, BE design, Implementation Plan, and TDD test plan.
 
-If `brain/BRAIN-INDEX.md` exists:
-- Read `brain/00-MOC/MOC-Lessons.md` — scan for lessons related to the User Story or domain. Read any LES note flagged `severity: high`.
-- If the task likely has a UI: read `brain/00-MOC/MOC-Frontend.md` — note PAT/DEC entries for components, state, routing, API calls.
-- If the task likely has a backend: read `brain/00-MOC/MOC-Backend.md` and `brain/00-MOC/MOC-Decisions.md` — note PAT/DEC entries for auth, DB schema, service layer, error handling. Check any DEC flagged "rules out" that affects this task.
-- Read the 1–3 most relevant notes only. **Reuse what the team has already decided.**
+## Step 0 — Check brain for relevant lessons, patterns, and decisions (scoped)
 
-Print: `Brain: [N] lessons/patterns — [LES-NNN], [PAT-NNN], [DEC-NNN]`
-Skip if brain doesn't exist yet.
+Skip entirely if `brain/BRAIN-INDEX.md` does not exist.
+
+Otherwise, follow the access protocol in `.claude/rules/brain.md` — open MOCs **only** when the task type / story points warrant it. Stop reading once you have 1–3 relevant notes.
+
+| Condition | MOC to open |
+|-----------|-------------|
+| `Points >= 5` AND brain has any LES note overlapping the User Story keywords | `MOC-Lessons.md` |
+| Task Type includes FE | `MOC-Frontend.md` |
+| Task Type includes BE | `MOC-Backend.md` |
+| Task introduces a non-trivial design decision (auth, schema, integration) | `MOC-Decisions.md` |
+
+Read the 1–3 most relevant linked notes — never the full MOC, never multiple MOCs that don't match the conditions above. **Reuse what the team has already decided.**
+
+Print: `Brain: [N] lessons/patterns — [LES-NNN], [PAT-NNN], [DEC-NNN]` (or `Brain: skipped — no matches`).
 
 ---
 
@@ -63,9 +71,11 @@ Note everything that can be **reused**. Write findings into the `## Existing Cod
 ### Context7 — fetch current library docs (if available)
 
 From codebase exploration, identify the key libraries this task depends on (max 3 — UI framework, state/data-fetching, validation for FE; web framework, ORM, validation for BE).
-For each library:
-1. `mcp__plugin_context7_context7__resolve-library-id` — resolve library name → context7 ID.
-2. `mcp__plugin_context7_context7__query-docs` — fetch docs for the specific patterns needed (component API, hook usage, query patterns, validation schema syntax, etc.).
+For each library, follow `.claude/rules/context7-cache.md`:
+1. **Cache check** — read `docs/sprints/[sprint-id]/.context7-cache.json`; on hit, reuse and skip both MCP calls below.
+2. `mcp__plugin_context7_context7__resolve-library-id` — resolve library name → context7 ID.
+3. `mcp__plugin_context7_context7__query-docs` — fetch docs for the specific patterns needed (component API, hook usage, query patterns, validation schema syntax, etc.).
+4. Append `{libraryId, result, fetchedAt}` to the cache file.
 
 Use the returned docs as source of truth for API syntax when filling the design sections.
 If context7 is not available, proceed using codebase patterns and existing knowledge.
@@ -218,6 +228,14 @@ Re-read the full doc and verify:
 - [ ] Every file path in Implementation Plan is a real path from Existing Code Context.
 - [ ] Every subtask is a single action (2–5 min).
 - [ ] Scope Overview: 3–6 bullets, each maps to at least one phase. No orphan bullet, no orphan phase.
+
+**Plan size advisory (5pt+):**
+- [ ] If `Points >= 5` and no `docs/sprints/[sprint-id]/[task-id]/[task-id]-plan.md` exists, print to the user:
+  ```
+  ⚠ Story is [N]pt — strongly recommend running /write-plan [task-id] before /implement
+  for an explicit subagent-driven plan. Skip only if scope is exceptionally well-understood.
+  ```
+  Advisory only — does not block proceeding.
 
 Fix any issue found. Re-read affected sections before presenting.
 

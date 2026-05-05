@@ -124,9 +124,12 @@ STATUS=$(cat .claude/rtp/[run-id]/[task-id]-[phase].status 2>/dev/null || echo "
    EOF
    ```
 
-   **Section extractor** — helper function to reduce injection size:
+   **Section extractor** — helper function to reduce injection size. Handles both `# ` and `## ` headings and stops at any same-or-higher-level heading:
    ```bash
    # extract_section FILE "Section Name" — returns section content or full file if small
+   # Section name may match a level-1 (# Foo) or level-2 (## Foo) heading; the
+   # extractor records the level of the matched heading and stops at the next
+   # heading of equal or shallower depth.
    extract_section() {
      local FILE=$1
      local SECTION=$2
@@ -136,7 +139,13 @@ STATUS=$(cat .claude/rtp/[run-id]/[task-id]-[phase].status 2>/dev/null || echo "
      if [ "$CHAR_COUNT" -le 6000 ]; then
        echo "$CONTENT"
      else
-       awk "/^## ${SECTION}/{found=1} found{print} /^## /{if(found && !/^## ${SECTION}/)exit}" "$FILE"
+       awk -v sec="$SECTION" '
+         !found && match($0, "^(#+) " sec, m) { found=1; lvl=length(m[1]); print; next }
+         found && match($0, "^(#+) ", m) {
+           if (length(m[1]) <= lvl) exit
+         }
+         found { print }
+       ' "$FILE"
      fi
    }
    ```

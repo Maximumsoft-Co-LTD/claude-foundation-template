@@ -23,9 +23,11 @@ If environment not ready → stop and tell the user what is missing.
 
 **Context7 — fetch test framework docs (if available):**
 Identify the project's test runner and E2E framework from the requirement doc's design sections or codebase (e.g. Jest, Vitest, Playwright, Cypress, pytest, go test).
-If unfamiliar setup patterns or E2E configuration are involved:
-1. `mcp__plugin_context7_context7__resolve-library-id` → `mcp__plugin_context7_context7__query-docs` — query for setup, teardown, assertion patterns, and E2E configuration for the detected framework.
-2. Use returned docs to validate test environment configuration before running.
+If unfamiliar setup patterns or E2E configuration are involved, follow `.claude/rules/context7-cache.md`:
+1. **Cache check** — read `docs/sprints/[sprint-id]/.context7-cache.json`; on hit, reuse and skip both MCP calls below.
+2. `mcp__plugin_context7_context7__resolve-library-id` → `mcp__plugin_context7_context7__query-docs` — query for setup, teardown, assertion patterns, and E2E configuration for the detected framework.
+3. Append `{libraryId, result, fetchedAt}` to the cache file.
+4. Use returned docs to validate test environment configuration before running.
 
 If context7 is not available, proceed using existing codebase test patterns.
 
@@ -113,7 +115,13 @@ E2E asserts logic; it does not catch wrong copy, broken layout, or state transit
 3. Capture a screenshot per AC showing the final visible outcome.
 4. Any visual / continuity / transition defect → **BLOCKED**. Fix code, re-walk.
 
-Skip 6a-smoke only for: BE-only tasks, infra/docs-only tasks, or non-interactive surfaces (cron, migrations, internal scripts).
+5. **Persist evidence** — write `docs/sprints/[sprint-id]/[task-id]/[task-id]-smoke.md` with these sections (required — `/retro-task` Step 1 hard-gates on this file existing):
+   - **Walked at** — ISO timestamp, dev server URL.
+   - **AC ↔ Smoke Step** table — one row per AC: AC ID, browser route(s) visited, States verified (Loading / Empty / Error / Success / Partial-Stale), screenshot path or console-log filename, verdict (`READY` / `BLOCKED`).
+   - **Defects found** — list any defect spotted and its resolution (fix commit ref, follow-up issue ID, or "deferred — see X").
+   - **Re-walk date** (if step 4 forced a fix-and-re-walk loop).
+
+Skip 6a-smoke only for: BE-only tasks, infra/docs-only tasks, or non-interactive surfaces (cron, migrations, internal scripts). When skipping, write a one-line `[task-id]-smoke.md` stating the reason — the file must exist either way.
 
 ### 6b — Journey tracing (both paths)
 

@@ -56,6 +56,12 @@ Mark sprint header as done:
 
 ---
 
+## Step 5b — Clear context7 cache
+
+If `docs/sprints/[sprint-id]/.context7-cache.json` exists, delete it. The cache is sprint-scoped (see `.claude/rules/context7-cache.md`) — leaving stale docs around can poison the next sprint with outdated library guidance.
+
+---
+
 ## Step 6 — Extract brain knowledge (required)
 
 **Dedup first.** `/retro-task` Step 4 may have already captured items. Before scanning, build a dedup set:

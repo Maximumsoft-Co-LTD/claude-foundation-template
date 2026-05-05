@@ -6,7 +6,11 @@ Arguments: `[sprint-id] [epic description]`  — e.g. `SP2 Build user authentica
 
 ---
 
+> **See worked example:** `.claude/examples/example-sprint-overview.md` — the sprint that follows from `example-discovery.md`, with three vertical-slice stories.
+
 ## Step 1 — Validate
+
+This step enforces `.claude/rules/discovery-epic-mapping.md` — every sprint must trace back to a discovery doc and an explicit epic row.
 
 1. Parse `[sprint-id]` and `[epic description]` from `$ARGUMENTS`.
 2. Read `docs/BACKLOG.md`:
@@ -14,7 +18,7 @@ Arguments: `[sprint-id] [epic description]`  — e.g. `SP2 Build user authentica
    - Scan ALL task IDs to find the highest `T[NNN]`. Next task starts at +1. If none → start from `T001`.
 3. Check `docs/discovery/` for a discovery doc related to this epic:
    - **Not found** → warn: "⚠️ No discovery doc found. Running `/discovery` first is recommended. Continue? (y/n)"
-   - **Found** → read it (Problem Statement, chosen approach, scope, constraints). Check for unresolved open questions. If any → warn and list them: "These may affect task scope. Continue? (y/n)"
+   - **Found** → read it (Problem Statement, chosen approach, scope, constraints). Record the discovery file path — it will be written to the sprint overview as `Origin:` in Step 2. Check for unresolved open questions. If any → warn and list them: "These may affect task scope. Continue? (y/n)"
    - **Epic Breakdown present** (multi-epic discovery) → find the row matching `[epic description]` (match by title or scope — fuzzy match is fine; ask user to confirm if ambiguous). If that row has `Depends On = Ek`:
      - Look up Ek's title in the Epic Breakdown.
      - Scan `docs/BACKLOG.md` for a sprint whose epic title matches Ek's title and status is `done`.
@@ -27,7 +31,7 @@ Arguments: `[sprint-id] [epic description]`  — e.g. `SP2 Build user authentica
 
 1. Create `docs/sprints/[sprint-id]/`.
 2. Create `docs/sprints/[sprint-id]/[sprint-id]-overview.md` from `docs/templates/SPRINT-OVERVIEW-TEMPLATE.md`.
-3. Pre-fill: Sprint ID, epic title, Start Date (today), Problem Statement (from discovery or description), Status: `planning`.
+3. Pre-fill: Sprint ID, epic title, Start Date (today), Problem Statement (from discovery or description), Status: `planning`. If a discovery doc was found in Step 1, also pre-fill `Origin: docs/discovery/[disc-id]-[name].md` per `.claude/rules/discovery-epic-mapping.md`.
 
 ---
 

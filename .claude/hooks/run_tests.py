@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 """
-TDD enforcement hook: runs tests automatically after source file edits.
+TDD enforcement hook: runs the targeted test for a source file edit.
 
 Triggers on PostToolUse(Write|Edit). Skips docs and config files.
-Runs the related test file first (fast feedback), falling back to the
-full suite only when no related test is found.
-
-Adapt detect_runner() for your project's test runner.
+Runs only the related test file (fast feedback). If no related test
+exists, exits silently — full-suite runs belong to /testing and CI.
 """
 import json
 import os
@@ -15,6 +13,17 @@ import sys
 
 data = json.load(sys.stdin)
 file_path = data.get("tool_input", {}).get("file_path", "")
+
+# Vitest/Jest filters match by substring against the in-process file path.
+# On macOS /tmp resolves to /private/tmp and other tools may pass paths from a
+# different mount root, so relativize to CWD whenever the file is inside it.
+if file_path:
+    try:
+        rel = os.path.relpath(os.path.realpath(file_path), os.path.realpath(os.getcwd()))
+        if not rel.startswith(".."):
+            file_path = rel
+    except ValueError:
+        pass
 
 # Skip docs and config files
 SKIP_PATTERNS = [
@@ -83,11 +92,23 @@ def single_test_command(test_file):
     ext = os.path.splitext(test_file)[1]
 
     if ext in (".ts", ".tsx", ".js", ".jsx"):
-        # Prefer vitest if config exists
+        # Prefer vitest if a config or package.json script/dep mentions it
         for cfg in ("vitest.config.ts", "vitest.config.js", "vite.config.ts"):
             if os.path.exists(cfg):
                 return ["npx", "vitest", "run", test_file]
-        return ["npx", "jest", "--testPathPattern", test_file, "--passWithNoTests"]
+        try:
+            with open("package.json", encoding="utf-8") as fh:
+                pkg = json.load(fh)
+            haystack = json.dumps({
+                "scripts": pkg.get("scripts", {}),
+                "deps": pkg.get("dependencies", {}),
+                "devDeps": pkg.get("devDependencies", {}),
+            })
+            if "vitest" in haystack:
+                return ["npx", "vitest", "run", test_file]
+        except (OSError, ValueError):
+            pass
+        return ["npx", "jest", "--testPathPatterns", test_file, "--passWithNoTests"]
 
     elif ext == ".go":
         package_dir = os.path.dirname(test_file) or "."
@@ -102,44 +123,17 @@ def single_test_command(test_file):
     return None
 
 
-def detect_runner():
-    """Auto-detect test runner from project files for full suite. Customize as needed."""
-    if os.path.exists("package.json"):
-        with open("package.json") as f:
-            pkg = json.load(f)
-        scripts = pkg.get("scripts", {})
-        if "test" in scripts:
-            return ["npm", "test", "--", "--watchAll=false", "--passWithNoTests"]
-    if os.path.exists("go.mod"):
-        return ["go", "test", "./...", "-count=1"]
-    if os.path.exists("Cargo.toml"):
-        return ["cargo", "test", "--", "--nocapture"]
-    if os.path.exists("pytest.ini") or os.path.exists("pyproject.toml"):
-        return ["python", "-m", "pytest", "--tb=short", "-q"]
-    if os.path.exists("Gemfile"):
-        return ["bundle", "exec", "rspec", "--format", "progress"]
-    return None
-
-
-# Determine which command to run
+# Determine which command to run.
+# Scope: only run a TARGETED test (the edited test, or a related test).
+# Full-suite fallback was removed — running the whole suite on every Write/Edit
+# is too slow and belongs to /testing and CI, not this hook.
 if is_test_file(file_path):
-    # Edited file is a test — run just it
     cmd = single_test_command(file_path)
-    if not cmd:
-        cmd = detect_runner()
 else:
-    # Look for a related test file first
     related = find_related_test(file_path)
-    if related:
-        cmd = single_test_command(related)
-        if not cmd:
-            cmd = detect_runner()
-    else:
-        # No related test found — fall back to full suite
-        cmd = detect_runner()
+    cmd = single_test_command(related) if related else None
 
 if not cmd:
-    print("⚠ No test runner detected — skipping tests. Add a test framework to enable auto-testing.", file=sys.stderr)
     sys.exit(0)
 
 try:

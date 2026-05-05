@@ -13,10 +13,26 @@ Arguments: `[task-id]`  — e.g. `SP1-T002`
 Parse `[task-id]`, extract `[sprint-id]`.
 
 Read in parallel:
-- `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — unified doc with `Estimate`, ACs, TDD test plans (FE and BE)
+- `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — unified doc with `Estimate`, ACs, TDD test plans (FE and BE), and the Task Type field
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-issues.md` (if exists) — bugs encountered
+- `docs/sprints/[sprint-id]/[task-id]/[task-id]-smoke.md` (if exists) — FE smoke walkthrough evidence
+- `docs/sprints/[sprint-id]/[task-id]/[task-id]-debug.md` (if exists) — debug record from `/debug`
 
 Run `git log --oneline --grep="[task-id]"` and capture commit messages — TDD signal lives here (test commits before impl commits).
+
+### FE smoke evidence — HARD GATE
+
+<HARD-GATE>
+If the requirement doc's `Task Type` is `fullstack` or `fe-only`, `[task-id]-smoke.md` MUST exist before this command may proceed.
+
+If missing, STOP and print:
+```
+✗ FE smoke walkthrough required — re-run /testing [task-id] (Step 6a-smoke)
+```
+Do NOT mark the task done, do NOT write the retro, do NOT capture brain entries.
+
+If Task Type is `be-only` or `infra`, no smoke file is required — continue silently.
+</HARD-GATE>
 
 ---
 
@@ -93,9 +109,11 @@ Write all / pick numbers / skip:
 
 For each confirmed item, write an atomic note. **Always include `source: retro-task [task-id]`** in frontmatter so `/retro-sprint` Step 6 dedupes against it.
 
-- Decision → `brain/02-decisions/DEC-[NNN]-[slug].md` — frontmatter: `type/id/status/date/sprint/source/tags` + sections: Status / Context / Decision / Rationale / Consequences
-- Pattern → `brain/03-patterns/PAT-[NNN]-[slug].md` — frontmatter: `type/id/sprint/source/tags` + sections: Problem / Solution / When to Use / When NOT to Use / Example
-- Lesson → `brain/04-lessons/LES-[NNN]-[slug].md` — frontmatter: `type/id/sprint/source/tags` + sections: What Happened / Root Cause / What Changed / Links
+If the item originates from `[task-id]-issues.md` and any sourced issue has `Severity: critical` or `Severity: major`, also set `from_bug: true` in the frontmatter — this lets `/brain-meter` and future audits filter "lessons from bugs" vs. "lessons from features." Once written, fill the `Brain entry` field in the source issue block with the new note's path.
+
+- Decision → `brain/02-decisions/DEC-[NNN]-[slug].md` — frontmatter: `type/id/status/date/sprint/source/from_bug?/tags` + sections: Status / Context / Decision / Rationale / Consequences
+- Pattern → `brain/03-patterns/PAT-[NNN]-[slug].md` — frontmatter: `type/id/sprint/source/from_bug?/tags` + sections: Problem / Solution / When to Use / When NOT to Use / Example
+- Lesson → `brain/04-lessons/LES-[NNN]-[slug].md` — frontmatter: `type/id/sprint/source/from_bug?/tags` + sections: What Happened / Root Cause / What Changed / Links
 - Concept → `brain/01-concepts/CON-[slug].md`
 
 IDs are sequential within each prefix — read existing files to find the next number.

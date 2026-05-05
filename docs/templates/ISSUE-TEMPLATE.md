@@ -43,4 +43,11 @@
 ### Blocks
 <!-- [task-id] list — or "none" -->
 
+### Lesson candidate?
+<!-- [ ] yes  /  [ ] no — does this incident teach something worth a brain LES note? -->
+<!-- If yes, /retro-task Step 4 will offer to capture it with from_bug: true. -->
+
+### Brain entry
+<!-- LES-NNN-slug.md path once captured by /retro-task or /retro-sprint — or "—" if not captured -->
+
 ---

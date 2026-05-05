@@ -2,9 +2,9 @@
 Workflow position: **standalone — use anytime a bug, test failure, or unexpected behavior occurs**
 
 Systematic debugging — find root cause before attempting fixes.
-Arguments: `[task-id?] [description]` — e.g. `SP1-T002 API returns 500 on empty payload` or `test_user_auth flaky`
+Arguments: `[task-id] [description]` — `[task-id]` is optional. e.g. `SP1-T002 API returns 500 on empty payload` or `test_user_auth flaky`
 
-`[task-id]` is optional. If provided, context is loaded from sprint docs and the bug is logged via `/issue` after fix.
+If `[task-id]` is provided, context is loaded from sprint docs and the bug is logged via `/issue` after fix.
 
 > **Superpowers note:** If `superpowers:systematic-debugging` is available, it enhances this command — it extends the 4-phase structure below with deeper pattern analysis and hypothesis testing. The phases and Iron Law below remain authoritative; the skill adds depth within each phase.
 
@@ -110,6 +110,17 @@ Key dimensions:
 | Regression test works | Red-green cycle verified (test fails without fix, passes with fix) |
 
 **Run the verification NOW. Don't rely on memory.**
+
+---
+
+## Phase 5 — Persist findings (required when `[task-id]` is provided)
+
+If `[task-id]` was passed, save the debug record so the audit trail outlives the chat. Skip silently for ad-hoc invocations.
+
+1. Parse `[sprint-id]` from `[task-id]`.
+2. Write `docs/sprints/[sprint-id]/[task-id]/[task-id]-debug.md` from `docs/templates/DEBUG-TEMPLATE.md`. Sections: Symptom, Reproduction, Root Cause, Fix, Tests Added, Lessons.
+3. If a prior debug file exists for the same task, append a new `## Incident — [ISO date]` block instead of overwriting — multiple debug rounds in one task should accumulate.
+4. If `[task-id]-issues.md` exists, append a back-reference line under the most recent issue: `Debug record: [task-id]-debug.md`.
 
 ---
 

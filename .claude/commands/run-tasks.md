@@ -17,6 +17,8 @@ Two gated phases:
 
 ## Step 1 — Parse, validate, register
 
+This step enforces `.claude/rules/parallel-work.md` — one agent owns one task end-to-end. Never split a single task across multiple agents.
+
 1. Parse `[task-id]` list from `$ARGUMENTS`. Extract `[sprint-id]` from each.
 2. Read `docs/BACKLOG.md` — collect status, `depends_on`, priority per task. Skip tasks already `done` or `in-progress` (warn).
 3. Build tiers: tasks with no unmet `depends_on` = Tier 1; tasks depending on Tier 1 = Tier 2; etc.
@@ -37,14 +39,25 @@ Read and store as `SPRINT_SNAPSHOT`:
 If a file is missing, omit that section silently — do not fail.
 
 ### Codebase Manifest
-Read and store as `CODEBASE_MANIFEST`:
-- Directory tree (2 levels) of the project source root (`src/`, `app/`, `pkg/`, etc.)
-- Package/module config: `package.json`, `go.mod`, `pyproject.toml`, `Cargo.toml` (whichever exists)
-- Shared types: any `types.*`, `*.d.ts`, `interfaces.*` in src/
-- DB schema: `schema.*`, or latest file in `migrations/`
-- Test config: `jest.config.*`, `pytest.ini`, `vitest.config.*` (whichever exists)
+Read and store these slices, addressable by name:
+- `MANIFEST_TREE` — directory tree (2 levels) of the project source root (`src/`, `app/`, `pkg/`, etc.)
+- `MANIFEST_PKG` — package/module config: `package.json`, `go.mod`, `pyproject.toml`, `Cargo.toml` (whichever exists)
+- `MANIFEST_FE_TYPES` — shared types: `types.*`, `*.d.ts`, `interfaces.*` under FE source
+- `MANIFEST_DB` — DB schema (`schema.*`) or latest file in `migrations/`
+- `MANIFEST_TEST_CONFIG` — `jest.config.*`, `pytest.ini`, `vitest.config.*` (whichever exists)
 
-Inject in implementation agents (Steps 4+) as a `--- CODEBASE MANIFEST ---` block. Agents must NOT explore the codebase independently — everything they need is pre-loaded.
+Inject only the slices each agent needs — never the full bundle:
+
+| Agent | Slices to inject |
+|-------|------------------|
+| Implementer (`fullstack`) | TREE + PKG + FE_TYPES + DB + TEST_CONFIG |
+| Implementer (`fe-only`) | TREE + PKG + FE_TYPES + TEST_CONFIG (skip DB) |
+| Implementer (`be-only`) | TREE + PKG + DB + TEST_CONFIG (skip FE_TYPES) |
+| Implementer (`infra`) | PKG + TEST_CONFIG only |
+| Spec Reviewer | PKG + TEST_CONFIG only |
+| Quality Reviewer | PKG + TEST_CONFIG only |
+
+Inject as a `--- CODEBASE MANIFEST ---` block. Agents must NOT explore the codebase independently — everything they need is pre-loaded.
 
 ### Scrum Hierarchy
 Inject `SCRUM_HIERARCHY` into every agent prompt below — verbatim, as a `--- SCRUM HIERARCHY ---` block right after `--- SPRINT CONTEXT ---`. Fresh sub-agents have no memory of the template's vocabulary; without this block, "task" is ambiguous.
@@ -195,6 +208,8 @@ Reply:
 > - Quality Reviewer ≈ `/code-review` Stage 2 + `/testing`
 >
 > Do NOT also run `/code-review` or `/testing` manually for tasks processed by `/run-tasks`.
+>
+> **FE smoke gate caveat:** `/retro-task` Step 1 hard-gates on `[task-id]-smoke.md` for `fullstack` / `fe-only` tasks. The Quality Reviewer agent reads `/testing` and is responsible for executing Step 6a-smoke when the task touches the UI — it must produce `[task-id]-smoke.md` before the retro agent fires. If the smoke file is missing when retro-task runs, the agent will return BLOCKED for that task and the user must run `/testing [task-id]` manually before re-invoking retro.
 
 ## Step 4 — Subagent-driven implementation (parallel per tier)
 

@@ -144,21 +144,31 @@ Replace the placeholder conventions with your team's actual standards (naming, i
 
 ### Step 3 — Configure hooks for your stack
 
-The included hooks cover TypeScript, Go, and JavaScript. Enable only what applies:
+`.claude/settings.json` ships with a single `dispatch.py` entry that routes Write/Edit events to the right sub-hooks based on the edited file path — language linters (`lint_ts.py`, `lint_go.py`, `lint_js.py`), the targeted test runner (`run_tests.py`), and the brain citation meter (`brain_citation_meter.py`):
 
 ```json
-// .claude/settings.json — remove hooks for languages you don't use
+// .claude/settings.json — single dispatcher; sub-hooks live in .claude/hooks/
 {
   "hooks": {
     "PostToolUse": [
-      { "matcher": "Write|Edit", "hooks": [{ "type": "command", "command": "python3 .claude/hooks/lint_ts.py" }] },
-      { "matcher": "Write|Edit", "hooks": [{ "type": "command", "command": "python3 .claude/hooks/run_tests.py" }] }
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          { "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/dispatch.py\"", "timeout": 120 }
+        ]
+      }
     ]
   }
 }
 ```
 
-If your stack isn't covered, copy an existing hook file and adjust the linter command and file extension patterns at the top.
+The dispatcher:
+- skips source linters on docs / brain notes / `.claude/` config edits
+- runs only the linter(s) matching the edited file extension (Go vs TS vs JS) — no work for languages you don't use
+- runs the targeted test for the edited file (vitest auto-detected from `package.json` even without a config file; jest as fallback)
+- updates the brain citation meter only when a workflow output doc under `docs/sprints/` or `docs/discovery/` is written
+
+If your stack isn't covered, drop a new sub-hook in `.claude/hooks/` and add the routing rule in `dispatch.py` (one `if`).
 
 ### Step 4 — Initialize the brain
 
