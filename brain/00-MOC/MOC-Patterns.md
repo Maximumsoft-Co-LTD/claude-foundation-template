@@ -22,6 +22,7 @@ updated: 2026-03-25
 | [[../03-patterns/PAT-005-subagent-driven-development]] | 3-agent pipeline: implementer → spec reviewer → quality reviewer | Workflow | 2026-04-15 |
 | [[../03-patterns/PAT-006-worktree-isolation]] | Git worktrees for parallel-agent file isolation | Workflow | 2026-04-15 |
 | [[../03-patterns/PAT-007-headless-parallel-agents]] | `claude -p` subprocesses for context-light parallel runs | Workflow | 2026-04-15 |
+| [[../03-patterns/PAT-008-audit-in-transaction]] | Audit append inside the same transaction as the state change | Database | 2026-05-05 |
 
 ---
 
@@ -41,6 +42,9 @@ updated: 2026-03-25
 - [[../03-patterns/PAT-005-subagent-driven-development]]
 - [[../03-patterns/PAT-006-worktree-isolation]]
 - [[../03-patterns/PAT-007-headless-parallel-agents]]
+
+### Database Patterns
+- [[../03-patterns/PAT-008-audit-in-transaction]]
 
 ---
 
