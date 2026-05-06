@@ -28,6 +28,7 @@ Each decision note follows:
 |----|-------|--------|------|
 | [[../02-decisions/DEC-001-real-deps-integration-tests]] | Real deps for integration tests (no mocks) | active | 2026-03-25 |
 | [[../02-decisions/DEC-002-posttooluse-lint-hooks]] | Auto-lint on every Write/Edit | active | 2026-03-25 |
+| [[../02-decisions/DEC-004-two-modules-shared-audit]] | Two domain modules sharing a common `audit_log` table (Approach A) | active | 2026-05-05 |
 | [[../02-decisions/DEC-003-vertical-slice-tasks]] | Tasks must be vertical slices (E2E) | active | 2026-03-25 |
 
 ---

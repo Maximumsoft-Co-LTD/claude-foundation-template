@@ -22,8 +22,8 @@
 
 ---
 
-## SP1 — ERP Inventory + Purchase Order Slice (v1)
-> `docs/sprints/SP1/SP1-overview.md`
+## SP1 — ERP Inventory + Purchase Order Slice (v1) ✓ done
+> `docs/sprints/SP1/SP1-overview.md` · retro: `docs/sprints/SP1/SP1-retro.md`
 
 | Task | User Story | Depends On | Points | Status | Priority | Assigned |
 |------|-----------|------------|--------|--------|----------|----------|

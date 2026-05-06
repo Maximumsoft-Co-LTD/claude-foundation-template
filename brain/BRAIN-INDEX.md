@@ -243,9 +243,9 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 
 ## 📅 Sprint Knowledge
 
-| Sprint | Status | Brain Summary |
-|--------|--------|---------------|
-| SP1 | planning | [[05-sprints/SP1-brain]] |
+| Sprint | Status | Tasks | Decisions | Lessons | Patterns | Brain Summary |
+|--------|--------|-------|-----------|---------|----------|---------------|
+| SP1 | done | 2 (SP1-T001, SP1-T002) | DEC-004 | LES-004, LES-005 | PAT-008 | [[05-sprints/SP1-brain]] |
 
 ---
 

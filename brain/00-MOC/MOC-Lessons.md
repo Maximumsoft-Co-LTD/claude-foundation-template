@@ -19,6 +19,7 @@ updated: 2026-03-25
 | [[../04-lessons/LES-002-mock-vs-real-db-divergence]] | Mocked Integration Tests Masked a Real Migration Bug | template-example | example | — |
 | [[../04-lessons/LES-003-discovery-skipped-caused-rework]] | Skipping /discovery on a "Simple" Feature Led to Mid-Sprint Scope Expansion | template-example | example | — |
 | [[../04-lessons/LES-004-audit-outside-transaction]] | Audit Row Outside the State-Change Transaction Allows Silent Divergence | retro-task SP1-T001 (from-bug) | SP1 | 2026-05-05 |
+| [[../04-lessons/LES-005-boundary-cases-need-tdd-rows]] | Boundary Cases Belong as TDD-Plan Rows, Not Buried in AC Text | retro-sprint SP1 | SP1 | 2026-05-05 |
 
 > Rows above marked `template-example` ship as illustrative examples. Real entries from this team start with `LES-004` onward.
 
