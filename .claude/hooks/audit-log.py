@@ -1,92 +1,93 @@
 #!/usr/bin/env python3
 """
-Audit log hook — appends every user prompt, tool use, and stop event to
-audit.md per AI-DLC spec.
+Audit-log hook: append-only trail of every user prompt, AI completion, and
+destructive tool invocation. Runs on UserPromptSubmit, Stop, and PreToolUse
+events.
 
-Triggered on: UserPromptSubmit, PreToolUse (destructive ops), Stop.
+Format (per AI-DLC spec):
+  ## [Stage / Event]
+  **Timestamp**: <ISO-8601>
+  **User Input**: "<verbatim>"
+  **AI Response**: "<verbatim>"
+  **Context**: <branch / task / decision>
+  ---
 
-Append-only. Never overwrites. ISO-8601 timestamps. Complete raw user input
-preserved verbatim (no summarization).
+Destination:
+  - docs/sprints/<sprint-id>/<task-id>/audit.md   (when on a task branch)
+  - docs/audit-<YYYY-MM-DD>.md                    (otherwise)
 
-Audit file location:
-  - If active sprint + task detected: docs/sprints/[sprint]/[task]/audit.md
-  - Else: docs/audit-[YYYY-MM-DD].md
-
-Determines active task by reading docs/sprints/*/.autopilot-state.json (if
-present) or by parsing the current branch name (`SP[N]/SP[N]-T[NNN]-...`).
+Append-only. Never overwrite. Never summarize.
 """
+import datetime as dt
 import json
 import os
 import re
 import subprocess
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 
 PROJECT_DIR = Path(os.environ.get("CLAUDE_PROJECT_DIR", os.getcwd()))
 
-DESTRUCTIVE_BASH_PATTERNS = [
-    r"\bgit\s+push\s+.*\b(main|master)\b",
-    r"\bgit\s+push\s+.*--force\b",
-    r"\bgit\s+push\s+.*-f\b",
+DESTRUCTIVE_BASH_PATTERNS = (
+    r"\brm\s+-rf\b",
+    r"\bgit\s+push\b.*\b(--force|-f)\b",
+    r"\bgit\s+push\b.*\bmain\b",
+    r"\bgit\s+push\b.*\bmaster\b",
     r"\bgit\s+reset\s+--hard\b",
     r"\bgit\s+branch\s+-D\b",
-    r"\brm\s+-rf\b",
-    r"\bdb\.[a-zA-Z]+\.drop\(",
-    r"\bdropDatabase\(",
-]
+    r"\bdocker\s+(rm|rmi)\s+-f\b",
+    r"\bdrop(Database|Collection)\s*\(",
+    r"\bdb\.\w+\.deleteMany\s*\(\s*\{\s*\}\s*\)",
+    r"\bDELETE\s+FROM\b",
+    r"\bTRUNCATE\b",
+)
 
 
 def now_iso() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def current_branch() -> str:
+def git_branch() -> str:
     try:
-        out = subprocess.check_output(
+        out = subprocess.run(
             ["git", "rev-parse", "--abbrev-ref", "HEAD"],
-            cwd=PROJECT_DIR,
-            stderr=subprocess.DEVNULL,
-            text=True,
-        ).strip()
-        return out
+            capture_output=True, text=True, cwd=PROJECT_DIR, timeout=2,
+        )
+        return out.stdout.strip()
     except Exception:
         return ""
 
 
-def parse_task_from_branch(branch: str) -> tuple[str, str]:
-    m = re.match(r"^(SP\d+)/(SP\d+-T\d+)", branch)
+def task_context(branch: str) -> tuple[str, str]:
+    """Parse SPn/SPn-Tnnn-... → (sprint_id, task_id) or ("", "")."""
+    m = re.match(r"^(SP\d+)/((SP\d+)-T\d+)", branch)
     if m:
         return m.group(1), m.group(2)
     return "", ""
 
 
-def resolve_audit_path() -> Path:
-    sprint_id, task_id = parse_task_from_branch(current_branch())
+def audit_path(sprint_id: str, task_id: str) -> Path:
     if sprint_id and task_id:
-        d = PROJECT_DIR / "docs" / "sprints" / sprint_id / task_id
-        d.mkdir(parents=True, exist_ok=True)
-        return d / "audit.md"
-    d = PROJECT_DIR / "docs"
-    d.mkdir(parents=True, exist_ok=True)
-    return d / f"audit-{datetime.now(timezone.utc).strftime('%Y-%m-%d')}.md"
+        p = PROJECT_DIR / "docs" / "sprints" / sprint_id / task_id / "audit.md"
+    else:
+        today = dt.date.today().isoformat()
+        p = PROJECT_DIR / "docs" / f"audit-{today}.md"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    return p
 
 
-def append_entry(path: Path, header: str, body: str) -> None:
-    if not path.exists():
-        path.write_text(f"# Audit log — {path.name}\n\n", encoding="utf-8")
+def append_entry(path: Path, header: str, fields: dict[str, str]) -> None:
+    block = [f"## {header}", f"**Timestamp**: {now_iso()}"]
+    for k, v in fields.items():
+        v_escaped = v.replace("\n", "\\n")
+        block.append(f"**{k}**: \"{v_escaped}\"")
+    block.append("---\n")
     with path.open("a", encoding="utf-8") as f:
-        f.write(f"## {header}\n")
-        f.write(f"**Timestamp**: {now_iso()}\n")
-        f.write(body)
-        f.write("\n---\n\n")
+        f.write("\n".join(block) + "\n")
 
 
-def is_destructive(tool_name: str, tool_input: dict) -> bool:
-    if tool_name == "Bash":
-        cmd = tool_input.get("command", "")
-        return any(re.search(p, cmd) for p in DESTRUCTIVE_BASH_PATTERNS)
-    return False
+def is_destructive_bash(cmd: str) -> bool:
+    return any(re.search(p, cmd, re.IGNORECASE) for p in DESTRUCTIVE_BASH_PATTERNS)
 
 
 def main() -> None:
@@ -97,29 +98,46 @@ def main() -> None:
         sys.exit(0)
 
     event = payload.get("hook_event_name", "")
-    audit = resolve_audit_path()
+    branch = git_branch()
+    sprint_id, task_id = task_context(branch)
+    path = audit_path(sprint_id, task_id)
+    context = f"branch={branch}; task={task_id or 'none'}"
 
     if event == "UserPromptSubmit":
-        prompt = payload.get("prompt", "")
-        body = f'**User Input**: """\n{prompt}\n"""\n**Context**: prompt submitted\n'
-        append_entry(audit, "User Prompt", body)
-
-    elif event == "PreToolUse":
-        tool_name = payload.get("tool_name", "")
-        tool_input = payload.get("tool_input", {})
-        if not is_destructive(tool_name, tool_input):
-            sys.exit(0)
-        body = (
-            f"**Tool**: {tool_name}\n"
-            f"**Input**: `{json.dumps(tool_input)[:500]}`\n"
-            f"**Context**: destructive op detected\n"
-        )
-        append_entry(audit, "Destructive Op (pre)", body)
+        prompt = payload.get("prompt", "") or payload.get("user_prompt", "")
+        append_entry(path, "User prompt", {
+            "User Input": prompt,
+            "Context": context,
+        })
 
     elif event == "Stop":
-        body = "**Context**: assistant turn completed\n"
-        append_entry(audit, "Turn End", body)
+        # Stop event marks end of an AI response turn
+        response = payload.get("stop_reason", "") or "turn-end"
+        append_entry(path, "AI turn end", {
+            "AI Response": f"[turn ended: {response}]",
+            "Context": context,
+        })
 
+    elif event == "PreToolUse":
+        tool = payload.get("tool_name", "")
+        tool_input = payload.get("tool_input", {})
+        if tool == "Bash":
+            cmd = tool_input.get("command", "")
+            if is_destructive_bash(cmd):
+                append_entry(path, "Destructive op (PreToolUse)", {
+                    "Tool": tool,
+                    "Command": cmd,
+                    "Context": context,
+                })
+        elif tool in ("Write", "Edit") and tool_input.get("file_path", "").endswith((".env", "secrets.json", "credentials.json")):
+            append_entry(path, "Sensitive file write (PreToolUse)", {
+                "Tool": tool,
+                "Path": tool_input.get("file_path", ""),
+                "Context": context,
+            })
+
+    # Hooks return JSON to stdout; empty object = no extra context
+    print(json.dumps({}))
     sys.exit(0)
 
 
