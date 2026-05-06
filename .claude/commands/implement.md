@@ -70,16 +70,9 @@ Read **in parallel** and store content in memory as `DOC_OVERVIEW`, `DOC_REQ`:
 
 `DOC_REQ` is the **single source of truth** — it contains the story, FE design (if any), BE design (if any), Implementation Plan, and TDD Test Plan all in one file. It is injected into every sub-agent prompt — agents must NOT re-read this file.
 
-**Section extraction rule (size guard):** Before injecting into a sub-agent, check character count:
-- ≤ 6000 chars → inject full `DOC_REQ`
-- \> 6000 chars → extract only the section(s) that agent needs (from the matching `##` heading to the next heading at the same level)
-
-| Agent | Sections to extract from `DOC_REQ` |
-|-------|-----------------------------------|
-| A — FE Tests | `## Acceptance Criteria` + `### [FE] TDD Tests` + `## E2E Test Plan` + `# 3 · Frontend Design` (State Inventory, Fail Case Matrix) |
-| B — BE Tests | `## Acceptance Criteria` + `### [BE] TDD Tests` + `# 4 · Backend Design` (API Endpoints, Input Validation, Error Handling) |
-| C — FE Impl | `## Acceptance Criteria` + `### [FE] Plan` (includes its subtasks) + `# 3 · Frontend Design` (Component Breakdown, State Inventory, API Contracts Consumed) + `### [FE] Scope` |
-| D — BE Impl | `## Acceptance Criteria` + `### [BE] Plan` (includes its subtasks) + `# 4 · Backend Design` (API Endpoints, Data Models, Service/Layer Breakdown, Business Logic) + `### [BE] Scope` |
+**Section extraction rule (size guard):** Only relevant when delegating to a sub-agent. Per `.claude/rules/parallel-work.md`, one sub-agent owns the WHOLE task (both FE and BE) — never split by layer. Check character count of `DOC_REQ`:
+- ≤ 6000 chars → inject full `DOC_REQ` to the sub-agent.
+- \> 6000 chars → extract `## Acceptance Criteria` + relevant `### [FE]` and `### [BE]` blocks + `# 3 · Frontend Design` and/or `# 4 · Backend Design` sections + `## E2E Test Plan`. Inject all of them — the agent is owning the full vertical slice and needs both halves of the contract.
 
 Validate:
 - Missing requirement or empty ACs → stop: "Run `/requirement [task-id]` first."
@@ -131,7 +124,7 @@ Key dimensions:
 
 ## Step 1d — Scrum hierarchy briefing
 
-Every sub-agent spawned in Step 2 and Step 3 receives this block as part of its prompt. Define once here so the injection stays DRY:
+If a sub-agent is spawned in Step 2 or Step 3 (single owner per task — never split by layer; see `.claude/rules/parallel-work.md`), inject this block into its prompt. Define once here so the injection stays DRY:
 
 ```
 --- SCRUM HIERARCHY ---
@@ -140,101 +133,48 @@ Task (SP[N]-T[NNN])          = Scrum Story — vertical slice (FE+BE+data), user
 Scope Overview bullet        = feature-area summary inside the story (not a story)
 Implementation Plan row      = Scrum engineering task — layer-level work, NOT user-facing
 Implementation Plan checkbox = Scrum Subtask — atomic 2–5 min action
-You are implementing engineering tasks inside a Story that already has defined ACs. Do NOT expand scope beyond the ACs. Do NOT treat Implementation Plan rows as stories. Do NOT ask the user mid-layer — follow the plan.
+You are implementing engineering tasks inside a Story that already has defined ACs. Do NOT expand scope beyond the ACs. Do NOT treat Implementation Plan rows as stories. Do NOT ask the user mid-layer — follow the plan. You own this task end-to-end (FE + BE + tests). Do NOT delegate to other agents by layer.
 ---
 ```
 
-Store as `SCRUM_HIERARCHY`. Inject into every sub-agent prompt in Step 2 and Step 3.
+Store as `SCRUM_HIERARCHY`.
 
 ---
 
 ## Step 2 — Write failing tests
 
-**If `SHARED_TYPES`:** write shared type/interface files first, then proceed.
+**Single-owner-end-to-end:** Per `.claude/rules/parallel-work.md`, one task is owned by one agent (or the main session) end-to-end. Do NOT split FE and BE for the same task between two agents — layer-split agents produce contracts that don't match. The `HAS_FE` / `HAS_BE` flags determine which test plans to write, not how many agents to spawn.
 
-**If `HAS_FE` AND `HAS_BE`:** launch 2 parallel sub-agents:
+**If `SHARED_TYPES`:** write shared type/interface files first.
 
-> **Agent A — FE Tests**
-> --- SCRUM HIERARCHY ---
-> [inject SCRUM_HIERARCHY]
-> ---
-> --- REQUIREMENT DOC: FE-RELEVANT SECTIONS (apply section extraction rule) ---
-> [inject from DOC_REQ: `## Acceptance Criteria` + `### [FE] TDD Tests` + `## E2E Test Plan` + `# 3 · Frontend Design` (State Inventory, Fail Case Matrix)]
-> ---
-> --- CONTEXT7 FE LIBRARY DOCS ---
-> [inject fetched FE library docs from Step 1]
-> ---
-> WORKTREE PATH: [inject absolute worktree path from Step 0b]
-> ---
-> Write all test files from the [FE] TDD Test Plan above.
-> Run FE tests — confirm every new test **fails** (red). Do NOT write implementation code.
+Then write failing tests in this order (FE before BE if both, so the FE contract drives the BE test design):
 
-> **Agent B — BE Tests**
-> --- SCRUM HIERARCHY ---
-> [inject SCRUM_HIERARCHY]
-> ---
-> --- REQUIREMENT DOC: BE-RELEVANT SECTIONS (apply section extraction rule) ---
-> [inject from DOC_REQ: `## Acceptance Criteria` + `### [BE] TDD Tests` + `# 4 · Backend Design` (API Endpoints, Input Validation, Error Handling)]
-> ---
-> --- CONTEXT7 BE LIBRARY DOCS ---
-> [inject fetched BE library docs from Step 1]
-> ---
-> WORKTREE PATH: [inject absolute worktree path from Step 0b]
-> ---
-> Write all test files from the [BE] TDD Test Plan above.
-> Run BE tests — confirm every new test **fails** (red). Do NOT write implementation code.
+**For each layer with tests (`HAS_FE`, `HAS_BE`):** write all test files from the corresponding `### [FE] TDD Tests` / `### [BE] TDD Tests` rows in `DOC_REQ`. After writing, run the tests and **confirm every new test fails (red)**. Do NOT write implementation code yet.
 
-Wait for both agents. Collect red-test confirmation.
+If a sub-agent is needed (e.g. context budget concerns or the user explicitly asked), spawn ONE sub-agent that owns BOTH the FE and BE tests for this task — never two parallel agents split by layer. Inject `SCRUM_HIERARCHY` + the full `DOC_REQ` (or both [FE] and [BE] sections if size-extracted).
 
-**If only `HAS_FE` or only `HAS_BE`:** write all test files sequentially. Confirm all **fail** (red).
-This is the normal path for FE-only and BE-only tasks — no error, no missing-doc warning needed.
-
+Wait for red-test confirmation before proceeding.
 
 ---
 
 ## Step 3 — Implement
 
+**Single-owner-end-to-end** (same rule as Step 2).
+
 **If `HAS_MIGRATION`:** run DB migrations first in main context.
 
-**If `HAS_FE` AND `HAS_BE`:** launch 2 parallel sub-agents:
+Then implement in this order:
+1. **Shared types/interfaces** (if any).
+2. **Backend layer** (if `HAS_BE`): endpoints, validation, service logic, repository, event publishing, caching, logging, security per the `### [BE] Plan` rows. Run BE tests after each logical unit.
+3. **Frontend layer** (if `HAS_FE`): components, routing, state, API calls, loading/error states, analytics, responsive, accessibility per the `### [FE] Plan` rows. Run FE tests after each logical unit.
 
-> **Agent C — FE Implementation**
-> --- SCRUM HIERARCHY ---
-> [inject SCRUM_HIERARCHY]
-> ---
-> --- REQUIREMENT DOC: FE-RELEVANT SECTIONS (apply section extraction rule) ---
-> [inject from DOC_REQ: `## Acceptance Criteria` + `### [FE] Plan` + `### [FE] Subtasks` + `# 3 · Frontend Design` (Component Breakdown, State Inventory, API Contracts Consumed) + `## [FE] Scope`]
-> ---
-> --- CONTEXT7 FE LIBRARY DOCS ---
-> [inject fetched FE library docs from Step 1]
-> ---
-> WORKTREE PATH: [inject absolute worktree path from Step 0b]
-> ---
-> Implement components, routing, state, API calls, loading/error states, analytics, responsive, accessibility per the [FE] Plan and [FE] Subtasks above.
-> Tests are already written — implement until they pass. No extras, no shortcuts.
-> Run FE tests after each logical unit. Log any bugs found (do NOT run /issue — report in output).
-> Final state: all FE tests green.
+BE-before-FE because FE typically consumes the BE contract; reversing wastes a refactor pass.
 
-> **Agent D — BE Implementation**
-> --- SCRUM HIERARCHY ---
-> [inject SCRUM_HIERARCHY]
-> ---
-> --- REQUIREMENT DOC: BE-RELEVANT SECTIONS (apply section extraction rule) ---
-> [inject from DOC_REQ: `## Acceptance Criteria` + `### [BE] Plan` + `### [BE] Subtasks` + `# 4 · Backend Design` (API Endpoints, Data Models, Service/Layer Breakdown, Business Logic) + `## [BE] Scope`]
-> ---
-> --- CONTEXT7 BE LIBRARY DOCS ---
-> [inject fetched BE library docs from Step 1]
-> ---
-> WORKTREE PATH: [inject absolute worktree path from Step 0b]
-> ---
-> Implement endpoints, validation, service logic, repository, event publishing, caching, logging, security per the [BE] Plan and [BE] Subtasks above.
-> Tests are already written — implement until they pass. No extras, no shortcuts.
-> Run BE tests after each logical unit. Log any bugs found (do NOT run /issue — report in output).
-> Final state: all BE tests green.
+If a sub-agent is needed, spawn ONE sub-agent that owns BOTH layers for this task end-to-end. Inject `SCRUM_HIERARCHY` + the relevant `DOC_REQ` sections.
 
-Wait for both agents. If either reported bugs → run `/issue [task-id] [description]` per bug.
+Implement until all tests are green. Tests are already written — implement what they require, no extras, no shortcuts. Run tests after each logical unit. Log any bugs found (do NOT run /issue inside this step — report in output).
 
-**If only `HAS_FE` or only `HAS_BE`:** implement sequentially in main context.
+If during implementation you uncover a bug that is NOT covered by the existing tests, run `/issue [task-id] [description]` per bug after Step 4 verification.
 
 
 ---

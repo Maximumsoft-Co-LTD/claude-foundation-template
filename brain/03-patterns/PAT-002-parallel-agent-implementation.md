@@ -2,58 +2,66 @@
 type: pattern
 id: PAT-002
 category: implementation
-tags: [parallel, agents, FE, BE, performance]
-related: [CON-vertical-slice, DEC-003-vertical-slice-tasks]
-updated: 2026-03-25
+tags: [parallel, agents, vertical-slice, performance]
+related: [CON-vertical-slice, DEC-003-vertical-slice-tasks, PAT-005-subagent-driven-development]
+updated: 2026-05-05
+supersedes: PAT-002 (within-task FE/BE split — see History)
 ---
 
-# PAT-002 — Parallel Agent Implementation (FE + BE)
+# PAT-002 — Parallel Agent Implementation (Between Tasks, Not Within)
 
 ## Problem
 
-Implementing a vertical slice sequentially (BE first, then FE) blocks FE work and doubles calendar time. The two layers are largely independent once the API contract is agreed.
+A sprint contains multiple independent tasks (vertical-slice user stories). Running them sequentially blocks calendar time when no dependency exists between them. But splitting a SINGLE task between two agents (one for FE, one for BE) produces broken contracts — the FE agent invents a request shape, the BE agent invents a response shape, and the two never converge without a rework round.
 
 ## Solution
 
-After design is confirmed, split implementation into two parallel sub-agents:
+Parallelise at the **task** boundary, not the **layer** boundary:
 
 ```
-Main context: run DB migrations (if any)
-    ↓ (fire in parallel)
-Agent C — FE Implementation          Agent D — BE Implementation
-  Write components per design doc       Write endpoints per design doc
-  Implement state + API calls           Implement service + repository
-  Handle loading/error states           Handle validation + error codes
-  Run FE tests after each unit          Run BE tests after each unit
-  Report bugs (do not call /issue)      Report bugs (do not call /issue)
-    ↓ (wait for both)
-Main context: collect bug reports → /issue per bug
+Sprint backlog: [SP1-T001 (foundation), SP1-T002 (deps T001), SP1-T003 (independent)]
     ↓
-Full test suite (FE + BE in parallel)
+Tier 1 (no deps):       Agent X owns SP1-T001 end-to-end (FE + BE + tests)
+                        Agent Y owns SP1-T003 end-to-end (FE + BE + tests)
+    ↓ wait
+Tier 2 (depends T001):  Agent Z owns SP1-T002 end-to-end
 ```
+
+Each agent owns ONE task fully — its FE, BE, data, tests, and verification. The contract owner stays in one head, so the API and the UI agree by construction.
 
 ## Trigger Conditions
 
-Activate parallel agents when the design docs show:
-- `HAS_FE`: FE design has test plan items
-- `HAS_BE`: BE design has test plan items
-- Both are true → spawn Agent C and Agent D
-
-## Pre-condition: Shared Types
-
-If FE and BE share type/interface definitions (`SHARED_TYPES = true`), write those in the main context first, then spawn agents.
+- Sprint has 2+ tasks that share no `Depends On` relationship → parallelise.
+- Each task is self-contained (no shared in-flight contract with another running task).
 
 ## When NOT to Use
 
-- FE-only or BE-only tasks → implement sequentially in main context
-- Tasks where FE state depends on real BE responses at every step (tight coupling) → sequential
+- Two tasks with a shared in-flight contract (one task defines the API the other consumes mid-sprint) → run sequentially.
+- A single task that "feels too big to give one agent" → the answer is to **split the task** at `/new-sprint` Step 3 vertical-slice rules, NOT to split the agent.
 
-## Bug Handling
+## Within-task work always stays single-owner
 
-Agents log bugs during implementation but do NOT call `/issue` themselves. They surface the bug descriptions to the main context, which calls `/issue [task-id] [description]` once per bug after both agents complete.
+For a single task:
+- Write shared types first (if any).
+- Write all failing tests (FE + BE) — single owner.
+- Implement BE first, then FE (FE typically consumes the BE contract).
+- Run tests after each logical unit.
+
+If the task needs a sub-agent for context-budget reasons, spawn ONE sub-agent that owns the WHOLE task end-to-end. Never two parallel agents split by layer.
+
+## How to apply
+
+- `/run-tasks` (or `/run-tasks-p` for headless) builds dependency tiers — each task in a tier is one agent.
+- `/implement` Step 2 + Step 3 follow single-owner-end-to-end (see updated command spec).
+
+## History
+
+The original PAT-002 (2026-03-25) prescribed within-task FE/BE parallel split (Agent C + Agent D). That design contradicted `.claude/rules/parallel-work.md` and was discovered via the SP1 workflow-test (see `docs/sprints/SP1/WORKFLOW-TEST-REPORT.md` F12). This rewrite (2026-05-05) reorients the pattern to between-task parallelism, which is what `/run-tasks` already does correctly.
 
 ## Related
 
 - [[../01-concepts/CON-vertical-slice]]
 - [[../02-decisions/DEC-003-vertical-slice-tasks]]
-- `/implement` command in `.claude/commands/implement.md`
+- [[PAT-005-subagent-driven-development]] — the 3-agent pipeline within a single task (implementer → spec reviewer → quality reviewer) is sequential, not parallel
+- `.claude/rules/parallel-work.md` — the authoritative rule
+- `.claude/commands/run-tasks.md` and `run-tasks-p.md` — the commands that apply this pattern
