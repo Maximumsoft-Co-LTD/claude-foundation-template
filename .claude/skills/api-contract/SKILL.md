@@ -206,6 +206,20 @@ Next: write handler + composable, both importing from SSoT
 
 ---
 
+## Behavior in autopilot mode
+
+Per `.claude/rules/autonomous-mode.md`:
+- **Manual mode**: present contract + 2-option completion message.
+- **Autopilot mode**: emit status line + return. Flag `?` if SSoT location is ambiguous (no convention exists) — orchestrator batches.
+
+## Output (autopilot status line — required)
+
+`> api-contract: [METHOD path], SSoT [path]  [✓|?]`
+
+Example: `> api-contract: POST /api/things, SSoT internal/contracts/  ✓`
+
+---
+
 ## Why this exists
 
 Previous pain: "API เรียกผิด, UI ไม่ตรง". Root cause: FE and BE each invent their own shape and never reconcile until manual testing. Locking the contract before either side is written makes drift impossible by construction — both sides import the same definition, both sides break the build if you change it without updating the other.

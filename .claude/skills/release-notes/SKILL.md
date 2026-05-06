@@ -227,6 +227,20 @@ Next:
 
 ---
 
+## Behavior in autopilot mode
+
+Per `.claude/rules/autonomous-mode.md`:
+- **Manual mode**: present staged changelog + draft commit message + 2-option completion.
+- **Autopilot mode**: emit status line. Tag creation + push are destructive ops and ALWAYS block for explicit yes/no, regardless of mode.
+
+## Output (autopilot status line — required)
+
+`> release-notes: v[old] → v[new], [N] entries  [✓]`
+
+Example: `> release-notes: v1.4.0 → v1.5.0, 5 entries (2 added, 1 changed, 2 fixed)  ✓`
+
+---
+
 ## Why this exists
 
 Previous pain: "ต้องคอยอัพเดท README และ CHANGELOG.md หลังจบ sprint, ลืมทำ". Root cause: the work happens at the lowest-energy point of the sprint (right after exhausting deep work), with no structured prompt. This skill turns it into a deterministic, evidence-driven step that runs from `/retro-sprint` and produces a staged diff — there's nothing left to "remember to do later."

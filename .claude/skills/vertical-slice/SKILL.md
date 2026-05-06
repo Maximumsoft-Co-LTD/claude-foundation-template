@@ -139,6 +139,20 @@ Next: /implement [task-id]  (work S1 only, then re-check)
 
 ---
 
+## Behavior in autopilot mode
+
+Per `.claude/rules/autonomous-mode.md`:
+- **Manual mode**: present slice plan + 2-option completion message (per `completion-format.md`).
+- **Autopilot mode**: emit status line + return. Phase boundary handled by orchestrator after this skill.
+
+## Output (autopilot status line — required)
+
+`> vertical-slice: [N] slices, total [N]min  [✓]`
+
+Example: `> vertical-slice: 4 slices planned (S1=login, S2=callback, S3=session, S4=logout)  ✓`
+
+---
+
 ## Why this exists
 
 Previous pain: "ใช้เวลานานในการทำ task — task เล็กใหญ่ใช้เวลาเท่ากัน". Root cause: tasks are sliced by layer (all BE, then all FE), not by behavior. Layer-sliced work has no shippable midpoint, so a 1-hour task and a 4-hour task both take "until it's all done." Vertical slicing forces a shippable result every 15–45 min, regardless of total task size.

@@ -138,6 +138,22 @@ Next: /implement [task-id]   (or vertical-slice if estimate > 90 min)
 
 ---
 
+## Behavior in autopilot mode
+
+Per `.claude/rules/autonomous-mode.md`:
+- **Manual mode** (default): BLOCK as documented in steps above; wait for user confirmation.
+- **Autopilot mode** (`AUTOPILOT=1`, set by `/dev`): emit canonical status line and return. Block ONLY on the 4 official conditions. This skill flags `?` when confidence < 90% — orchestrator batches into `ask-choice`.
+
+## Output (autopilot status line — required)
+
+`> scope-check: [N] ACs, [N] boundaries, ~[N]min, conf [X]%  [✓|?]`
+
+Examples:
+- `> scope-check: 5 ACs, 3 boundaries, ~6h, conf 95%  ✓`
+- `> scope-check: 4 ACs, ambig on AC3 (auth scope)  ?`
+
+---
+
 ## Why this exists
 
 Previous pain: "ตอนวางแผนต้องคอยเช็คว่าเข้าใจถูกไหม". This skill makes the check **mandatory and structured**, not ad-hoc. One round-trip up-front beats three rounds of "no, I meant..." after code is written.

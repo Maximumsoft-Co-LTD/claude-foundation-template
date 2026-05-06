@@ -193,6 +193,22 @@ Next:
 
 ---
 
+## Behavior in autopilot mode
+
+Per `.claude/rules/autonomous-mode.md`:
+- **Manual mode**: produce verdict block + block /git-commit on FAIL.
+- **Autopilot mode**: emit status line. **FAIL is one of the 4 official block conditions** — auto-trigger `/debug`; if `/debug` resolves to GREEN, continue; otherwise BLOCK with diagnosis.
+
+## Output (autopilot status line — required)
+
+`> ui-verify: PASS [N/N ACs]  [✓]` or `> ui-verify: FAIL on [AC] ([reason])  [✗]`
+
+Examples:
+- `> ui-verify: PASS 5/5 ACs, 7/7 edges  ✓`
+- `> ui-verify: FAIL on AC2 (toast missing after save)  ✗`
+
+---
+
 ## Why this exists
 
 Previous pain: "ทำงานไม่ผ่าน UI กดไม่ได้". Root cause: type-check and unit tests pass without proving any path actually works in the browser. This skill makes "open it and click it" a mandatory blocking step, with evidence captured so it can't be skipped silently.
