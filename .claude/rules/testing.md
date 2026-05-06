@@ -37,3 +37,19 @@ If you catch yourself thinking any of these — STOP. You are about to skip TDD:
 | "Need to explore first" | Fine. Throw away exploration, then start with TDD. |
 | "Test is hard to write" | Listen to it — hard to test = hard to use. Simplify the design. |
 | "Just this once" | No exceptions. |
+
+## Boundary cases must be planned, not improvised
+
+For every AC that contains a comparison operator (`>`, `>=`, `<`, `<=`, `!=`, `before`, `after`, `non-empty`, `exactly`), the TDD Test Plan MUST include at least one row that hits the exact boundary (e.g. `n === threshold`, `n === 0`, `length === 1`).
+
+Without an explicit boundary row, an off-by-one or sign error slips past spec-compliance review (which only checks "is there a test for AC-N?", not "is the boundary covered?").
+
+Source: `brain/04-lessons/LES-005-boundary-cases-need-tdd-rows.md` (SP1, retro-sprint promotion).
+
+## Audit-in-transaction (state change + audit row are atomic)
+
+When a service writes a state change AND records an audit/history row, both writes MUST happen inside the same transaction. The audit append goes inside the transaction closure, not after it. If the audit append throws, the entire mutation must roll back.
+
+Test for this directly: monkey-patch your audit logger to throw, call the state-changing method, assert that the DB state is unchanged.
+
+Source: `brain/03-patterns/PAT-008-audit-in-transaction.md` (SP1, retro-task promotion). Origin lesson: `brain/04-lessons/LES-004-audit-outside-transaction.md` (from-bug).

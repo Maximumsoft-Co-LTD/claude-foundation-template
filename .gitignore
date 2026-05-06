@@ -23,3 +23,10 @@ logs/
 
 # key for Claude
 .key
+
+# Workflow-test sandbox (created by tmp/erp-test/) — keep source, ignore deps + DB
+tmp/**/node_modules/
+tmp/**/*.db
+tmp/**/*.db-journal
+tmp/**/*.db-wal
+tmp/**/*.db-shm
