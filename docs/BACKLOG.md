@@ -19,6 +19,19 @@
 | ID | Title | Status | Date | Open Questions | Doc |
 |----|-------|--------|------|----------------|-----|
 | disc-001 | ERP: Inventory + Purchase Order Slice | backlog | 2026-05-05 | 2 | [disc-001](discovery/disc-001-erp-inventory-and-purchase-order.md) |
+| disc-002 | Kiosk Ticket Booking (self-service, no login) | backlog | 2026-05-07 | 0 | [disc-002](discovery/disc-002-kiosk-ticket-booking.md) |
+
+---
+
+## SP2 — Kiosk Customer Booking Flow (v1) — `planning`
+> `docs/sprints/SP2/SP2-overview.md` · origin: `docs/discovery/disc-002-kiosk-ticket-booking.md`
+
+| Task | User Story | Depends On | Points | Status | Priority | Assigned |
+|------|-----------|------------|--------|--------|----------|----------|
+| SP2-T003 | As a walk-in customer, I want to see today's available showtimes on a touch-friendly list so that I can pick the show I want without staff help. | — | 3 | `todo` | high | — |
+| SP2-T004 | As a walk-in customer, I want to see the seat layout for my chosen showtime with available/held/booked seats clearly distinguished so that I can pick a free seat. | SP2-T003 | 5 | `todo` | high | — |
+| SP2-T005 | As a walk-in customer, I want to enter my name and confirm my held seat so that the system creates a booking and atomically transitions the seat from held to booked with no double-bookings. | SP2-T004 | 5 | `todo` | high | — |
+| SP2-T006 | As a walk-in customer, I want to see my ticket with a scannable QR code on the kiosk screen after confirming so that I can show it at entry. | SP2-T005 | 3 | `todo` | high | — |
 
 ---
 
