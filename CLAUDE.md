@@ -16,8 +16,9 @@ A workflow template for Claude Code. Provides structured sprint management, TDD 
 ## Architecture
 
 - `.claude/commands/` — slash command definitions invoked by Claude Code
+- `.claude/skills/` — atomic, model-invocable skills used as building blocks inside commands (see Atomic Skills section below)
 - `.claude/rules/` — path-scoped conventions loaded automatically when Claude edits matching files
-- `.claude/hooks/` — Python scripts executed at lifecycle events (PostToolUse: lint, test)
+- `.claude/hooks/` — Python scripts executed at lifecycle events (PostToolUse: lint, test; UserPromptSubmit: audit-log)
 - `docs/templates/` — Markdown templates for each workflow stage
 - `docs/sprints/` — sprint and task output docs, one folder per sprint/task
 - `docs/BACKLOG.md` — auto-updated task registry with status and story points
@@ -80,6 +81,28 @@ Single task: `/discovery → /new-sprint → /requirement (unified story + FE de
 Multiple tasks in parallel: `/run-tasks [task-id] [task-id] ...` (Agent tool) or `/run-tasks-p [task-id] [task-id] ...` (headless `claude -p` — leaner parent context)
 
 Full workflow reference: `.claude/commands/_WORKFLOW-REF.md` — see **Superpowers-Inspired Principles** table for enforcement details.
+
+## Atomic Skills (`.claude/skills/`)
+
+Skills are model-invocable building blocks that commands compose. Each skill is `disable-model-invocation: false` so Claude picks them up by description match — but every command file also explicitly references the skills it depends on. See the skill's own `SKILL.md` for steps, inputs/outputs, and autopilot status-line format.
+
+| Category | Skills | Used by |
+|---|---|---|
+| **Intent atom** | `prompt-understand` · `scope-check` · `ask-choice` · `solution-options` | `/dev`, `/discovery`, `/requirement` |
+| **Pre-implementation gates** | `workspace-detect` · `reverse-engineer` · `impact-map` · `risk-register` · `nfr-plan` · `api-contract` · `vertical-slice` · `tdd-plan` | `/dev`, `/requirement`, `/implement` |
+| **Bug & quality** | `bug-repro` · `debug` · `mongo-review` · `ui-verify` | `/issue`, `/debug`, `/code-review` |
+| **Delivery** | `pr-create` · `release-notes` · `local-run` | `/git-commit`, `/retro-sprint` |
+| **Meta** | `skill-evolution` · `brain-capture` · `agent-routing` · `session-handoff` | `/retro-sprint`, `/run-tasks`, mid-session |
+
+**Three new gates wired into the core flow:**
+
+| Skill | Trigger | Where |
+|---|---|---|
+| `bug-repro` | Any bug fix → must produce verified-RED failing test before code | `/issue` Step 3, `/debug` Phase 4 |
+| `impact-map` | Change touches existing code → enumerate Tier-1/2/3 dependents | `/issue` Step 2, `/implement` Step 1e, `/code-review` Step 2a |
+| `risk-register` | Migration · auth · payment · public API · removed cron → mitigation + rollback required | `/implement` Step 1e, `/code-review` Step 2b |
+
+Code review now treats missing `impact-map` coverage or missing `risk-register` verification evidence as automatic Critical findings.
 
 ## Superpowers Integration
 
