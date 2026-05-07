@@ -3,6 +3,10 @@ Workflow position: **/new-sprint → START → /implement**
 
 Write the **single requirement doc** for a task. This one doc contains: story + ACs + FE design (if any) + BE design (if any) + implementation plan with subtasks + test plans. Run BEFORE `/implement`.
 
+**This is the first command that reads the actual codebase.** `/discovery` and `/new-sprint` operate at the planning level (no deep code reading). `/requirement` is where you open real source files, learn the conventions, and turn the scaffolded skeleton into a concrete implementation plan grounded in the codebase.
+
+A skeleton `[task-id]-requirement.md` may already exist from `/new-sprint` (Step 5 scaffolding) — read it first and treat it as a starting point. Pre-filled fields (User Story, seeded ACs, Metadata) are inputs to refine, not work to redo.
+
 Arguments: `[task-id]`  — e.g. `SP1-T001`
 
 > **1 task = 1 user story = 1 doc.** There is no separate `/design fe` or `/design be` anymore — design now lives inside the requirement doc, gated by the `Task Type` field.

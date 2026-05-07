@@ -19,13 +19,34 @@ Copies `.claude/`, `brain/`, `docs/`, and a new stack-aware `CLAUDE.md` into the
 
 **1 task = 1 user story = 1 doc.** Requirement, FE design, BE design, Implementation Plan, and test plans all live in one `[task-id]-requirement.md`. There is no separate `/design fe` or `/design be` — design lives inside `/requirement`.
 
-**Single task (sequential):**
+**Canonical 8-command spec (per task):**
+```
+/discovery → /new-sprint → /requirement → /implement
+    → /code-review → /testing (→ /issue → /testing once on bug)
+    → /git-commit
+```
+
+`/dev` runs this end-to-end for every task in dependency order without stopping (see `dev.md`). Each command's responsibility:
+
+| Command | Reads code? | Writes code? | Notes |
+|---|---|---|---|
+| `/discovery` | no | no | Gather requirements only |
+| `/new-sprint` | no | scaffold dirs only | Break down all tasks, scaffold `[task-id]/` + skeleton requirement docs |
+| `/requirement` | **yes — first command that does** | no | Turn skeleton into concrete plan grounded in the codebase |
+| `/implement` | yes | yes (RED→GREEN) | Write tests then implementation |
+| `/code-review` | yes (diff) | no | Review `git diff` against ACs + design |
+| `/testing` | yes | no (delegates to /issue) | Full suite + AC coverage; on bug → `/issue` once |
+| `/issue` | yes | yes (TDD fix) | Repro test → minimal fix → re-runs `/testing` once |
+| `/git-commit` | no | no | Stage, commit, finishing-branch options |
+
+**Single task (sequential, full template flow with retros):**
 ```
 /discovery → /new-sprint → /requirement → /implement
     → /issue (loop) → /code-review → /testing
     → /retro-task → /git-commit → /next-task (→ repeat per task)
     → /retro-sprint (once ALL tasks in sprint are done — includes brain update)
 ```
+`/retro-task` is recommended but `/git-commit` warn-not-blocks if it is missing.
 
 **Multiple tasks in parallel (subagent-driven):**
 ```

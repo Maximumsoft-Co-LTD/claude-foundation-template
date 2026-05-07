@@ -62,11 +62,13 @@ Anything verbose belongs in the audit log (handled by `audit-log.py` hook), neve
 | 2.1 /new-sprint | **spawn fork** | writes overview + BACKLOG mutations |
 | 3.0 dispatch decision | inline | reads BACKLOG only, ≤ 100 lines |
 | 3.A /run-tasks (parallel) | inline call — `/run-tasks` itself spawns its own agent fleet | already delegated |
-| 3.B.1 /requirement (per task) | **spawn fork** | writes the unified doc (heaviest writer) |
+| 3.B.1 /requirement (per task) | **spawn fork** | writes the unified doc (heaviest writer); first stage that reads real source code |
 | 3.B.2 local-run | inline | starts processes, no transcript noise worth keeping |
-| 3.B.3 /implement (per slice) | **spawn fork per slice** | writes code, runs tests, ui-verify |
-| 3.B.4 /code-review (per task) | **spawn fork** (background in pipeline mode) | reads diff + ACs, returns findings; runs concurrently with next task's /requirement+/implement |
-| 3.B.5 /retro-task | inline | short summary writer |
+| 3.B.3 /implement (per slice) | **spawn fork per slice** | writes code, runs tests, ui-verify (no commit inside) |
+| 3.B.4 /code-review (per task) | **spawn fork** (background in pipeline mode) | reads diff + design docs, two-stage review; in pipeline mode runs concurrently with next task's /requirement+/implement |
+| 3.B.5 /testing (per task) | **spawn fork** (background in pipeline mode) | full suite + AC coverage + may invoke /issue once; in pipeline mode runs concurrently with next task |
+| 3.B.6 /retro-task | inline | short summary writer (optional in autopilot) |
+| 3.B.7 /git-commit (per task) | inline | small writer, block on destructive op (push/merge); orchestrator gates commit on review + testing pass and dependency order |
 | 4.1 /retro-sprint | **spawn fork** | reads all task retros + writes consolidation |
 | 5.1 pr-create | inline | small, but block on destructive op |
 
@@ -124,21 +126,28 @@ Arguments:
   │           │              per task, retro-task — all delegated
   │           │
   │           └─ Sequential path (N=1, all-chained, risk-tagged, or user-paced):
-  │                For each task in dep order:
-  │                  3.B.1  /requirement (autopilot)
+  │                For each task in dep order — runs the canonical 8-command spec:
+  │                  3.B.1  /requirement (autopilot)            ← reads real code
   │                           └─ scope-check, api-contract (cond), tdd-plan, nfr-plan (cond)
   │                  3.B.2  Skill("local-run")
-  │                  3.B.3  /implement (autopilot)
+  │                  3.B.3  /implement (autopilot)              ← write code RED→GREEN
   │                           └─ for each slice:
   │                                api-contract (cond)
   │                                tdd-plan (slice scope)
   │                                write code (RED → GREEN)
   │                                mongo-review (cond)
   │                                ui-verify        [BLOCK on FAIL]
-  │                                /git-commit
   │                                ════ phase boundary (slice) ════
-  │                  3.B.4  /retro-task (autopilot)
+  │                  3.B.4  /code-review (autopilot)            ← review git diff
+  │                           └─ Stage 1 spec compliance → Stage 2 quality
+  │                              critical findings auto-handoff to /issue
+  │                  3.B.5  /testing (autopilot)                ← full suite + AC coverage
+  │                           └─ on bug: /issue (single round-trip) → /testing re-runs once
+  │                              persistent failure → /debug, do NOT loop /issue
+  │                  3.B.6  /retro-task (autopilot)             ← optional but recommended
   │                           └─ brain-capture
+  │                  3.B.7  /git-commit (autopilot)             ← stage + commit + branch finish
+  │                           └─ retro-task missing = warn-not-block per /git-commit Step 2
   │
   ├─ STAGE 4 — Sprint close
   │    4.1  /retro-sprint (autopilot mode)
@@ -279,80 +288,88 @@ Update state: append completed step IDs as `/run-tasks` checkpoints arrive (pars
 
 ### Step 5.B — Sequential path (per-task for-loop)
 
-Two sub-modes: **plain sequential** (`pipeline_mode = false`) and **pipelined sequential** (`pipeline_mode = true`). The per-task building blocks are identical; only the ordering of `/code-review` and the next task's `/requirement` differs.
+The orchestrator stays lean by spawning a fork per heavy step. The for-loop body for each task `[task-id]` (in dependency order) follows the **canonical 8-command spec** — `/requirement → /implement → /code-review → /testing (with /issue loop) → /git-commit`. `/retro-task` is optional but recommended for brain-capture.
+
+Two sub-modes: **plain sequential** (`pipeline_mode = false`) and **pipelined sequential** (`pipeline_mode = true`). The per-task building blocks are identical; only the ordering of `/code-review`+`/testing` (run as background forks in pipeline mode) and the next task's `/requirement` differs.
 
 #### Per-task building blocks (used by both sub-modes)
 
-1. **/requirement** — **spawn fork**. Fork prompt: "Run `/requirement [task-id]` in autopilot mode. Sprint context: `[sprint_id]`. Discovery doc: `docs/discovery/disc-NNN-[name].md`. Skills under it (scope-check, api-contract, tdd-plan, nfr-plan) emit status lines. Produce `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`. Return `=== FORK RESULT ===` with artifact path. If any sub-skill flags `?` → return early with `status: ambig`."
+1. **/requirement** — **spawn fork**. Fork prompt: "Run `/requirement [task-id]` in autopilot mode. Sprint context: `[sprint_id]`. Discovery doc: `docs/discovery/disc-NNN-[name].md`. A skeleton requirement doc may already exist from `/new-sprint` Step 5 — read and refine it; this is the first command that reads real source code. Skills under it (scope-check, api-contract, tdd-plan, nfr-plan) emit status lines. Produce `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`. Return `=== FORK RESULT ===` with artifact path. If any sub-skill flags `?` → return early with `status: ambig`."
 
 2. **local-run** — inline. Invoke `Skill("local-run")` if stack not already up (check `/tmp/local-run-status.json`).
 
 3. **/implement (per slice)** — **spawn one fork per slice**, not one fork for the whole task.
 
    For each slice in the Implementation Plan:
-   - **Spawn fork** with prompt: "Run the next slice of `/implement [task-id]` in autopilot mode. Slice scope: `[slice description from Implementation Plan]`. Run api-contract (if FE+BE), tdd-plan (slice-scoped), write code RED→GREEN, mongo-review (if Mongo touched), ui-verify. **Do NOT call `/git-commit` here — the orchestrator handles commits per Step 5.B's commit-order rule.** Return `=== FORK RESULT ===` with the slice's file paths + tests RED→GREEN counts + ui-verify result."
+   - **Spawn fork** with prompt: "Run the next slice of `/implement [task-id]` in autopilot mode. Slice scope: `[slice description from Implementation Plan]`. Run api-contract (if FE+BE), tdd-plan (slice-scoped), write code RED→GREEN, mongo-review (if Mongo touched), ui-verify. ui-verify FAIL is a block condition — auto-trigger `/debug` inside the fork; if `/debug` resolves to GREEN, continue and return `status: ok`; if not, return `status: blocked` with the diagnosis. Return `=== FORK RESULT ===` with tests RED→GREEN counts + ui-verify result. **Do NOT commit inside this fork — the orchestrator runs `/code-review` → `/testing` → `/git-commit` after all slices complete, in dependency order per Step 5.B's commit-order rule.**"
    - When fork returns: orchestrator reads the result. On `blocked` → surface the diagnosis to user (block condition #3). On `ok` → emit slice phase-boundary 1-liner and continue immediately.
-   - Update state file with each slice's file list before spawning the next slice.
+   - Update state file with the slice's progress before spawning the next slice.
 
-   **Why fork-per-slice and not fork-per-task:** a single task can have 4–8 slices, each heavy (RED tests + code + GREEN tests + ui-verify). One mega-fork would bloat its own context near task end. Per-slice forks keep each fork small enough that the slice's context is fully evicted from main session by the time it returns.
+   **Why fork-per-slice and not fork-per-task:** a single task can have 4–8 slices, each heavy (RED tests + code + GREEN tests + ui-verify). One mega-fork would bloat its own context near task end. Per-slice forks keep each fork small enough that the slice's context is fully evicted from main session by the time it returns. Commit happens once per task (Step 7) after `/code-review` + `/testing` confirm the task as a whole is shippable — not per-slice.
 
-   **Why commits move out of the slice fork:** in pipeline mode, commit order depends on review of the *previous* task. Letting the slice fork commit immediately would break that ordering. Commits are now collected by the orchestrator and applied in 5.B-step "commit-and-retro" below.
+4. **/code-review** — **spawn fork** (background in pipeline mode, foreground in plain sequential). Fork prompt: "Run `/code-review [task-id]` in autopilot mode. All slices for this task are complete and tests are GREEN per the implement forks. Run Stage 1 spec compliance against `[task-id]-requirement.md` ACs, then Stage 2 code quality on `git diff main...HEAD`. Auto-handoff Critical findings to `/issue` per the command's Step 3d. Return `=== FORK RESULT ===` with `result: APPROVED | REQUEST CHANGES`, count of Critical/Minor/Suggestion findings, and which ACs flipped to ✓ vs ✗."
 
-4. **/code-review** — **spawn fork**. Fork prompt: "Run `/code-review [task-id]` in autopilot mode. Read the task's requirement doc + diff (uncommitted changes from this task's slices, listed in state). Run two-stage review (spec compliance → code quality). Per `.claude/rules/superpowers.md`, missing impact-map / risk-register coverage = automatic Critical. Return `=== FORK RESULT ===` with `status: ok` (review passed, no Critical findings), `status: blocked` (Critical findings — include diagnosis + AC #s in `summary`), or `status: ambig` (findings unclear, need human read)."
+   On `REQUEST CHANGES` with Critical findings → `/code-review` already triggered `/issue` for each Critical; orchestrator reads those `/issue` results from the fork's summary, treats them as part of this stage, then re-spawns `/code-review` once. Two consecutive REQUEST CHANGES → block per autopilot rule (ambiguity → escalate via `ask-choice`).
 
-5. **commit-and-retro** — orchestrator-owned, never spawned:
-   - Stage all task files via `git add` (explicit file list from slices, never `git add -A`).
-   - Build commit message: `[task-id] type: <one-liner from requirement doc>` ≤ 72 chars (per `.claude/commands/git-commit.md` rules).
-   - `git commit` (let pre-commit hooks run; do not pass `--no-verify`).
-   - Then `/retro-task` (inline — short summary writer; invoke `Skill("brain-capture")` only if a lesson surfaced).
+5. **/testing** — **spawn fork** (background in pipeline mode, foreground in plain sequential). Fork prompt: "Run `/testing [task-id]` in autopilot mode. Cross-check every AC against the test plan in `[task-id]-requirement.md`, run unit + integration + E2E (or `mcp__claude-in-chrome__*` smoke walkthrough for FE), then full regression. On a failing test, invoke `/issue [task-id] [description]` exactly once per distinct bug — `/issue` will TDD-fix and then auto-re-run `/testing` per its Step 6. If a re-run still fails on the same symptom, escalate to `/debug` instead of looping `/issue` a second time. Return `=== FORK RESULT ===` with `production_readiness: PASS | FAIL`, AC coverage table, and `issue_count` (number of `/issue` round-trips this run)."
+
+   On `FAIL` after one `/issue` cycle → block (this is the 'ui-verify fail' equivalent for the testing stage).
+
+6. **/retro-task** — inline. Short summary writer; invoke `Skill("brain-capture")` only if a lesson surfaced from any slice or issue. Optional — skip if no notable lesson and the user's intent was speed-focused.
+
+7. **/git-commit** — inline (small writer, but block on destructive ops per autopilot rule). Orchestrator-owned: stage by explicit file list (no `git add -A`), draft commit message `[task-id] type: ...` ≤ 72 chars, commit, run finishing-branch flow. Retro-doc absence at this point only warns; does not block. The final commit SHA is the task's deliverable. **Commit ordering** is gated by Step 5.B's commit-order rule — in pipeline mode, the commit runs only when `/code-review` + `/testing` for this task have both returned PASS *and* every earlier task is already committed.
+
+   **Why commits move out of the slice fork:** in pipeline mode, commit order depends on review + testing of the *previous* task. Letting the slice fork commit immediately would break that ordering. Commits are now collected by the orchestrator and applied via Step 7 (`/git-commit`) once both `/code-review` and `/testing` for the task return PASS.
 
 #### Sub-mode A — Plain sequential (no pipeline)
 
-Used when `pipeline_mode = false` (N=1, user hint, or risk-tagged). For each task in dependency order:
+Used when `pipeline_mode = false` (N=1, user hint, or risk-tagged). For each task in dependency order, the seven per-task steps above run strictly serially:
 
 ```
 1. /requirement (fork)
 2. local-run (inline)
 3. /implement per slice (forks, in order)
-4. /code-review (fork)              ← if blocked → /issue, retry from Step 4
-5. commit-and-retro
-6. phase boundary → next task
+4. /code-review (fork)         ← if REQUEST CHANGES → /issue, retry once
+5. /testing (fork)             ← if FAIL → /issue once, retry; second FAIL → block
+6. /retro-task (inline, optional)
+7. /git-commit (inline)
+8. phase boundary → next task
 ```
 
-Strictly serial. No background work.
+No background work.
 
 #### Sub-mode B — Pipelined sequential (`pipeline_mode = true`)
 
 After T_N's slices finish, the orchestrator does TWO things in the same turn:
 
-1. **Spawn `/code-review T_N`** as a background fork. Record `review_forks[T_N] = { fork_id, status: "pending", started_at: now }` in state. Append `T_N` to `ready_to_commit` (commit is held).
+1. **Spawn `/code-review T_N` AND `/testing T_N`** as background forks. Record `review_forks[T_N] = { fork_id, status: "pending", started_at: now }` and `testing_forks[T_N]` likewise in state. Append `T_N` to `ready_to_commit` (commit is held).
 2. **Continue main flow**: `/requirement T_{N+1}` (fork) → `local-run` → `/implement T_{N+1}` per slice (forks).
 
-The notification for the review fork arrives in a later turn as a user-role message. Whenever the orchestrator gets a review notification, it updates `review_forks[T_N].status` to `pass` / `fail` (`fail` = `status: blocked` from the fork) and records the result.
+Notifications for review and testing forks arrive in later turns as user-role messages. Whenever the orchestrator gets a notification, it updates the corresponding `*_forks[T_N].status` to `pass` / `fail` (`fail` = `status: blocked` from the fork) and records the result.
 
 **Commit-order rule (the load-bearing invariant of pipeline mode):**
 
-- `T_K` may commit only when `review_forks[T_K].status == "pass"` AND every earlier `T_J` (J < K) is already committed.
-- After T_{N+1}'s slices finish, **before** spawning review T_{N+1}, the orchestrator drains `ready_to_commit` greedily in dependency order:
+- `T_K` may commit only when `review_forks[T_K].status == "pass"` AND `testing_forks[T_K].status == "pass"` AND every earlier `T_J` (J < K) is already committed.
+- After T_{N+1}'s slices finish, **before** spawning review/testing T_{N+1}, the orchestrator drains `ready_to_commit` greedily in dependency order:
   - For each `T_K` at the head of `ready_to_commit`:
-    - If `review_forks[T_K].status == "pass"` → run commit-and-retro for T_K, remove from `ready_to_commit`.
-    - If `review_forks[T_K].status == "pending"` → wait for the next review notification turn (the orchestrator does NOT busy-loop; it returns to user with a status line and resumes when the notification lands).
-    - If `review_forks[T_K].status == "fail"` → BLOCK pipeline. Surface review diagnosis. Open `/issue T_K` with the failed AC and review summary. T_{N+1} (and any later tasks that already finished implementing) stay in `ready_to_commit` until T_K is fixed and re-reviewed pass.
-- Then spawn review T_{N+1} and continue with T_{N+2}'s `/requirement`.
+    - If both `review` and `testing` forks for T_K are `pass` → run Step 7 (`/git-commit`) + Step 6 (`/retro-task`) for T_K, remove from `ready_to_commit`.
+    - If either is `pending` → wait for the next notification turn (the orchestrator does NOT busy-loop; it returns to user with a status line and resumes when the notification lands).
+    - If either is `fail` → BLOCK pipeline. Surface diagnosis. Open `/issue T_K` with the failed AC / failing test. T_{N+1} (and any later tasks that already finished implementing) stay in `ready_to_commit` until T_K is fixed and re-reviewed/re-tested pass.
+- Then spawn review/testing T_{N+1} and continue with T_{N+2}'s `/requirement`.
 
-**End-of-sprint drain:** after the last task's slices finish, the orchestrator stops starting new requirements and drains `ready_to_commit` to empty (waiting on each remaining review notification, blocking on any fail).
+**End-of-sprint drain:** after the last task's slices finish, the orchestrator stops starting new requirements and drains `ready_to_commit` to empty (waiting on each remaining notification, blocking on any fail).
 
 **Pipeline status lines (additive to the standard ✓/⏳/✗/?):**
 
 ```
-> dev: pipeline T002 implement done; T001 review pending  ⏳
-> dev: pipeline T001 review PASS; commit + retro  ✓
-> dev: pipeline T001 review FAIL on AC3; opening /issue, T002 commit held  ✗
+> dev: pipeline T002 implement done; T001 review+testing pending  ⏳
+> dev: pipeline T001 review PASS testing PASS; commit + retro     ✓
+> dev: pipeline T001 testing FAIL on AC3; opening /issue, T002 hold  ✗
 ```
 
 **Risk handling at runtime:** if a task carrying a risk flag is encountered mid-sprint (e.g. user added one after dispatch), the orchestrator does NOT continue in pipeline mode for that task — it drains `ready_to_commit` first, runs the risk-tagged task in plain sequential, then resumes pipeline for subsequent non-risk tasks.
 
-Update state after every transition (slice done, requirement done, review notification received, commit landed): `task_id`, `completed_steps`, `review_forks`, `ready_to_commit`.
+Update state after every transition (slice done, requirement done, review/testing notification received, commit landed): `task_id`, `completed_steps`, `review_forks`, `testing_forks`, `ready_to_commit`.
 
 ---
 
@@ -446,19 +463,22 @@ Usage:
 Pipeline (5 stages):
   1. Inception      workspace-detect → reverse-engineer (if brownfield)
                     → /discovery
-  2. Sprint plan    /new-sprint
+  2. Sprint plan    /new-sprint  (also scaffolds all task dirs — no code reading)
   3. Per-task work  Dispatch decision → one of:
                     • parallel: /run-tasks [all task-ids]
-                    • sequential+pipeline: per task, /requirement →
-                      /implement → spawn /code-review fork (background)
-                      → start next task's /requirement+/implement while
-                      the review runs → drain commits in dep order
-                    • plain sequential: /requirement → /implement →
-                      /code-review → commit → /retro-task per task
-                    Picks parallel when ≥ 2 tasks share a tier (no risk).
+                    • sequential+pipeline (8-command spec, per task):
+                        /requirement → /implement → spawn /code-review +
+                        /testing forks (background) → start next task's
+                        /requirement + /implement while they run → drain
+                        commits in dep order once review+testing PASS
+                    • plain sequential (8-command spec, strictly serial):
+                        /requirement → /implement → /code-review →
+                        /testing (with /issue loop) → /retro-task → /git-commit
+                    Picks parallel when ≥ 2 tasks share a tier and no
+                    risk flags (auth/payment/migration).
                     Picks pipeline when sequential, N ≥ 2, no risk flags.
                     Picks plain sequential when N=1, user-paced, or
-                    risk-tagged (auth/payment/migration).
+                    risk-tagged.
   4. Sprint close   /retro-sprint
   5. PR (if requested in intent)
 
@@ -467,9 +487,9 @@ Blocks ONLY on 3 conditions:
   • Destructive op   — push to main, drop collection, force-push, rm -rf
   • UI verify fail   — auto-/debug first, block only if unresolved
 
-Pipeline mode adds one effective block: a code-review FAIL on T_N holds
-T_{N+1}'s commit (and any later finished task) until /issue closes T_N.
-Implement of later tasks keeps going; only commits are gated.
+Pipeline mode adds one effective block: a code-review or testing FAIL on
+T_N holds T_{N+1}'s commit (and any later finished task) until /issue
+closes T_N. Implement of later tasks keeps going; only commits are gated.
 
 Phase boundaries emit a brief summary and continue automatically. The
 pipeline does not pause for "looks good?" prompts — if there is nothing
@@ -515,7 +535,7 @@ replace them.
 - ❌ **Pipeline mode: predicting a fork's review outcome** before its notification — never write "review will pass" or pre-fill commit text. Status only
 - ❌ **Auto-pausing at the 30-min budget** — the user explicitly chose soft hint. Past 30 min, keep reporting elapsed time; do not pause unless the user types `pause`
 - ❌ **Hiding the budget marker after 30 min "to avoid noise"** — the marker is the one signal the user opted into. Keep emitting at every phase boundary
-- ❌ **Letting the slice fork run `/git-commit`** — in pipeline mode, commits move to the orchestrator (commit-and-retro step) so commit order can match review order. The slice fork only writes code + ui-verify
+- ❌ **Letting the slice fork run `/git-commit`** — in pipeline mode, commits move to the orchestrator (Step 7 `/git-commit`) so commit order can match review + testing order. The slice fork only writes code + ui-verify
 
 ---
 
