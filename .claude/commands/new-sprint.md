@@ -114,7 +114,7 @@ If a discovery doc was found, cross-check proposed tasks against it:
 - **In-scope items** — which task covers each? Flag uncovered items.
 - **User journeys** — which task delivers each To-Be journey end-to-end? Flag uncovered journeys.
 
-**Metric-instrumentation gate** (per `.claude/rules/metric-instrumentation.md` Gate 1): every Success Metric in the sprint overview MUST have a Measurement cell that names a concrete data source (audit row / structured log line / DB column / counter) AND identifies which task produces the artifact. Block the table if any Measurement is "TBD", "manual check", or vague — either define the artifact or remove the metric.
+**Metric-instrumentation gate** (per `.claude/rules/metric-instrumentation.md` Gate 1): every Success Metric in the sprint overview MUST have a Measurement cell that names a concrete data source (audit row / structured log line / DB column / counter) AND identifies which task produces the artifact. Block the table if any Measurement is "TBD" or vague. **One-shot manual count is allowed** for v1 metrics only when the cell explicitly names the artifact/condition AND records ownership + a debt note for replacing it with an instrumented source next sprint (e.g. `manual count: rows in X collection where Y, owner: @name, debt: instrument in SP[N+1]`).
 
 ```
 Coverage check:

@@ -1,6 +1,6 @@
 ---
 description: Manual UI verification before commit — start dev server, click every AC path in real browser, capture evidence, block /git-commit on failure
-allowed-tools: Read, Grep, Glob, Bash(npm *), Bash(npx *), Bash(yarn *), Bash(pnpm *), Bash(go run:*), Bash(python *), Bash(curl *), Bash(lsof:*), Bash(mkdir:*), Bash(ls:*)
+allowed-tools: Read, Grep, Glob, Bash(npm *), Bash(npx *), Bash(yarn *), Bash(pnpm *), Bash(go run:*), Bash(go test:*), Bash(go vet:*), Bash(pytest:*), Bash(ruff:*), Bash(python *), Bash(curl *), Bash(lsof:*), Bash(mkdir:*), Bash(ls:*)
 disable-model-invocation: false
 ---
 
@@ -32,13 +32,22 @@ If skipping, state explicitly: "ui-verify skipped — no UI surface touched."
 
 ## Step 1 — Start the dev server
 
-Detect the stack from `package.json` and start the right command:
+First, detect the package manager from lockfile (in priority order):
+
+| Lockfile present | `[pkg]` |
+|---|---|
+| `pnpm-lock.yaml` | `pnpm` |
+| `yarn.lock` | `yarn` |
+| `package-lock.json` | `npm` |
+| none | fall back to `npm` |
+
+Then detect the stack from `package.json` and start the right command (substitute `[pkg]`):
 
 | Stack signal | Start command | Default URL |
 |---|---|---|
-| `nuxt` in deps | `npm run dev` | `http://localhost:3000` |
-| `next` in deps | `npm run dev` | `http://localhost:3000` |
-| `vite` + `vue` | `npm run dev` | `http://localhost:5173` |
+| `nuxt` in deps | `[pkg] run dev` | `http://localhost:3000` |
+| `next` in deps | `[pkg] run dev` | `http://localhost:3000` |
+| `vite` + `vue` | `[pkg] run dev` | `http://localhost:5173` |
 | Backend separate | `go run ./cmd/api` or `python -m app` | per project README |
 
 Run dev server in **background**. Wait for "ready" log line. If port collides, `lsof -i :PORT` and resolve before continuing.
@@ -129,14 +138,14 @@ Failures here → fix before commit, not "later."
 
 ## Step 6 — Run automated suite alongside
 
-Manual UI verify does NOT replace tests. Run:
+Manual UI verify does NOT replace tests. Use the `[pkg]` detected in Step 1; run:
 
 ```bash
 # FE
-npm run test          # unit
-npm run test:e2e      # if Playwright/Cypress configured
-npm run typecheck     # tsc --noEmit
-npm run lint          # eslint
+[pkg] run test          # unit
+[pkg] run test:e2e      # if Playwright/Cypress configured
+[pkg] run typecheck     # tsc --noEmit
+[pkg] run lint          # eslint
 
 # BE (Go)
 go test ./...

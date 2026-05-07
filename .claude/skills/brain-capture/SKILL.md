@@ -165,6 +165,7 @@ The MOC for the type lives in `brain/00-MOC/`:
 - PAT → patterns by area (`MOC-Frontend.md`, `MOC-Backend.md`, `MOC-QA.md`)
 - DEC → `MOC-Decisions.md`
 - GLO → glossary itself acts as MOC (or `MOC-Glossary.md` if exists)
+- CON → `MOC-Concepts.md`
 
 Add a single line under the right section:
 

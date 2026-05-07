@@ -84,7 +84,7 @@ Check every changed file against requirement + design docs:
 **Impact-map coverage**
 - If the requirement doc has an `## Impact Map` section: every Tier-1 row appears in the diff (or has a documented reason for being excluded).
 - Tier-3 rows (external consumers) → check that the diff includes the contract-versioning artifact promised (new endpoint version, Sunset header, OpenAPI bump, schema migration with rolling read).
-- Missing impact-map for a task that obviously touched existing code → add to Critical findings; the missing artifact is itself a review failure.
+- **Missing impact-map → Critical** ONLY when the change meets the same trigger as `/implement` Step 1e (non-trivial existing surface, shared contracts, or external-consumer impact). For purely local fixes explicitly allowed to skip in `/issue` Step 2, mark Impact-map coverage as N/A with rationale instead of Critical.
 
 **Spec verdict:** `PASS` (all ACs covered, design matched, impact-map honored) or `FAIL` (list gaps).
 If FAIL → stop. Fix spec gaps before proceeding to Stage 2.
@@ -126,11 +126,13 @@ If context7 is not available, proceed using codebase patterns and existing knowl
 - Empty states, null/undefined, boundary values handled?
 - Errors surfaced to the user — not silently swallowed?
 
-**Risk-register evidence (only if a `## Risk Register` section exists)**
-- Every "Must-mitigate-before-merge = Yes" row has its Verification column filled with concrete evidence (terminal output, test name + green, EXPLAIN plan, k6 numbers).
-- Rollback plans are present for high-severity rows.
-- 🔴🔴 No-rollback rows (irreversible: column drop, document deletion) → require sign-off note in the review.
-- Missing verification evidence on a Must-mitigate row → automatic Critical finding.
+**Risk-register evidence**
+- **Required-but-missing → Critical:** if `/implement` Step 1e triggers apply (migration · auth · payment · public API · removed cron · destructive/irreversible op) but no `## Risk Register` section exists in the requirement doc → automatic Critical finding.
+- If a `## Risk Register` section exists, then:
+  - Every "Must-mitigate-before-merge = Yes" row has its Verification column filled with concrete evidence (terminal output, test name + green, EXPLAIN plan, k6 numbers).
+  - Rollback plans are present for high-severity rows.
+  - 🔴🔴 No-rollback rows (irreversible: column drop, document deletion) → require sign-off note in the review.
+  - Missing verification evidence on a Must-mitigate row → automatic Critical finding.
 
 
 ---

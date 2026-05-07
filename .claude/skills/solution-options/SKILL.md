@@ -110,9 +110,13 @@ Anti-pattern: "Option 2 because it has many pros" → that's not a reason, list 
 
 If the decision affects requirements, architecture, or user-visible behavior:
 
+**Manual mode:**
+
 ```
 Invoke Skill("ask-choice") to confirm the recommendation with the user.
 ```
+
+**Autopilot mode:** do NOT invoke `ask-choice` directly. Emit `?` in the status line and return so the orchestrator can batch ambiguities (per `.claude/rules/autonomous-mode.md`).
 
 If the decision is purely technical and reversible, proceed with the recommended option without asking.
 

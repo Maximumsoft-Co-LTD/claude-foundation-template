@@ -92,7 +92,7 @@ The caller command reads this and decides.
 
 Per `.claude/rules/autonomous-mode.md`:
 - **Manual mode**: emit frame + confidence + next-step hint, return to caller.
-- **Autopilot mode**: same — this skill never blocks; flags `?` only when confidence < 70%.
+- **Autopilot mode**: same — this skill never blocks; flags `?` when confidence < 90% (or `unknowns` is non-empty) so the orchestrator can batch them via `ask-choice`.
 
 ## Output (autopilot status line — required)
 

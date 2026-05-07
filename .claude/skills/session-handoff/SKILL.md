@@ -1,6 +1,6 @@
 ---
 description: Serialize current session state into a handoff doc so the next session (or another engineer) can resume without cold start
-allowed-tools: Read, Grep, Glob, Edit, Write, Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(ls:*), Bash(cat:*)
+allowed-tools: Read, Grep, Glob, Edit, Write, Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git branch:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(ls:*), Bash(cat:*)
 disable-model-invocation: false
 ---
 

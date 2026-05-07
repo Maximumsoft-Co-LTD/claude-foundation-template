@@ -42,6 +42,44 @@ DESTRUCTIVE_BASH_PATTERNS = (
     r"\bTRUNCATE\b",
 )
 
+# Patterns that strongly indicate a secret. Replaced with [REDACTED] before
+# anything is written to docs/, since audit files are committed.
+REDACT_PATTERNS = (
+    # key=value / key: value forms (token, api_key, password, secret, etc.)
+    re.compile(
+        r"((?:api[-_]?key|access[-_]?token|auth[-_]?token|bearer[-_]?token|"
+        r"refresh[-_]?token|secret|password|passwd|pwd|client[-_]?secret|"
+        r"private[-_]?key)[\"']?\s*[:=]\s*[\"']?)"
+        r"([^\s\"'&]+)",
+        re.IGNORECASE,
+    ),
+    # HTTP Authorization headers: "Bearer <token>" / "Basic <token>"
+    re.compile(r"(Authorization\s*:\s*(?:Bearer|Basic|Token)\s+)(\S+)", re.IGNORECASE),
+    re.compile(r"\b(Bearer\s+)([A-Za-z0-9._\-]{20,})", re.IGNORECASE),
+    # URI credentials: scheme://user:password@host
+    re.compile(r"([a-z][a-z0-9+.\-]*://[^:\s/@]+:)([^@\s]+)(@)", re.IGNORECASE),
+    # AWS access key IDs
+    re.compile(r"\b(AKIA[0-9A-Z]{16})\b"),
+    # Generic high-entropy hex blobs ≥ 32 chars (covers many tokens)
+    re.compile(r"\b([A-Fa-f0-9]{32,})\b"),
+    # JWT-looking strings (three base64url segments)
+    re.compile(r"\b(eyJ[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+)\b"),
+)
+
+
+def redact(value: str) -> str:
+    if not value:
+        return value
+    out = value
+    for pat in REDACT_PATTERNS:
+        if pat.groups >= 3:
+            out = pat.sub(r"\1[REDACTED]\3", out)
+        elif pat.groups == 2:
+            out = pat.sub(r"\1[REDACTED]", out)
+        else:
+            out = pat.sub("[REDACTED]", out)
+    return out
+
 
 def now_iso() -> str:
     return dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -79,7 +117,7 @@ def audit_path(sprint_id: str, task_id: str) -> Path:
 def append_entry(path: Path, header: str, fields: dict[str, str]) -> None:
     block = [f"## {header}", f"**Timestamp**: {now_iso()}"]
     for k, v in fields.items():
-        v_escaped = v.replace("\n", "\\n")
+        v_escaped = redact(v).replace("\n", "\\n")
         block.append(f"**{k}**: \"{v_escaped}\"")
     block.append("---\n")
     with path.open("a", encoding="utf-8") as f:
@@ -91,11 +129,11 @@ def is_destructive_bash(cmd: str) -> bool:
 
 
 def main() -> None:
+    raw = sys.stdin.read()
     try:
-        raw = sys.stdin.read()
         payload = json.loads(raw) if raw else {}
-    except Exception:
-        sys.exit(0)
+    except json.JSONDecodeError:
+        payload = {}
 
     event = payload.get("hook_event_name", "")
     branch = git_branch()
