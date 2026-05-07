@@ -90,9 +90,11 @@ Key dimensions:
 
 ## Phase 4 — Implementation
 
-1. **Write failing test** that reproduces the bug.
-2. **Run it — confirm it FAILS** with an expected error, not a setup crash. Never skip this step.
-   - Passes immediately? You are testing existing behavior, not the bug. Fix the test first.
+**Use the `bug-repro` skill** for steps 1–2 — it produces the failing test artifact (minimal repro, correct layer, verified RED with the bug's exact signature, regression row appended). Improvising the test inline misses the artifact discipline; use the skill.
+
+1. **Write failing test** via `bug-repro` — it locates the right test layer and writes the test asserting EXPECTED behavior (per the contract from Phase 1).
+2. **RED verified** by the skill — test fails with the bug's signature, not a setup crash.
+   - Passes immediately? `bug-repro` flags this as repro-wrong; fix the test first.
 3. **Implement single fix** — address root cause, ONE change. No "while I'm here" improvements.
 4. **Verify fix** — test passes? No regressions? Issue resolved?
 5. **If fix doesn't work and attempt count ≥ 3 → STOP:**

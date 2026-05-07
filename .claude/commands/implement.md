@@ -141,6 +141,32 @@ Store as `SCRUM_HIERARCHY`.
 
 ---
 
+## Step 1e — Impact map and risk register (gates the dangerous-change cases)
+
+Before writing any test or code, assess what the implementation will touch and what could go wrong.
+
+**Impact map (always run if the task touches non-trivial existing code):**
+- Invoke the `impact-map` skill with the change surface(s) extracted from the Implementation Plan (modified files, changed endpoints, new DB fields).
+- Skip if the task creates entirely new files with no existing callers (greenfield-within-brownfield).
+- The skill writes the table to the requirement doc and returns a `highest-risk` indicator.
+
+**Risk register (required when triggers below match):**
+Run `risk-register` if ANY of these apply (per the skill's Step 1 categories):
+- DB migrations / schema changes / data backfill (`HAS_MIGRATION` flag)
+- Auth / session / permission changes
+- Payment / billing / money calculation
+- Public API surface changes (Tier-3 row in impact-map)
+- Removing a cron / queue consumer / healthcheck
+- Impact-map returned any 🔴 row
+
+The risk register output drives:
+- "Must-mitigate-before-merge" rows → verification evidence required during Step 4
+- Rollback plans → referenced if `/code-review` flags a critical issue
+
+If `impact-map` showed Tier-3 (external consumer) and there is no contract-versioning strategy, **STOP** — escalate via `solution-options` before writing code. Do not silently break a public API.
+
+---
+
 ## Step 2 — Write failing tests
 
 **Single-owner-end-to-end:** Per `.claude/rules/parallel-work.md`, one task is owned by one agent (or the main session) end-to-end. Do NOT split FE and BE for the same task between two agents — layer-split agents produce contracts that don't match. The `HAS_FE` / `HAS_BE` flags determine which test plans to write, not how many agents to spawn.
