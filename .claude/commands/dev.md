@@ -42,22 +42,30 @@ Arguments:
   │           └─ may invoke: vertical-slice, solution-options
   │  ════ phase boundary ════
   │
-  ├─ STAGE 3 — Per-task loop
-  │    For each task in sprint:
-  │      3.1  /requirement (autopilot mode)
-  │             └─ scope-check, api-contract (cond), tdd-plan, nfr-plan (cond)
-  │      3.2  Skill("local-run")                  # ensure stack up
-  │      3.3  /implement (autopilot mode)
-  │             └─ for each slice:
-  │                  api-contract (cond)
-  │                  tdd-plan (slice scope)
-  │                  write code (RED → GREEN)
-  │                  mongo-review (cond)
-  │                  ui-verify        [BLOCK on FAIL]
-  │                  /git-commit
-  │                  ════ phase boundary (slice) ════
-  │      3.4  /retro-task (autopilot mode)
-  │             └─ brain-capture
+  ├─ STAGE 3 — Per-task execution
+  │    3.0  Dispatch decision (parallel vs sequential)
+  │           │
+  │           ├─ Parallel path (≥ 2 tasks share a tier, no risk flags):
+  │           │    3.A  /run-tasks [all task-ids]
+  │           │           └─ tier batching, plan-review gate, 3-agent pipeline
+  │           │              per task, retro-task — all delegated
+  │           │
+  │           └─ Sequential path (N=1, all-chained, risk-tagged, or user-paced):
+  │                For each task in dep order:
+  │                  3.B.1  /requirement (autopilot)
+  │                           └─ scope-check, api-contract (cond), tdd-plan, nfr-plan (cond)
+  │                  3.B.2  Skill("local-run")
+  │                  3.B.3  /implement (autopilot)
+  │                           └─ for each slice:
+  │                                api-contract (cond)
+  │                                tdd-plan (slice scope)
+  │                                write code (RED → GREEN)
+  │                                mongo-review (cond)
+  │                                ui-verify        [BLOCK on FAIL]
+  │                                /git-commit
+  │                                ════ phase boundary (slice) ════
+  │                  3.B.4  /retro-task (autopilot)
+  │                           └─ brain-capture
   │
   ├─ STAGE 4 — Sprint close
   │    4.1  /retro-sprint (autopilot mode)
@@ -137,7 +145,54 @@ Update state: `current_stage = "3"`, `sprint_id = "[SP-N]"`.
 
 ---
 
-## Step 5 — Run STAGE 3 (Per-task loop)
+## Step 5 — Run STAGE 3 (Per-task execution)
+
+### Step 5.0 — Dispatch decision (parallel vs sequential)
+
+Read `docs/BACKLOG.md` + sprint overview. Compute:
+
+- `N` = number of non-done tasks in this sprint
+- `MAX_TIER_WIDTH` = largest count of independent tasks at any tier (from `depends_on` graph)
+- `RISK_FLAGS` = true if any non-done task is tagged auth / payment / migration / removed cron / public-API change (per `risk-register` taxonomy; check task title/tags in BACKLOG)
+- `USER_HINT` = original intent contains an explicit pacing word: `ทีละ task` / `step by step` / `one by one` / `ดู phase boundary`
+
+Choose mode (first match wins):
+
+| Condition | Mode | Why |
+|---|---|---|
+| `N == 1` | sequential | nothing to parallelize |
+| `MAX_TIER_WIDTH == 1` (all chained) | sequential | nothing to parallelize |
+| `USER_HINT == true` | sequential | honor explicit user pacing request |
+| `RISK_FLAGS == true` | sequential | per-slice ui-verify boundaries are the safety net for risk-tagged work |
+| else (≥ 2 tasks share a tier, no risk flags) | **parallel** | real speedup, low conflict risk |
+
+Emit one status line stating the choice + reason:
+
+```
+> dev: dispatch=parallel via /run-tasks (3 tasks, 2 tiers)  ✓
+> dev: dispatch=sequential (auth task present, per-slice gates needed)  ✓
+> dev: dispatch=sequential (1 task)  ✓
+```
+
+Then branch to 5.A or 5.B.
+
+### Step 5.A — Parallel path (delegate to /run-tasks)
+
+1. Invoke `/run-tasks [task-id-1] [task-id-2] ...` with every non-done task in the sprint.
+2. `/run-tasks` owns: tier batching, Phase 1 plan-review gate, 3-agent pipeline per task (Implementer → Spec Reviewer → Quality Reviewer), per-task retro.
+3. `/dev` keeps `AUTOPILOT=1` exported so downstream skills inside `/run-tasks` agents emit status lines per `autonomous-mode.md`.
+4. **Single Stage 3 phase boundary** at end of `/run-tasks` — per-slice boundaries collapse into per-task checkpoints printed inside `/run-tasks`.
+
+Surface the tradeoff in the boundary summary:
+
+```
+parallel mode: per-slice ui-verify boundaries replaced by /run-tasks
+plan-review gate (after Phase 1) + per-task checkpoints (after Phase 2 per task).
+```
+
+Update state: append completed step IDs as `/run-tasks` checkpoints arrive (parse from its output). Then proceed to Stage 4.
+
+### Step 5.B — Sequential path (per-task for-loop)
 
 For each task in the sprint's BACKLOG (in dependency order):
 
@@ -238,7 +293,11 @@ Pipeline (5 stages):
   1. Inception      workspace-detect → reverse-engineer (if brownfield)
                     → /discovery
   2. Sprint plan    /new-sprint
-  3. Per-task loop  /requirement → /implement (per slice) → /retro-task
+  3. Per-task work  Dispatch decision → either:
+                    • parallel: /run-tasks [all task-ids]
+                    • sequential: /requirement → /implement → /retro-task per task
+                    Picks parallel when ≥ 2 tasks share a tier and no
+                    risk flags (auth/payment/migration). Sequential otherwise.
   4. Sprint close   /retro-sprint
   5. PR (if requested in intent)
 
@@ -265,6 +324,8 @@ unchanged for manual control. /dev does NOT replace them.
 - ❌ Continuing past a `?` flag silently — orchestrator must batch + ask
 - ❌ Multiple `ask-choice` invocations in a row — batch into one (max 4 questions per AskUserQuestion)
 - ❌ Skipping phase boundary "to save time" — phase boundaries are the user's checkpoint UX
+- ❌ Forcing parallel mode when a task is risk-tagged (auth/payment/migration) — per-slice ui-verify boundaries are the safety net; parallel collapses them
+- ❌ Forcing sequential mode "to be safe" when 4 independent CRUD tasks share a tier — wastes the speedup that parallel was designed for
 
 ---
 
