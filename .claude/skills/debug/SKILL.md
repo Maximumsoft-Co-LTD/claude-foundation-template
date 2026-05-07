@@ -1,113 +1,208 @@
 ---
-description: Systematic debugging protocol — reproduce, isolate, hypothesize, verify, fix
-allowed-tools: Read, Grep, Bash(git *), Bash(npm *), Bash(go *), Bash(python *), Bash(cat *)
+description: Root-cause investigation protocol — reproduce, isolate, hypothesize, verify, fix with TDD — never workaround
+allowed-tools: Read, Grep, Glob, Edit, Bash(git:*), Bash(go test:*), Bash(npm test:*), Bash(npm run:*), Bash(pytest:*), Bash(curl:*), Bash(mongosh:*), Bash(jq:*), Bash(cat:*)
 disable-model-invocation: false
 ---
 
-# /debug
-Workflow position: **during /implement or /testing → START → continue or /issue**
+# debug
 
-Structured debugging session for a failing test, runtime error, or unexpected behavior. Produces a root-cause finding, not just a workaround.
-Arguments: `[task-id] [symptom]`  — e.g. `SP1-T003 "user.save() throws 500 when email contains +"`
+Workflow position: **invoked from `/issue`, `/debug` command, or mid-`/implement` when a test fails or behavior is wrong**
 
----
+Produces a root cause, not a workaround. Distinct from "patching until green."
 
-## Step 1 — Reproduce
-
-Parse `[task-id]` and `[symptom]`.
-
-**Goal: produce a minimal, deterministic reproduction.**
-
-1. Run the failing test or trigger the behavior: note exact error message, stack trace, exit code.
-2. If the error is non-deterministic → run 3 times. Document whether it's consistent or flaky.
-3. Confirm the failure exists on the current branch: `git stash && [reproduce] && git stash pop`
-4. If it passes on main → this is a regression introduced in this branch.
-
-Do NOT attempt a fix yet.
+Arguments: `[task-id] [symptom in quotes]` — e.g. `SP3-T012 "POST /things returns 500 when name has emoji"`
 
 ---
 
-## Step 2 — Narrow the scope
+## When to invoke
 
-Binary search the failure:
+- Test fails and the failure isn't an obvious typo
+- UI bug that `ui-verify` caught
+- 500 / unexpected response from API
+- Flaky test (passes sometimes)
+- Production / staging incident
 
-- Which layer fails first? (HTTP handler → service → repository → DB)
-- Which input triggers it? (try removing fields, using known-good values)
-- Does it fail with a fresh DB / clean state?
-- Does it fail with the minimal possible input?
-
-Write down the **smallest reproducible case** before continuing.
-
----
-
-## Step 3 — Read relevant code
-
-Read:
-- The failing test or error source
-- The function/method where the error originates
-- Any recently changed files in this task: `git diff main...HEAD --name-only`
-
-Do NOT read the entire codebase — stay within the call chain of the error.
-
-If stuck after reading 5 files → stop. Document what you know and ask the user for guidance. Do not retry the same approach.
+Skip:
+- Compile error from a typo in the line you just wrote — fix directly
+- Lint warning — just fix
 
 ---
 
-## Step 4 — Form and rank hypotheses
+## Step 1 — Reproduce minimally
 
-List 2–4 hypotheses for root cause, ranked by likelihood:
+Run the failing case. Record exactly:
 
 ```
-H1 (most likely): [hypothesis] — evidence: [what points to this]
-H2: [hypothesis] — evidence: [what points to this]
-H3: [hypothesis] — evidence: [what points to this]
+Command:    [the command]
+Exit code:  [N]
+Stderr:     [first 10 lines]
+Stack top:  [file:line]
 ```
 
-Test H1 first. Add a targeted log or assertion to confirm or disprove it. Do not fix — only verify.
+Run 3 times if non-deterministic. Note "consistent" vs "flaky."
+
+Confirm it actually fails on the current branch:
+
+```bash
+git stash && [reproduce] ; git stash pop
+```
+
+If passes on stash → the failure is from your uncommitted changes (good — small search space).
 
 ---
 
-## Step 5 — Confirm root cause
+## Step 2 — Shrink the input
 
-Once a hypothesis is confirmed:
+Binary-search the trigger:
+
+| Question | Action |
+|---|---|
+| Does it fail with empty input? | Try with `{}` body or empty form |
+| Does it fail with a known-good input? | Compare known-good vs failing |
+| Does it fail at boundary? | n=0, n=1, n=max |
+| Does it fail with charset weirdness? | emoji, RTL, NUL, very long string |
+
+Goal: a single-line repro:
 
 ```
-Root cause: [precise description]
+curl -X POST http://localhost:8080/api/things -d '{"name":"🦀"}' --> 500
+```
+
+If you can't reduce → step 3 anyway, but flag low confidence.
+
+---
+
+## Step 3 — Trace the path
+
+Read code in this order, stop when you have the suspect:
+
+1. Failing test or error source
+2. Function at the top of the stack
+3. Functions called by it (one level)
+4. Recently changed files in this branch: `git diff main...HEAD --name-only`
+
+Hard cap: **5 files**. If you've read 5 and still don't see it → step 4.
+
+---
+
+## Step 4 — Form 2–3 hypotheses
+
+```
+H1 (most likely): [hypothesis] — evidence: [what points here]
+H2:               [hypothesis] — evidence: [...]
+H3:               [hypothesis] — evidence: [...]
+```
+
+Rank by:
+1. Recency — code touched in this branch is suspect first
+2. Specificity — "that one regex" beats "something with parsing"
+3. Prior incidents — `grep -i "[symptom keyword]" brain/04-lessons/`
+
+---
+
+## Step 5 — Verify (do not fix yet)
+
+For H1, add a log or assertion that confirms or denies. Do NOT fix.
+
+Examples:
+- "If H1 is right, this `panic` should print before crash" → add log
+- "If H1 is right, body should be empty here" → add assertion
+- "If H1 is right, query returns 0 rows" → run query manually via mongosh
+
+Result is binary: H1 confirmed or denied. If denied → try H2.
+
+If all 3 denied → step 3 was incomplete; re-read with the new info.
+
+---
+
+## Step 6 — Document the root cause
+
+```
+Root cause: [precise — "json.Unmarshal silently drops 4-byte UTF-8 because struct tag uses string not []byte"]
 Location:   [file:line]
-Trigger:    [exact condition that causes the failure]
+Trigger:    [exact condition]
 Not caused by: [ruled-out hypotheses]
+Class:      [logic / state / concurrency / config / dependency]
 ```
 
 ---
 
-## Step 6 — Fix (TDD)
+## Step 7 — Fix (TDD)
 
-1. Write (or update) a test that **fails** for the root cause specifically.
-2. Implement the minimal fix.
-3. Confirm the new test passes.
-4. Run the full test suite — confirm no regressions.
+1. Write a test that reproduces this exact root cause. Run it. Confirm it FAILS.
+2. Implement minimal fix.
+3. Confirm the test PASSES.
+4. Run full suite. Confirm no regressions.
 
-Keep the fix minimal. Do not refactor surrounding code while fixing.
+The test from step 1 is non-negotiable — without it, the fix can regress next sprint and nobody notices.
 
 ---
 
-## Step 7 — Decide: inline fix or /issue
+## Step 8 — Capture lesson
 
-- **Simple fix (< 30 lines, no design impact)** → fix inline, continue `/implement` or `/testing`.
-- **Non-trivial fix (design change, cross-task impact, > 30 lines)** → run `/issue [task-id] [description]`.
+If the bug class might recur (anything except "obvious typo"):
+
+```
+Invoke Skill("brain-capture") with type=LES, source=from-bug.
+```
+
+The note prevents the same bug from happening to future-you.
+
+---
+
+## Step 9 — Decide scope
+
+| Fix size | Action |
+|---|---|
+| < 30 lines, no design impact | inline fix; continue current command |
+| Touches public API, > 30 lines, or breaks AC | invoke `/issue [task-id] [description]` to spin up a sub-task |
+| Cross-cutting (affects 3+ tasks) | STOP. This is its own task. Run `/new-sprint` add-task flow. |
 
 ---
 
 ## Output
 
 ```
-Root cause: [description]  |  Location: [file:line]
-Fix: [1-line summary]  |  Test added: yes/no
-
-Regressions: none / [N] caught and fixed
+debug: [task-id] — RESOLVED  /  ESCALATED
+Root cause: [1 line]
+Fix:        [1 line, file:line]
+Test added: yes (path/to/test) — was RED, now GREEN
+Regressions: 0 / [N caught and fixed]
+Brain note: LES-NNN  /  skipped (not recurring class)
 
 Next:
-  Simple fix → continue /implement or /testing [task-id]
-  Non-trivial → /issue [task-id] [description]
-  Unresolvable → document and ask user
+  RESOLVED → continue caller command (/implement, /testing, etc.)
+  ESCALATED → /issue [task-id] [description]
 ```
+
+---
+
+## Anti-patterns
+
+- ❌ Try-fix-try-fix loop without forming a hypothesis
+- ❌ Workaround that hides the symptom (`try / catch` around the bug)
+- ❌ Skipping the failing test — the regression test is the whole value
+- ❌ "Probably the framework, let me upgrade" without verification
+- ❌ Reading 20 files looking for inspiration
+
+---
+
+## Behavior in autopilot mode
+
+Per `.claude/rules/autonomous-mode.md`:
+- **Manual mode**: full root-cause + fix flow.
+- **Autopilot mode** (typically auto-invoked from `ui-verify` FAIL): same flow. If RESOLVED with regression test GREEN → emit `✓` and orchestrator continues. If unresolvable → BLOCK with diagnosis.
+
+## Output (autopilot status line — required)
+
+`> debug: ROOT [class] @ [file:line], fix [size]  [✓]` or `> debug: UNRESOLVED [hyp count] tested  [✗]`
+
+Examples:
+- `> debug: ROOT logic @ handlers/things.go:42, fix 5 lines  ✓`
+- `> debug: UNRESOLVED 3 hyps tested, escalating  ✗`
+
+---
+
+## Why this exists
+
+Debugging without protocol is gambling. The reproduce → narrow → hypothesize → verify cycle is dull but converges; "let me try things" diverges. The TDD requirement at step 7 turns each bug into a test that enforces the fix forever.

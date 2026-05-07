@@ -44,19 +44,25 @@ Do NOT implement the fix yet — that's Step 3.
 
 > context7 library doc lookup is included in `/debug` Phase 2 — it fires automatically during pattern analysis if the bug involves a library API.
 
+**Impact assessment** — once the root cause is located (what file/function/contract), invoke the `impact-map` skill scoped to that surface. The Tier-1/Tier-2/Tier-3 table tells you what else the fix might break. Skip only for purely local bugs (single function, no callers outside its own file/test).
+
 If stuck after 3 hypotheses → document the blocker and ask the user.
 
 ---
 
 ## Step 3 — Fix using TDD
 
-Follow `rules/testing.md` — Verify RED is mandatory before implementing:
+Follow `rules/testing.md` — Verify RED is mandatory before implementing.
 
-1. Write a **failing test** that reproduces the bug.
-2. **Run it — confirm it fails** (expected failure, not a setup error). Never skip this.
+**Use the `bug-repro` skill** to produce the failing test artifact (steps 1–2 below) — it captures Trigger / Observed / Expected / Contract, finds the minimal repro, picks the right layer, verifies RED with the exact bug signature, and appends a regression row to the requirement doc. Do NOT improvise the test inline when the skill exists for this purpose.
+
+1. Run `bug-repro` → emits a **failing test** that reproduces the bug at the lowest viable layer.
+2. **RED verified** by the skill (test fails with the bug's exact signature, not a setup error).
 3. Implement the minimal fix — ONE change, address root cause only.
 4. Run the full test suite — confirm all pass, 0 regressions.
 5. Keep the fix minimal. No "while I'm here" improvements.
+
+If the impact-map from Step 2 had any 🔴 row → before merging the fix, also run `risk-register` to plan mitigation/rollback for the affected surfaces.
 
 
 ---
