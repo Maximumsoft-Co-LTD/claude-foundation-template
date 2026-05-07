@@ -48,7 +48,7 @@ B) Continue to /new-sprint
 
 ```
 Slice S2 done: callback handler + session creation
-Tests: 4 RED → 4 GREEN. ui-verify: PASS. Committed SP4-T032.
+Tests: 4 RED → 4 GREEN. Build: exit 0. (ui-verify runs in /testing.)
 
 Next: choose one
 A) Request changes — describe what to revise

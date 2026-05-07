@@ -85,11 +85,11 @@ Integration tests must not leave data in shared environments. Confirm teardown/r
 
 ---
 
-## Step 6 — Production readiness gate (E2E + User Journey)
+## Step 6 — Production readiness gate (E2E + ui-verify + User Journey)
 
-**This is the final gate. E2E tests are mandatory for every non-infra task.**
+**This is the final gate. E2E tests are mandatory for every non-infra task. `ui-verify` is mandatory for every FE-touching task — this is the workflow position where ui-verify lives.**
 
-### 6a — Determine E2E execution method
+### 6a — E2E execution (automated path)
 
 Check if the project has an E2E framework configured (Playwright, Cypress, etc.):
 
@@ -101,35 +101,35 @@ Check if the project has an E2E framework configured (Playwright, Cypress, etc.)
    - Test passes but skips key journey steps → **not production-ready**. Rewrite the test.
    - Test passes with mocked data or stubbed API → **not production-ready**. Fix to use real deps.
 
-**If no E2E framework exists → Manual browser verification (mandatory):**
-1. Ask user for the running app URL (local or staging). If not provided, stop and request it.
-2. For each AC in `[task-id]-requirement.md`, execute the GIVEN/WHEN steps manually using browser automation tools (`mcp__claude-in-chrome__*`):
-   - Navigate to the relevant page
-   - Perform exactly the actions described in WHEN
-   - Capture a screenshot and verify the THEN outcome is visually and functionally correct
-   - Verify against real data (no stubs, no mocks)
-3. If any AC cannot be verified because the feature is broken → **BLOCKED**. Fix code, re-verify.
-4. Record each AC result with screenshot evidence in the output.
+**If no E2E framework exists** → automated coverage of the journey is missing; rely on `ui-verify` (Step 6a-uiverify below) as the sole journey check, AND open a follow-up `/issue` to add an E2E framework before next sprint.
 
-### 6a-smoke — Manual smoke walkthrough (FE tasks, MANDATORY regardless of E2E status)
+### 6a-uiverify — Manual UI verification via the `ui-verify` skill (FE-touching tasks, MANDATORY)
 
-E2E asserts logic; it does not catch wrong copy, broken layout, or state transitions that *feel* discontinuous. This step closes that gap. **Required for every task that touches the UI, even when 6a E2E passed.**
+E2E asserts logic; it does not catch wrong copy, broken layout, or state transitions that *feel* discontinuous. The `ui-verify` skill closes that gap by walking every AC path in a real browser and capturing evidence. **This is the only place in the workflow where `ui-verify` runs — `/implement` does NOT run it.** Required for every task that touches the UI, even when 6a E2E passed.
 
-1. Ask user for the running dev server URL. If not provided, stop and request it.
-2. For each AC, walk through the flow in a real browser using `mcp__claude-in-chrome__*`:
-   - **Visual correctness:** copy/labels match the requirement doc, no overflow, no layout breaks at default viewport.
-   - **State continuity:** every state in the FE design's State Inventory (Loading / Empty / Error / Success / Partial-Stale) renders correctly when triggered. No flash of wrong state, no stuck spinners, no orphaned stale data after success.
-   - **Transition smoothness:** clicking through the user journey end-to-end — every transition lands on the expected next state. No dead-end, no missing back-navigation, no double-click bugs.
-3. Capture a screenshot per AC showing the final visible outcome.
-4. Any visual / continuity / transition defect → **BLOCKED**. Fix code, re-walk.
+1. Invoke `Skill("ui-verify")` with `[task-id]`. The skill will:
+   - Detect the package manager + stack and start the dev server (or reuse `Skill("local-run")` if already running).
+   - Extract the AC checklist from `[task-id]-requirement.md` and write a clickable path per AC.
+   - Walk every AC path (click → inspect Network → inspect Console → inspect DOM → refresh).
+   - Run the mandatory edge-case rows (empty input, very long input, special chars, slow network, browser-back, refresh, mobile viewport).
+   - Verify the FE design's State Inventory (Loading / Empty / Error / Success / Partial-Stale) renders correctly per AC — no flash of wrong state, no stuck spinners, no orphaned stale data after success.
+   - Capture screenshots + network logs to `docs/sprints/[sprint-id]/[task-id]/ui-verify/`.
+   - Run the automated suite alongside (unit, e2e if configured, typecheck, lint, `go test`, `pytest`).
+   - Return verdict `PASS` or `FAIL`.
 
-5. **Persist evidence** — write `docs/sprints/[sprint-id]/[task-id]/[task-id]-smoke.md` with these sections (required — `/retro-task` Step 1 hard-gates on this file existing):
+2. **On FAIL** → BLOCKED. Open `/debug [task-id] [symptom]` on the failing AC. Do NOT proceed to retro/commit. "It's a small thing, I'll fix in next commit" is exactly the failure mode this gate prevents.
+
+   In autopilot mode: ui-verify FAIL is one of the 3 official block conditions per `.claude/rules/autonomous-mode.md` — auto-`/debug`; if `/debug` resolves to GREEN, continue; otherwise BLOCK with diagnosis.
+
+3. **Persist summary** — write `docs/sprints/[sprint-id]/[task-id]/[task-id]-smoke.md` with these sections (required — `/retro-task` Step 1 hard-gates on this file existing):
    - **Walked at** — ISO timestamp, dev server URL.
-   - **AC ↔ Smoke Step** table — one row per AC: AC ID, browser route(s) visited, States verified (Loading / Empty / Error / Success / Partial-Stale), screenshot path or console-log filename, verdict (`READY` / `BLOCKED`).
+   - **AC ↔ Smoke Step** table — one row per AC: AC ID, browser route(s) visited, States verified (Loading / Empty / Error / Success / Partial-Stale), screenshot path under `ui-verify/`, verdict (`READY` / `BLOCKED`).
+   - **Edge cases** — checkmarks for the seven mandatory rows (empty / long input / special chars / slow network / browser-back / refresh / mobile viewport).
    - **Defects found** — list any defect spotted and its resolution (fix commit ref, follow-up issue ID, or "deferred — see X").
-   - **Re-walk date** (if step 4 forced a fix-and-re-walk loop).
+   - **Re-walk date** (if a fix-and-re-walk loop occurred).
+   - **Evidence** — link to `docs/sprints/[sprint-id]/[task-id]/ui-verify/` (screenshots + network logs + notes.md produced by the skill).
 
-Skip 6a-smoke only for: BE-only tasks, infra/docs-only tasks, or non-interactive surfaces (cron, migrations, internal scripts). When skipping, write a one-line `[task-id]-smoke.md` stating the reason — the file must exist either way.
+Skip 6a-uiverify only for: BE-only tasks, infra/docs-only tasks, or non-interactive surfaces (cron, migrations, internal scripts). When skipping, write a one-line `[task-id]-smoke.md` stating the reason — the file must exist either way.
 
 ### 6b — Journey tracing (both paths)
 
@@ -159,8 +159,9 @@ Re-read the Production Readiness output just written and verify:
 - [ ] Every AC from `[task-id]-requirement.md` appears in the output — none silently skipped.
 - [ ] Every `BLOCKED` entry has a specific reason stated.
 - [ ] No AC is marked `READY` if its E2E / Manual verification used mocked or stubbed data.
-- [ ] **FE tasks:** Step 6a-smoke ran for every AC — visual correctness, all 5 State Inventory states, transition smoothness verified. Screenshots captured. No AC marked `READY` without smoke walkthrough evidence.
-- [ ] Step numbers in this command file are sequential (1→2→3→4→5→6a/6a-smoke/6b/6c→7→8) — no gaps.
+- [ ] **FE-touching tasks:** Step 6a-uiverify ran (`Skill("ui-verify")` invoked) for every AC — visual correctness, all 5 State Inventory states, transition smoothness verified. Screenshots captured under `docs/sprints/[sprint-id]/[task-id]/ui-verify/`. `[task-id]-smoke.md` summary file written. No AC marked `READY` without ui-verify evidence.
+- [ ] **BE-only / infra-only tasks:** `[task-id]-smoke.md` exists with a one-line skip reason (so `/retro-task` Step 1 hard-gate passes).
+- [ ] Step numbers in this command file are sequential (1→2→3→4→5→6a/6a-uiverify/6b/6c→7→8) — no gaps.
 
 Fix any issue found before proceeding.
 

@@ -6,9 +6,11 @@ disable-model-invocation: false
 
 # ui-verify
 
-Workflow position: **after /implement, before /git-commit → BLOCK commit if any AC path fails**
+Workflow position: **invoked from `/testing` Step 6a-uiverify (after /code-review, before /retro-task) → BLOCK commit if any AC path fails**
 
 Catches "type-check passes but the button doesn't actually work" before it ships. Stack-aware for Vue3+Nuxt and Next; covers Socket.io flows.
+
+**Note:** This skill does NOT run during `/implement`. It runs once per task at `/testing` time, after all slices have landed and the task is whole. Partial UI from an in-progress task is rarely click-through ready, and a single browser walk after the task is whole is cheaper and more accurate than N partial walks per slice.
 
 Arguments: `[task-id]`
 
@@ -196,7 +198,7 @@ ACs: [N/N]  |  Edges: [N/N]  |  Tests: [PASS | FAIL]
 Evidence: docs/sprints/[sprint-id]/[task-id]/ui-verify/
 
 Next:
-  PASS → /git-commit [task-id]
+  PASS → resume /testing Step 6b (journey tracing) → /retro-task → /git-commit
   FAIL → /debug [task-id] [symptom]
 ```
 

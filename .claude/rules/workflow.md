@@ -48,9 +48,9 @@ Each row is a contract: the phase produces a named artifact, and the next phase 
 | Discovery | `docs/discovery/disc-NNN-[name].md` with explicit Epic Breakdown + Next Steps | `.claude/rules/discovery.md`, `.claude/rules/discovery-epic-mapping.md` |
 | Sprint planning | Sprint overview with filled Stories table + Success Metrics (Gate 1) + BACKLOG.md updated | `.claude/rules/new-sprint.md`, `.claude/rules/metric-instrumentation.md` |
 | Requirement | `[task-id]-requirement.md` confirmed by user (HARD-GATE) — story + design + Impl Plan + TDD plan, every AC mapped to ≥1 test row, Success Metric ACs propagated (Gate 2) | `.claude/rules/testing.md`, `.claude/rules/metric-instrumentation.md`, `.claude/rules/clarification.md` |
-| Implementation | All tests written and verified RED before any production code; ui-verify PASS for FE-touching slices; tests GREEN | `.claude/rules/testing.md` |
+| Implementation | All tests written and verified RED before any production code; tests GREEN; build exit 0 | `.claude/rules/testing.md` |
 | Code review | Two-stage review (spec compliance → code quality), missing impact-map / risk-register coverage = automatic Critical | `.claude/rules/superpowers.md` |
-| Testing | Full suite green; every AC has at least one passing test | `.claude/rules/testing.md` |
+| Testing | Full suite green; every AC has at least one passing test; **ui-verify PASS for FE-touching tasks** | `.claude/rules/testing.md` |
 | Retro-task | Task retro written; BACKLOG.md status = `done` | — |
 | Git commit | File list confirmed (HARD-GATE — no silent `git add -A`); commit message matches `[task-id] type: ...` ≤72 chars | — |
 | Retro-sprint | Every Success Metric has Actual + Source artifact + Verdict (Gate 3) | `.claude/rules/metric-instrumentation.md` |

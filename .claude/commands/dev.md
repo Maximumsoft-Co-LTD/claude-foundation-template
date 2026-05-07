@@ -64,9 +64,9 @@ Anything verbose belongs in the audit log (handled by `audit-log.py` hook), neve
 | 3.A /run-tasks (parallel) | inline call — `/run-tasks` itself spawns its own agent fleet | already delegated |
 | 3.B.1 /requirement (per task) | **spawn fork** | writes the unified doc (heaviest writer); first stage that reads real source code |
 | 3.B.2 local-run | inline | starts processes, no transcript noise worth keeping |
-| 3.B.3 /implement (per slice) | **spawn fork per slice** | writes code, runs tests, ui-verify (no commit inside) |
+| 3.B.3 /implement (per slice) | **spawn fork per slice** | writes code, runs tests (no ui-verify, no commit inside) |
 | 3.B.4 /code-review (per task) | **spawn fork** (background in pipeline mode) | reads diff + design docs, two-stage review; in pipeline mode runs concurrently with next task's /requirement+/implement |
-| 3.B.5 /testing (per task) | **spawn fork** (background in pipeline mode) | full suite + AC coverage + may invoke /issue once; in pipeline mode runs concurrently with next task |
+| 3.B.5 /testing (per task) | **spawn fork** (background in pipeline mode) | full suite + AC coverage + ui-verify + may invoke /issue once; in pipeline mode runs concurrently with next task |
 | 3.B.6 /retro-task | inline | short summary writer (optional in autopilot) |
 | 3.B.7 /git-commit (per task) | inline | small writer, block on destructive op (push/merge); orchestrator gates commit on review + testing pass and dependency order |
 | 4.1 /retro-sprint | **spawn fork** | reads all task retros + writes consolidation |
@@ -136,13 +136,13 @@ Arguments:
   │                                tdd-plan (slice scope)
   │                                write code (RED → GREEN)
   │                                mongo-review (cond)
-  │                                ui-verify        [BLOCK on FAIL]
   │                                ════ phase boundary (slice) ════
   │                  3.B.4  /code-review (autopilot)            ← review git diff
   │                           └─ Stage 1 spec compliance → Stage 2 quality
   │                              critical findings auto-handoff to /issue
-  │                  3.B.5  /testing (autopilot)                ← full suite + AC coverage
-  │                           └─ on bug: /issue (single round-trip) → /testing re-runs once
+  │                  3.B.5  /testing (autopilot)                ← full suite + AC coverage + ui-verify
+  │                           └─ ui-verify (FE-touching tasks)  [BLOCK on FAIL]
+  │                              on bug: /issue (single round-trip) → /testing re-runs once
   │                              persistent failure → /debug, do NOT loop /issue
   │                  3.B.6  /retro-task (autopilot)             ← optional but recommended
   │                           └─ brain-capture
@@ -255,8 +255,8 @@ Choose mode (first match wins):
 | `N == 1` | sequential | no | nothing to overlap |
 | `MAX_TIER_WIDTH == 1` AND `N == 1` | sequential | no | only one task |
 | `USER_HINT == true` | sequential | no | honor explicit user pacing — don't overlap |
-| `RISK_FLAGS == true` | sequential | no | review must be sync; per-slice ui-verify boundaries are the safety net for risk-tagged work |
-| sequential AND `N ≥ 2` AND no risk flags | sequential | **yes — pipeline mode** | implement T_{N+1} overlaps with review T_N; commit order preserved |
+| `RISK_FLAGS == true` | sequential | no | review + testing must be sync; per-task ui-verify (in `/testing`) + risk-register evidence are the safety net for risk-tagged work |
+| sequential AND `N ≥ 2` AND no risk flags | sequential | **yes — pipeline mode** | implement T_{N+1} overlaps with review+testing T_N; commit order preserved |
 | else (≥ 2 tasks share a tier, no risk flags) | **parallel** | n/a | real speedup via /run-tasks |
 
 Set `dispatch_mode` and `pipeline_mode` in state file. Emit one status line:
@@ -280,8 +280,8 @@ Then branch to 5.A or 5.B.
 Surface the tradeoff in the boundary summary:
 
 ```
-parallel mode: per-slice ui-verify boundaries replaced by /run-tasks
-plan-review gate (after Phase 1) + per-task checkpoints (after Phase 2 per task).
+parallel mode: per-task ui-verify (in /testing) replaces per-slice manual gates;
+/run-tasks adds plan-review gate (after Phase 1) + per-task checkpoints (after Phase 2 per task).
 ```
 
 Update state: append completed step IDs as `/run-tasks` checkpoints arrive (parse from its output). Then proceed to Stage 4.
@@ -301,19 +301,19 @@ Two sub-modes: **plain sequential** (`pipeline_mode = false`) and **pipelined se
 3. **/implement (per slice)** — **spawn one fork per slice**, not one fork for the whole task.
 
    For each slice in the Implementation Plan:
-   - **Spawn fork** with prompt: "Run the next slice of `/implement [task-id]` in autopilot mode. Slice scope: `[slice description from Implementation Plan]`. Run api-contract (if FE+BE), tdd-plan (slice-scoped), write code RED→GREEN, mongo-review (if Mongo touched), ui-verify. ui-verify FAIL is a block condition — auto-trigger `/debug` inside the fork; if `/debug` resolves to GREEN, continue and return `status: ok`; if not, return `status: blocked` with the diagnosis. Return `=== FORK RESULT ===` with tests RED→GREEN counts + ui-verify result. **Do NOT commit inside this fork — the orchestrator runs `/code-review` → `/testing` → `/git-commit` after all slices complete, in dependency order per Step 5.B's commit-order rule.**"
-   - When fork returns: orchestrator reads the result. On `blocked` → surface the diagnosis to user (block condition #3). On `ok` → emit slice phase-boundary 1-liner and continue immediately.
+   - **Spawn fork** with prompt: "Run the next slice of `/implement [task-id]` in autopilot mode. Slice scope: `[slice description from Implementation Plan]`. Run api-contract (if FE+BE), tdd-plan (slice-scoped), write code RED→GREEN, mongo-review (if Mongo touched). Do NOT run ui-verify — that runs once per task during the `/testing` stage. Return `=== FORK RESULT ===` with tests RED→GREEN counts + build status. **Do NOT commit inside this fork — the orchestrator runs `/code-review` → `/testing` → `/git-commit` after all slices complete, in dependency order per Step 5.B's commit-order rule.**"
+   - When fork returns: orchestrator reads the result. On `blocked` (build failure or test that won't go GREEN) → surface to user. On `ok` → emit slice phase-boundary 1-liner and continue immediately.
    - Update state file with the slice's progress before spawning the next slice.
 
-   **Why fork-per-slice and not fork-per-task:** a single task can have 4–8 slices, each heavy (RED tests + code + GREEN tests + ui-verify). One mega-fork would bloat its own context near task end. Per-slice forks keep each fork small enough that the slice's context is fully evicted from main session by the time it returns. Commit happens once per task (Step 7) after `/code-review` + `/testing` confirm the task as a whole is shippable — not per-slice.
+   **Why fork-per-slice and not fork-per-task:** a single task can have 4–8 slices, each heavy (RED tests + code + GREEN tests + build). One mega-fork would bloat its own context near task end. Per-slice forks keep each fork small enough that the slice's context is fully evicted from main session by the time it returns. ui-verify runs once per task at `/testing` time — not per slice — because partial UI from an in-progress task is rarely click-through ready, and a single browser walk after all slices land is cheaper and more accurate than N partial walks. Commit happens once per task (Step 7) after `/code-review` + `/testing` confirm the task as a whole is shippable — not per-slice.
 
 4. **/code-review** — **spawn fork** (background in pipeline mode, foreground in plain sequential). Fork prompt: "Run `/code-review [task-id]` in autopilot mode. All slices for this task are complete and tests are GREEN per the implement forks. Run Stage 1 spec compliance against `[task-id]-requirement.md` ACs, then Stage 2 code quality on `git diff main...HEAD`. Auto-handoff Critical findings to `/issue` per the command's Step 3d. Return `=== FORK RESULT ===` with `result: APPROVED | REQUEST CHANGES`, count of Critical/Minor/Suggestion findings, and which ACs flipped to ✓ vs ✗."
 
    On `REQUEST CHANGES` with Critical findings → `/code-review` already triggered `/issue` for each Critical; orchestrator reads those `/issue` results from the fork's summary, treats them as part of this stage, then re-spawns `/code-review` once. Two consecutive REQUEST CHANGES → block per autopilot rule (ambiguity → escalate via `ask-choice`).
 
-5. **/testing** — **spawn fork** (background in pipeline mode, foreground in plain sequential). Fork prompt: "Run `/testing [task-id]` in autopilot mode. Cross-check every AC against the test plan in `[task-id]-requirement.md`, run unit + integration + E2E (or `mcp__claude-in-chrome__*` smoke walkthrough for FE), then full regression. On a failing test, invoke `/issue [task-id] [description]` exactly once per distinct bug — `/issue` will TDD-fix and then auto-re-run `/testing` per its Step 6. If a re-run still fails on the same symptom, escalate to `/debug` instead of looping `/issue` a second time. Return `=== FORK RESULT ===` with `production_readiness: PASS | FAIL`, AC coverage table, and `issue_count` (number of `/issue` round-trips this run)."
+5. **/testing** — **spawn fork** (background in pipeline mode, foreground in plain sequential). Fork prompt: "Run `/testing [task-id]` in autopilot mode. Cross-check every AC against the test plan in `[task-id]-requirement.md`, run unit + integration + E2E, then invoke `Skill('ui-verify')` for any FE-touching task (mandatory — this is where ui-verify lives in the workflow), then full regression. ui-verify FAIL is a block condition — auto-trigger `/debug` inside the fork; if `/debug` resolves to GREEN, continue. On a failing test, invoke `/issue [task-id] [description]` exactly once per distinct bug — `/issue` will TDD-fix and then auto-re-run `/testing` per its Step 6. If a re-run still fails on the same symptom, escalate to `/debug` instead of looping `/issue` a second time. Return `=== FORK RESULT ===` with `production_readiness: PASS | FAIL`, AC coverage table, ui-verify verdict + evidence path, and `issue_count` (number of `/issue` round-trips this run)."
 
-   On `FAIL` after one `/issue` cycle → block (this is the 'ui-verify fail' equivalent for the testing stage).
+   On `FAIL` after one `/issue` cycle, OR ui-verify FAIL unresolved by `/debug` → block per autopilot rule (block condition #3).
 
 6. **/retro-task** — inline. Short summary writer; invoke `Skill("brain-capture")` only if a lesson surfaced from any slice or issue. Optional — skip if no notable lesson and the user's intent was speed-focused.
 
@@ -527,7 +527,7 @@ replace them.
 - ❌ Multiple `ask-choice` invocations in a row — batch into one (max 4 questions per AskUserQuestion)
 - ❌ Adding an A/B prompt at every phase boundary "to be safe" — autopilot phase boundaries continue automatically when none of the 3 block conditions apply (the A/B prompt only appears at the final end-of-`/dev` summary)
 - ❌ Re-announcing the pause option at phase boundaries — strings like `Press enter to continue, or type pause to stop`, `type pause if you want to stop`, or any other "you can pause / interrupt / continue" reminder turn the soft boundary into a hard block. The pause mechanism is documented once in `/dev help`; the user already knows. See `autonomous-mode.md` § Forbidden phase-boundary outputs.
-- ❌ Forcing parallel mode when a task is risk-tagged (auth/payment/migration) — per-slice ui-verify boundaries are the safety net; parallel collapses them
+- ❌ Forcing parallel mode when a task is risk-tagged (auth/payment/migration) — per-task ui-verify (in /testing) + risk-register evidence are the safety net; parallel collapses the per-task checkpoints
 - ❌ Forcing sequential mode "to be safe" when 4 independent CRUD tasks share a tier — wastes the speedup that parallel was designed for
 - ❌ **Pipeline mode: committing T_{N+1} before T_N's review passes** — breaks commit ordering and lets a broken T_N ship inside T_{N+1}'s commit history. Always drain `ready_to_commit` in dependency order
 - ❌ **Pipeline mode: spawning a review fork for a risk-tagged task** — risk tasks (auth/payment/migration/public-API) must be reviewed synchronously; pipeline must drain to empty and switch to plain sequential before that task starts
@@ -535,7 +535,7 @@ replace them.
 - ❌ **Pipeline mode: predicting a fork's review outcome** before its notification — never write "review will pass" or pre-fill commit text. Status only
 - ❌ **Auto-pausing at the 30-min budget** — the user explicitly chose soft hint. Past 30 min, keep reporting elapsed time; do not pause unless the user types `pause`
 - ❌ **Hiding the budget marker after 30 min "to avoid noise"** — the marker is the one signal the user opted into. Keep emitting at every phase boundary
-- ❌ **Letting the slice fork run `/git-commit`** — in pipeline mode, commits move to the orchestrator (Step 7 `/git-commit`) so commit order can match review + testing order. The slice fork only writes code + ui-verify
+- ❌ **Letting the slice fork run `/git-commit`** — in pipeline mode, commits move to the orchestrator (Step 7 `/git-commit`) so commit order can match review + testing order. The slice fork only writes code + runs tests (ui-verify is per-task in `/testing`, not per-slice)
 
 ---
 

@@ -209,7 +209,7 @@ Reply:
 >
 > Do NOT also run `/code-review` or `/testing` manually for tasks processed by `/run-tasks`.
 >
-> **FE smoke gate caveat:** `/retro-task` Step 1 hard-gates on `[task-id]-smoke.md` for `fullstack` / `fe-only` tasks. The Quality Reviewer agent reads `/testing` and is responsible for executing Step 6a-smoke when the task touches the UI — it must produce `[task-id]-smoke.md` before the retro agent fires. If the smoke file is missing when retro-task runs, the agent will return BLOCKED for that task and the user must run `/testing [task-id]` manually before re-invoking retro.
+> **FE ui-verify gate caveat:** `/retro-task` Step 1 hard-gates on `[task-id]-smoke.md` for `fullstack` / `fe-only` tasks. The Quality Reviewer agent runs `/testing` and is responsible for executing Step 6a-uiverify (`Skill("ui-verify")`) when the task touches the UI — it must produce `[task-id]-smoke.md` (the summary file) plus the `docs/sprints/[sprint-id]/[task-id]/ui-verify/` evidence directory before the retro agent fires. If the smoke file is missing when retro-task runs, the agent will return BLOCKED for that task and the user must run `/testing [task-id]` manually before re-invoking retro. (ui-verify no longer runs inside `/implement` — it lives in `/testing` only.)
 
 ## Step 4 — Subagent-driven implementation (parallel per tier)
 

@@ -27,7 +27,7 @@ If the requirement doc's `Task Type` is `fullstack` or `fe-only`, `[task-id]-smo
 
 If missing, STOP and print:
 ```
-✗ FE smoke walkthrough required — re-run /testing [task-id] (Step 6a-smoke)
+✗ FE ui-verify walkthrough required — re-run /testing [task-id] (Step 6a-uiverify)
 ```
 Do NOT mark the task done, do NOT write the retro, do NOT capture brain entries.
 
