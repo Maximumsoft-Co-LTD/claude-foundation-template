@@ -210,7 +210,14 @@ The brain fills up naturally as you run `/retro-sprint` — brain update is buil
 
 ## Workflow
 
-**Single task (sequential):**
+**Autopilot (single intent, hands-off):**
+```
+/dev "what you want"   # runs the full pipeline; blocks only on the 4 official conditions
+                       # (ambiguity, destructive op, phase boundary, ui-verify fail)
+                       # auto-picks parallel vs sequential per task graph + risk flags
+```
+
+**Single task (sequential, manual):**
 ```
 /discovery → /new-sprint → /requirement (unified story + FE design + BE design + Implementation Plan + tests) → /implement
     → /issue (loop) → /code-review → /testing
@@ -235,6 +242,7 @@ Full quick reference (flow diagram, hard gates, escape hatches): `docs/WORKFLOW-
 
 | Command | Args | Purpose |
 |---------|------|---------|
+| `/dev` | `"intent"` | **Autopilot** — runs the full pipeline end-to-end; blocks only on the 4 official conditions |
 | `/discovery` | `[disc-id] [name]` | Understand problem before planning |
 | `/brainstorm` | `[disc-id] [name]` | Open-ended ideation — superpowers bridge, alternative to `/discovery` |
 | `/new-sprint` | `[SP[N]] [epic description]` | Create sprint, scaffold tasks as user stories with E2E validation scenarios |
@@ -330,7 +338,29 @@ Full section requirements per point level: `.claude/commands/_WORKFLOW-REF.md`
 
 ## Skills (`.claude/skills/`)
 
-Skills extend the core workflow with optional steps — insert them where they add value for your project type.
+Skills come in two flavours.
+
+**1. Atomic skills (model-invocable building blocks).** Used internally by commands and by `/dev` autopilot. Each ships with `disable-model-invocation: false` so Claude composes them by description match. Total catalog: 23 skills, grouped by purpose.
+
+| Category | Skills | Used by |
+|----------|--------|---------|
+| **Intent atom** | `prompt-understand` · `scope-check` · `ask-choice` · `solution-options` | `/dev`, `/discovery`, `/requirement` |
+| **Pre-implementation gates** | `workspace-detect` · `reverse-engineer` · `impact-map` · `risk-register` · `nfr-plan` · `api-contract` · `vertical-slice` · `tdd-plan` | `/dev`, `/requirement`, `/implement` |
+| **Bug & quality** | `bug-repro` · `debug` · `mongo-review` · `ui-verify` | `/issue`, `/debug`, `/code-review` |
+| **Delivery** | `pr-create` · `release-notes` · `local-run` | `/git-commit`, `/retro-sprint` |
+| **Meta** | `skill-evolution` · `brain-capture` · `agent-routing` · `session-handoff` | `/retro-sprint`, `/run-tasks`, mid-session |
+
+**Three new gates (0.17.0):**
+
+| Skill | Trigger | Where it runs |
+|-------|---------|---------------|
+| `bug-repro` | Any bug fix → produce verified-RED failing test before code | `/issue` Step 3 · `/debug` Phase 4 |
+| `impact-map` | Change touches existing code → enumerate Tier-1/2/3 dependents | `/issue` Step 2 · `/implement` Step 1e · `/code-review` Step 2a |
+| `risk-register` | Migration · auth · payment · public API · removed cron → mitigation + rollback required | `/implement` Step 1e · `/code-review` Step 2b |
+
+`/code-review` treats missing `impact-map` coverage or missing `risk-register` verification on a Must-mitigate row as an automatic Critical finding.
+
+**2. Optional slash-command skills.** Insert these where they add value for your project type — invoke as a slash command.
 
 **Frontend Design**
 
@@ -413,6 +443,18 @@ Common glob patterns:
 | `**/{test,__tests__,spec}/**/*` | Test directories |
 | `app/**/*.{ts,tsx}` | Next.js app router |
 
+**Always-on rules (no `paths:` frontmatter, load every session):**
+
+| Rule | What it enforces |
+|------|------------------|
+| `testing.md` | TDD Iron Law — fail-first, real-deps integration, no `.only`/`.skip`, audit-in-transaction |
+| `confidence-gate.md` | AI must be ≥ 90% confident before proceeding with any workflow command |
+| `autonomous-mode.md` | The 4 (and only 4) reasons `/dev` blocks; one-line `> [skill]: status [marker]` progress format |
+| `completion-format.md` | Every artifact-step exit uses 2-option `A) Request changes / B) Continue` template — no third options |
+| `metric-instrumentation.md` | 3-gate enforcement: every Success Metric must trace target → instrumented artifact → measured actual at `/new-sprint`, `/requirement`, and `/retro-sprint` |
+| `parallel-work.md` | Unit of split for parallel sub-agents is one user story per agent — never one layer per agent |
+| `self-check.md` | After every Write/Edit on a workflow file, re-read before reporting done |
+
 ---
 
 ## Hooks (`.claude/hooks/`)
@@ -421,10 +463,8 @@ Hooks run shell commands automatically at Claude Code lifecycle events — makin
 
 | Hook file | Trigger | What it does |
 |-----------|---------|--------------|
-| `lint_ts.py` | `PostToolUse(Write\|Edit)` on `.ts/.tsx` | Runs `tsc --noEmit`, reports type errors to Claude |
-| `lint_go.py` | `PostToolUse(Write\|Edit)` on `.go` | Runs `golangci-lint`, reports lint errors to Claude |
-| `lint_js.py` | `PostToolUse(Write\|Edit)` on `.js/.jsx` | Runs ESLint, reports errors to Claude |
-| `run_tests.py` | `PostToolUse(Write\|Edit)` on source files | Runs test suite after implementation edits; reports failures immediately |
+| `dispatch.py` | `PostToolUse(Write\|Edit)` | Single entry that routes to the right sub-hook(s) by file path and runs them in parallel. Sub-hooks: `lint_ts.py` / `lint_go.py` / `lint_js.py` / `run_tests.py` / `brain_citation_meter.py`. Skips docs and `.claude/` config edits. |
+| `audit-log.py` | `UserPromptSubmit` + `PreToolUse(Bash)` + `Stop` | Writes a per-day compliance trail to `docs/audit-YYYY-MM-DD.md` (gitignored). Catches destructive Bash patterns (`rm -rf`, force push, `drop*`, `deleteMany`, `truncate`, `docker rm -f`) and sensitive-file writes (`.env`, `credentials.json`). Redacts `api_key`, `token`, `password`, `Bearer`, JWT, AWS-AKIA, and URI credentials before any value is appended. |
 
 ### TDD enforcement
 
