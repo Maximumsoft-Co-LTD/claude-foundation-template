@@ -199,7 +199,7 @@ local-run: UP
 
 Logs: /tmp/local-run-*.log
 Seed: [N] docs in [collections]
-Next: /implement   or   /ui-verify
+Next: /implement   or   /testing (which invokes ui-verify)
 ```
 
 If FAIL:

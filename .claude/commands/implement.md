@@ -211,6 +211,8 @@ If during implementation you uncover a bug that is NOT covered by the existing t
 
 **No completion claims without fresh verification evidence.** Run everything in this step — do not rely on output from Step 3 sub-agents.
 
+**Scope of this step:** test suite + build only. **Do NOT run `ui-verify` here.** UI verification has moved to `/testing` Step 6a-uiverify and runs once per task after all slices land — partial UI from an in-progress task is rarely click-through ready, and a single browser walk after the task is whole is cheaper and more accurate than N partial walks per slice. If you find yourself wanting to invoke `Skill("ui-verify")` here, stop — that's the next command's job.
+
 Run full test suite + build (FE and BE in parallel if separate commands):
 
 | Claim | Required evidence | NOT sufficient |
