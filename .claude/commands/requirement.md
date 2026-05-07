@@ -210,6 +210,7 @@ Re-read the full doc and verify:
 - [ ] At least one failure-path AC exists.
 - [ ] Every in-scope discovery item is either covered by an AC or explicitly Out of Scope.
 - [ ] Success Metrics are measurable (not vague like "works correctly").
+- [ ] **Metric instrumentation propagated** (per `.claude/rules/metric-instrumentation.md` Gate 2): for every sprint Success Metric whose Measurement column references THIS task, the doc has (a) an Implementation Plan row that produces the artifact (write the log line / add the column / fire the event), (b) an AC asserting the artifact is emitted, (c) a TDD Test Plan row verifying emission. If any leg is missing → block until fixed.
 - [ ] Value: user impact + business outcome are filled, concrete, do NOT just restate the user story.
 - [ ] Sections that don't apply to this Task Type are marked `N/A — [reason]`.
 

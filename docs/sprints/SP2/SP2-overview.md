@@ -29,11 +29,14 @@ Walk-in customers queue at the staffed counter to buy tickets. Per disc-002 the 
 3. Tentatively-held seats auto-release after 60s of inactivity (TTL).
 
 ## Success Metrics
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Time-to-ticket (median) | ≤ 90s | Session-start → ticket-display timestamps |
-| Double-booking incidents | 0 | DB query: count of duplicate (showtimeId, seatId) bookings |
-| Stale seat-hold release | 100% within 65s | Cron + audit log of `hold_released` events |
+
+Per `.claude/rules/metric-instrumentation.md` Gate 1 — every row names a concrete data source, query, and the task that produces it.
+
+| Metric | Target | Measurement (artifact + query + owning task) |
+|--------|--------|-----------------------------------------------|
+| Time-to-ticket (median) | ≤ 90s | `audit_log` rows with `event='session_started'` and `event='ticket_issued'` (joined on `session_id`); query: `SELECT median(t2.ts - t1.ts) FROM audit_log t1 JOIN audit_log t2 USING (session_id) WHERE t1.event='session_started' AND t2.event='ticket_issued'`. Owner: SP2-T006 emits `ticket_issued`; SP2-T003 emits `session_started`. |
+| Double-booking incidents | 0 | `bookings` table; query: `SELECT showtime_id, seat_id, COUNT(*) FROM bookings WHERE status='booked' GROUP BY 1,2 HAVING COUNT(*) > 1`. Owner: SP2-T005 (creates the row + enforces the unique constraint). |
+| Stale seat-hold release | 100% within 65s | `audit_log` rows with `event='hold_released'`; query: `SELECT COUNT(*) FROM audit_log WHERE event='hold_released' AND (release_ts - hold_ts) > 65`. Target = 0 violations. Owner: TTL sweeper (infra inside SP2-T004). |
 
 ## Design References
 - None for v1 — UI follows reference wireframes inside the requirement docs (one per task).

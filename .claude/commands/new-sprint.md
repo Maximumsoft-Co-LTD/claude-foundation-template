@@ -114,6 +114,8 @@ If a discovery doc was found, cross-check proposed tasks against it:
 - **In-scope items** — which task covers each? Flag uncovered items.
 - **User journeys** — which task delivers each To-Be journey end-to-end? Flag uncovered journeys.
 
+**Metric-instrumentation gate** (per `.claude/rules/metric-instrumentation.md` Gate 1): every Success Metric in the sprint overview MUST have a Measurement cell that names a concrete data source (audit row / structured log line / DB column / counter) AND identifies which task produces the artifact. Block the table if any Measurement is "TBD", "manual check", or vague — either define the artifact or remove the metric.
+
 ```
 Coverage check:
 ✅ Covered:    [item] → T00N

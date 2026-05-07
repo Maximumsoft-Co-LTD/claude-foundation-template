@@ -34,8 +34,18 @@ Compute:
 
 From `[sprint-id]-overview.md`:
 - Each **Goal** → achieved / partially / no
-- Each **Success Metric** → actual result vs target
+- Each **Success Metric** → actual result vs target — **Gate 3** of `.claude/rules/metric-instrumentation.md`
 - **Definition of Done (Sprint Level)** → check each checkbox, mark passed/failed
+
+For Success Metrics, produce a row per metric in this exact form:
+
+| Metric | Target | Actual | Source artifact + query | Verdict |
+|--------|--------|--------|--------------------------|---------|
+| [name] | [target] | [actual number] | [`audit_log` SQL / log grep / dashboard link] | ✓ / ✗ / partial |
+
+**Run the query for real** — do not paste the SQL and report a guess. If the artifact is missing or the query returns no rows, mark Actual as `not measured` and add an Action Item: "Add instrumentation in next sprint" + flag the corresponding Definition-of-Done line as failed.
+
+`not measured` count > 0 → the sprint did not fully ship its measurement loop, even if all stories are coded. This must surface in the retro narrative, not be glossed over.
 
 
 ---
