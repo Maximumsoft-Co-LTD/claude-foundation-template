@@ -1,7 +1,8 @@
 # /git-commit
-Workflow position: **/retro-task → START → /next-task (or /retro-sprint)**
+Workflow position: **/testing (or /retro-task) → START → /next-task (or /retro-sprint)**
 
-Stage and commit all changes for a completed task.
+Stage and commit all changes for a completed task. Per the new core spec, `/git-commit` runs immediately after `/testing` is fully GREEN — `/retro-task` is recommended but no longer a hard gate; if the retro doc is missing, this command warns and proceeds.
+
 Arguments: `[task-id]`  — e.g. `SP1-T002`
 
 ---
@@ -17,13 +18,24 @@ Run in parallel: `git status` · `git branch --show-current` · `git diff` · `g
 
 ## Step 2 — Verify task is ready to commit
 
-Read `docs/sprints/[sprint-id]/[task-id]/[task-id]-retro.md`.
+Two readiness signals — the first is **mandatory**, the second is **advisory**.
 
-- File does not exist → **stop**. Task retro has not been completed. Run `/retro-task [task-id]` first.
+**Mandatory: testing is GREEN for this task.**
+- Look for evidence the latest `/testing [task-id]` run produced `Production Readiness: PASS` (every AC `READY`). Acceptable evidence:
+  - The current chat transcript shows a recent `/testing` PASS for this task, OR
+  - `docs/BACKLOG.md` status for `[task-id]` is `testing` or later (`review` / `done`).
+- No evidence → **stop**. Run `/testing [task-id]` first. Do not commit untested work.
 
-Read `docs/BACKLOG.md` — check status for `[task-id]`.
-
-- Status is not `done` → **stop**. Task retro has not been completed. Run `/retro-task [task-id]` first.
+**Advisory: task retro is written.**
+- Read `docs/sprints/[sprint-id]/[task-id]/[task-id]-retro.md`.
+- File missing → warn (do not block):
+  ```
+  ⚠ No retro doc at docs/sprints/[sprint-id]/[task-id]/[task-id]-retro.md
+    Recommended: run /retro-task [task-id] before committing so lessons aren't lost.
+    Continue without retro? (yes/no)
+  ```
+  Wait for explicit `yes` to proceed; on `no`, stop and let the user run `/retro-task`.
+- File present → continue silently.
 
 ---
 

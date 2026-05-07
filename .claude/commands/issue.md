@@ -1,7 +1,11 @@
 # /issue
-Workflow position: **implement (loop) → START → /code-review**
+Workflow position: **/implement | /code-review | /testing → START → re-run /testing (when called from /testing)**
 
-Log and resolve a bug found during implementation using TDD.
+Log and resolve a bug using TDD. Three callers:
+- **From /testing** — Step 4 found a failing test → after fix, this command re-runs `/testing` once (Step 6).
+- **From /code-review** — Step 3d auto-handoff for Critical findings → fix lands in the diff for the next review pass.
+- **From /implement** — bug uncovered while writing code → fix in place, return to implementation.
+
 Arguments: `[task-id] [issue description]`  — e.g. `SP1-T002 API returns 500 when email is null`
 
 ---
@@ -81,15 +85,30 @@ Append one issue entry to `docs/sprints/[sprint-id]/[task-id]/[task-id]-issues.m
 
 ---
 
+## Step 6 — Re-run /testing (auto, single round-trip)
+
+After Step 3 confirmed GREEN locally (the targeted regression test + the focused suite that surfaced the bug), invoke `/testing [task-id]` exactly once to re-validate the full test suite + AC coverage end-to-end.
+
+**Caller-aware skip rule:**
+- If `/issue` was invoked **from** `/testing` Step 4 (caller is `/testing`) → re-run `/testing` to close the loop.
+- If `/issue` was invoked **from** `/implement` (caller is the implementer fixing a bug it found) or **from** `/code-review` Step 3d critical-issue handoff → DO NOT auto-run `/testing` here; the caller already controls the next step. Skip to Output.
+- If invoked manually on the command line with no caller context → run `/testing [task-id]` once.
+
+**Recursion guard:** `/testing` invoked from this Step 6 must NOT re-trigger `/issue` for the same root cause. If the re-run still fails on the same symptom, surface `status: still-failing` to the user and recommend `/debug [task-id]` instead of looping `/issue`.
+
+---
+
 ## Output
 
 ```
 ✓ Issue logged: docs/sprints/[sprint-id]/[task-id]/[task-id]-issues.md
   Severity: [level]  |  Test added: yes/no  |  Blocks: [list or none]
+  Auto re-run: /testing [task-id] [skipped — caller controls / executed: PASS / executed: FAIL]
 
 Next:
-  Called during /implement → continue implementation
-  Called after /code-review  → /testing [task-id]
+  Called from /testing → /testing already re-run; if PASS proceed to /code-review or /git-commit
+  Called from /implement → continue implementation
+  Called from /code-review → loop closes; /code-review re-evaluates ACs
 ```
 
 If unresolvable → document as `status: blocked`, list what information is needed, ask the user.

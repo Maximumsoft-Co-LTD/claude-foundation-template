@@ -1,7 +1,8 @@
 # /new-sprint
 Workflow position: **/discovery → START → /requirement**
 
-Create a new sprint from an epic description and scaffold all stories.
+Break every story out of the discovery doc, scaffold all task directories, and update `BACKLOG.md`. Planning only — **no deep code reading at this stage**; that happens in `/requirement`.
+
 Arguments: `[sprint-id] [epic description]`  — e.g. `SP2 Build user authentication with OAuth`
 
 ---
@@ -142,7 +143,26 @@ Wait for confirmation.
 |------|-----------|------------|--------|--------|----------|----------|
 | SP2-T005 | As a [role], I want ... | — | 3 | `todo` | — | — |
 ```
-No per-task files created here. `/requirement` creates them when work begins.
+
+---
+
+## Step 5 — Scaffold task directories
+
+For every confirmed task in the Stories table, create the per-task workspace so `/requirement` has a starting point. This is **scaffolding only — do NOT read source code, do NOT explore the codebase, do NOT fill design sections**. Real code reading and design happen in `/requirement`.
+
+For each `[task-id]`:
+
+1. Create directory `docs/sprints/[sprint-id]/[task-id]/` if it does not exist.
+2. Copy `docs/templates/REQUIREMENT-TEMPLATE.md` to `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`.
+3. Pre-fill ONLY the cheap-to-fill fields directly from the Stories table + sprint overview (no codebase reading required):
+   - Title `# [task-id] — [User Story]`
+   - Metadata: `Sprint`, `Points`, `Priority` (if known), `Status: todo`
+   - Stories table's User Story → `## User Stories` first row
+   - E2E Validation Scenarios for this task → seed `## Acceptance Criteria` (one AC per scenario; mark each `TBD — refine in /requirement` for any field that needs codebase context)
+   - `Origin:` link to the discovery doc (if any)
+4. Leave every other section as-is (template `<!-- comments -->` + `TBD`). `/requirement` is the command that reads the codebase and fills these sections.
+
+If any `[task-id]-requirement.md` already exists (e.g. re-running `/new-sprint` on an existing sprint) → skip that file, do NOT overwrite. Print: `Skipped scaffold for [task-id] — file already exists`.
 
 ---
 
@@ -151,7 +171,8 @@ No per-task files created here. `/requirement` creates them when work begins.
 ```
 ✓ docs/sprints/[sprint-id]/[sprint-id]-overview.md
 ✓ BACKLOG.md updated — [N] tasks added
+✓ Scaffolded [N] task directories (skeleton requirement docs only — no code read)
 
-Next: /run-tasks [task-id] [task-id] ...   ← parallel
-  or: /next-task                            ← sequential
+Next: /requirement [task-id]                ← single, sequential
+  or: /run-tasks [task-id] [task-id] ...    ← parallel
 ```

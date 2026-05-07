@@ -56,10 +56,13 @@ Anything verbose belongs in the audit log (handled by `audit-log.py` hook), neve
 | 2.1 /new-sprint | **spawn fork** | writes overview + BACKLOG mutations |
 | 3.0 dispatch decision | inline | reads BACKLOG only, ≤ 100 lines |
 | 3.A /run-tasks (parallel) | inline call — `/run-tasks` itself spawns its own agent fleet | already delegated |
-| 3.B.1 /requirement (per task) | **spawn fork** | writes the unified doc (heaviest writer) |
+| 3.B.1 /requirement (per task) | **spawn fork** | writes the unified doc (heaviest writer); first stage that reads real source code |
 | 3.B.2 local-run | inline | starts processes, no transcript noise worth keeping |
-| 3.B.3 /implement (per slice) | **spawn fork per slice** | writes code, runs tests, ui-verify |
-| 3.B.4 /retro-task | inline | short summary writer |
+| 3.B.3 /implement (per slice) | **spawn fork per slice** | writes code, runs tests, ui-verify (no commit inside) |
+| 3.B.4 /code-review (per task) | **spawn fork** | reads diff + design docs, two-stage review |
+| 3.B.5 /testing (per task) | **spawn fork** | full suite + AC coverage + may invoke /issue once |
+| 3.B.6 /retro-task | inline | short summary writer (optional in autopilot) |
+| 3.B.7 /git-commit (per task) | inline | small writer, block on destructive op (push/merge) |
 | 4.1 /retro-sprint | **spawn fork** | reads all task retros + writes consolidation |
 | 5.1 pr-create | inline | small, but block on destructive op |
 
@@ -117,21 +120,28 @@ Arguments:
   │           │              per task, retro-task — all delegated
   │           │
   │           └─ Sequential path (N=1, all-chained, risk-tagged, or user-paced):
-  │                For each task in dep order:
-  │                  3.B.1  /requirement (autopilot)
+  │                For each task in dep order — runs the canonical 8-command spec:
+  │                  3.B.1  /requirement (autopilot)            ← reads real code
   │                           └─ scope-check, api-contract (cond), tdd-plan, nfr-plan (cond)
   │                  3.B.2  Skill("local-run")
-  │                  3.B.3  /implement (autopilot)
+  │                  3.B.3  /implement (autopilot)              ← write code RED→GREEN
   │                           └─ for each slice:
   │                                api-contract (cond)
   │                                tdd-plan (slice scope)
   │                                write code (RED → GREEN)
   │                                mongo-review (cond)
   │                                ui-verify        [BLOCK on FAIL]
-  │                                /git-commit
   │                                ════ phase boundary (slice) ════
-  │                  3.B.4  /retro-task (autopilot)
+  │                  3.B.4  /code-review (autopilot)            ← review git diff
+  │                           └─ Stage 1 spec compliance → Stage 2 quality
+  │                              critical findings auto-handoff to /issue
+  │                  3.B.5  /testing (autopilot)                ← full suite + AC coverage
+  │                           └─ on bug: /issue (single round-trip) → /testing re-runs once
+  │                              persistent failure → /debug, do NOT loop /issue
+  │                  3.B.6  /retro-task (autopilot)             ← optional but recommended
   │                           └─ brain-capture
+  │                  3.B.7  /git-commit (autopilot)             ← stage + commit + branch finish
+  │                           └─ retro-task missing = warn-not-block per /git-commit Step 2
   │
   ├─ STAGE 4 — Sprint close
   │    4.1  /retro-sprint (autopilot mode)
@@ -260,24 +270,34 @@ Update state: append completed step IDs as `/run-tasks` checkpoints arrive (pars
 
 ### Step 5.B — Sequential path (per-task for-loop)
 
-The orchestrator stays lean by spawning a fork per heavy step. The for-loop body for each task `[task-id]` (in dependency order):
+The orchestrator stays lean by spawning a fork per heavy step. The for-loop body for each task `[task-id]` (in dependency order) follows the **canonical 8-command spec** — `/requirement → /implement → /code-review → /testing (with /issue loop) → /git-commit`. `/retro-task` is optional but recommended for brain-capture.
 
-1. **/requirement** — **spawn fork**. Fork prompt: "Run `/requirement [task-id]` in autopilot mode. Sprint context: `[sprint_id]`. Discovery doc: `docs/discovery/disc-NNN-[name].md`. Skills under it (scope-check, api-contract, tdd-plan, nfr-plan) emit status lines. Produce `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`. Return `=== FORK RESULT ===` with artifact path. If any sub-skill flags `?` → return early with `status: ambig`."
+1. **/requirement** — **spawn fork**. Fork prompt: "Run `/requirement [task-id]` in autopilot mode. Sprint context: `[sprint_id]`. Discovery doc: `docs/discovery/disc-NNN-[name].md`. A skeleton requirement doc may already exist from `/new-sprint` Step 5 — read and refine it; this is the first command that reads real source code. Skills under it (scope-check, api-contract, tdd-plan, nfr-plan) emit status lines. Produce `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`. Return `=== FORK RESULT ===` with artifact path. If any sub-skill flags `?` → return early with `status: ambig`."
 
 2. **local-run** — inline. Invoke `Skill("local-run")` if stack not already up (check `/tmp/local-run-status.json`).
 
 3. **/implement** — **spawn one fork per slice**, not one fork for the whole task. The fork loop runs in the orchestrator:
 
    For each slice in the Implementation Plan:
-   - **Spawn fork** with prompt: "Run the next slice of `/implement [task-id]` in autopilot mode. Slice scope: `[slice description from Implementation Plan]`. Run api-contract (if FE+BE), tdd-plan (slice-scoped), write code RED→GREEN, mongo-review (if Mongo touched), ui-verify, and `/git-commit`. ui-verify FAIL is a block condition — auto-trigger `/debug` inside the fork; if `/debug` resolves to GREEN, continue and return `status: ok`; if not, return `status: blocked` with the diagnosis. Return `=== FORK RESULT ===` with commit SHA + tests RED→GREEN counts + ui-verify result."
+   - **Spawn fork** with prompt: "Run the next slice of `/implement [task-id]` in autopilot mode. Slice scope: `[slice description from Implementation Plan]`. Run api-contract (if FE+BE), tdd-plan (slice-scoped), write code RED→GREEN, mongo-review (if Mongo touched), ui-verify. ui-verify FAIL is a block condition — auto-trigger `/debug` inside the fork; if `/debug` resolves to GREEN, continue and return `status: ok`; if not, return `status: blocked` with the diagnosis. Return `=== FORK RESULT ===` with tests RED→GREEN counts + ui-verify result. Do NOT commit inside this fork — the orchestrator runs `/code-review` → `/testing` → `/git-commit` after all slices complete."
    - When fork returns: orchestrator reads the result. On `blocked` → surface the diagnosis to user (block condition #3). On `ok` → emit slice phase-boundary 1-liner and continue immediately.
-   - Update state file with the slice's commit SHA before spawning the next slice.
+   - Update state file with the slice's progress before spawning the next slice.
 
-4. **/retro-task** — inline. Short summary writer; invoke `Skill("brain-capture")` only if a lesson surfaced from any slice.
+4. **/code-review** — **spawn fork**. Fork prompt: "Run `/code-review [task-id]` in autopilot mode. All slices for this task are complete and tests are GREEN per the implement forks. Run Stage 1 spec compliance against `[task-id]-requirement.md` ACs, then Stage 2 code quality on `git diff main...HEAD`. Auto-handoff Critical findings to `/issue` per the command's Step 3d. Return `=== FORK RESULT ===` with `result: APPROVED | REQUEST CHANGES`, count of Critical/Minor/Suggestion findings, and which ACs flipped to ✓ vs ✗."
+
+   On `REQUEST CHANGES` with Critical findings → `/code-review` already triggered `/issue` for each Critical; orchestrator reads those `/issue` results from the fork's summary, treats them as part of this stage, then re-spawns `/code-review` once. Two consecutive REQUEST CHANGES → block per autopilot rule (ambiguity → escalate via `ask-choice`).
+
+5. **/testing** — **spawn fork**. Fork prompt: "Run `/testing [task-id]` in autopilot mode. Cross-check every AC against the test plan in `[task-id]-requirement.md`, run unit + integration + E2E (or `mcp__claude-in-chrome__*` smoke walkthrough for FE), then full regression. On a failing test, invoke `/issue [task-id] [description]` exactly once per distinct bug — `/issue` will TDD-fix and then auto-re-run `/testing` per its Step 6. If a re-run still fails on the same symptom, escalate to `/debug` instead of looping `/issue` a second time. Return `=== FORK RESULT ===` with `production_readiness: PASS | FAIL`, AC coverage table, and `issue_count` (number of `/issue` round-trips this run)."
+
+   On `FAIL` after one `/issue` cycle → block (this is the 'ui-verify fail' equivalent for the testing stage).
+
+6. **/retro-task** — inline. Short summary writer; invoke `Skill("brain-capture")` only if a lesson surfaced from any slice or issue. Optional — skip if no notable lesson and the user's intent was speed-focused.
+
+7. **/git-commit** — inline (small writer, but block on destructive ops per autopilot rule). Invoke `/git-commit [task-id]` autopilot variant: stage by file list (no `git add -A`), draft commit message, commit, run finishing-branch flow. Retro-doc absence at this point only warns; does not block. The final commit SHA is the task's deliverable.
 
 Update state after each task: `task_id`, append completed step ID.
 
-**Why fork-per-slice and not fork-per-task:** a single task can have 4–8 slices, and each slice is heavy (RED tests + code + GREEN tests + ui-verify + commit). One mega-fork would still bloat its own context near task end. Per-slice forks keep each fork small enough that the slice's context is fully evicted from main session by the time it returns.
+**Why fork-per-slice and not fork-per-task:** a single task can have 4–8 slices, and each slice is heavy (RED tests + code + GREEN tests + ui-verify). One mega-fork would still bloat its own context near task end. Per-slice forks keep each fork small enough that the slice's context is fully evicted from main session by the time it returns. Commit happens once per task (Step 7) after `/code-review` + `/testing` confirm the task as a whole is shippable — not per-slice.
 
 ---
 
@@ -356,10 +376,12 @@ Usage:
 Pipeline (5 stages):
   1. Inception      workspace-detect → reverse-engineer (if brownfield)
                     → /discovery
-  2. Sprint plan    /new-sprint
+  2. Sprint plan    /new-sprint  (also scaffolds all task dirs — no code reading)
   3. Per-task work  Dispatch decision → either:
                     • parallel: /run-tasks [all task-ids]
-                    • sequential: /requirement → /implement → /retro-task per task
+                    • sequential (canonical 8-command spec, per task):
+                        /requirement → /implement → /code-review →
+                        /testing (with /issue loop) → /retro-task → /git-commit
                     Picks parallel when ≥ 2 tasks share a tier and no
                     risk flags (auth/payment/migration). Sequential otherwise.
   4. Sprint close   /retro-sprint
