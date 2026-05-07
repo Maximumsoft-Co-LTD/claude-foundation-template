@@ -37,7 +37,7 @@ For the user-facing reference (command list, args, status lifecycle, story-point
 Both follow `/discovery → /new-sprint → /run-tasks{,-p} → /git-commit (per task) → /retro-sprint`.
 
 ### Autopilot
-`/dev` runs the full pipeline with minimal blocks. Behavior of every block point is governed by `.claude/rules/autonomous-mode.md` (4 official block reasons; status-line format; phase-boundary template). Skills MUST honor that rule when autopilot is active.
+`/dev` runs the full pipeline with minimal blocks. Behavior of every block point is governed by `.claude/rules/autonomous-mode.md` (3 official block reasons — ambiguity, destructive op, ui-verify fail; status-line format; phase-boundary continue-by-default template). Skills MUST honor that rule when autopilot is active.
 
 ## Phase gates (cannot be skipped)
 

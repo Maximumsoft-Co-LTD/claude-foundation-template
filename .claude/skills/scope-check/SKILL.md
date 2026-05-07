@@ -142,7 +142,7 @@ Next: /implement [task-id]   (or vertical-slice if estimate > 90 min)
 
 Per `.claude/rules/autonomous-mode.md`:
 - **Manual mode** (default): BLOCK as documented in steps above; wait for user confirmation.
-- **Autopilot mode** (`AUTOPILOT=1`, set by `/dev`): emit canonical status line and return. Block ONLY on the 4 official conditions. This skill flags `?` when confidence < 90% — orchestrator batches into `ask-choice`.
+- **Autopilot mode** (`AUTOPILOT=1`, set by `/dev`): emit canonical status line and return. Block ONLY on the 3 official conditions (ambiguity / destructive op / ui-verify fail). This skill flags `?` when confidence < 90% — orchestrator batches into `ask-choice`.
 
 ## Output (autopilot status line — required)
 

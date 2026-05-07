@@ -24,7 +24,6 @@ Adding a third option dilutes both. Users hesitate, conversations drift. AI-DLC 
 ## When this applies
 
 - End of every step in manual slash commands that produces an artifact (discovery doc, requirement doc, implementation, retro)
-- Every phase boundary in `/dev` autopilot (which uses the same A/B contract, with `enter` mapping to B and `pause` mapping to abort — see `autonomous-mode.md`)
 - End of any skill that produces a user-reviewable output
 
 ## When this does NOT apply
@@ -32,6 +31,7 @@ Adding a third option dilutes both. Users hesitate, conversations drift. AI-DLC 
 - Pure intermediate steps that don't produce a reviewable artifact (e.g. tool dispatch, internal lookup)
 - `ask-choice` invocations — those are decision points with 2–4 multi-choice options per their own rule
 - Destructive-op confirmations — those are explicit yes/no, not A/B (semantics differ)
+- **`/dev` autopilot phase boundaries** — autopilot phase boundaries do NOT use the A/B prompt. They emit a brief summary line and continue automatically unless one of the 3 autopilot block reasons applies (ambiguity / destructive op / ui-verify fail). See `autonomous-mode.md`. The A/B prompt only appears at the *final* end-of-`/dev` summary.
 
 ## Examples
 

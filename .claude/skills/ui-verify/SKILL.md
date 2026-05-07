@@ -206,7 +206,7 @@ Next:
 
 Per `.claude/rules/autonomous-mode.md`:
 - **Manual mode**: produce verdict block + block /git-commit on FAIL.
-- **Autopilot mode**: emit status line. **FAIL is one of the 4 official block conditions** — auto-trigger `/debug`; if `/debug` resolves to GREEN, continue; otherwise BLOCK with diagnosis.
+- **Autopilot mode**: emit status line. **FAIL is one of the 3 official block conditions** — auto-trigger `/debug`; if `/debug` resolves to GREEN, continue; otherwise BLOCK with diagnosis.
 
 ## Output (autopilot status line — required)
 

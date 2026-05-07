@@ -212,8 +212,9 @@ The brain fills up naturally as you run `/retro-sprint` — brain update is buil
 
 **Autopilot (single intent, hands-off):**
 ```
-/dev "what you want"   # runs the full pipeline; blocks only on the 4 official conditions
-                       # (ambiguity, destructive op, phase boundary, ui-verify fail)
+/dev "what you want"   # runs the full pipeline; blocks only on the 3 official conditions
+                       # (ambiguity, destructive op, ui-verify fail)
+                       # phase boundaries continue automatically — no "press enter" prompts
                        # auto-picks parallel vs sequential per task graph + risk flags
 ```
 
@@ -242,7 +243,7 @@ Full quick reference (flow diagram, hard gates, escape hatches): `docs/WORKFLOW-
 
 | Command | Args | Purpose |
 |---------|------|---------|
-| `/dev` | `"intent"` | **Autopilot** — runs the full pipeline end-to-end; blocks only on the 4 official conditions |
+| `/dev` | `"intent"` | **Autopilot** — runs the full pipeline end-to-end; blocks only on the 3 official conditions (ambiguity / destructive op / ui-verify fail) |
 | `/discovery` | `[disc-id] [name]` | Understand problem before planning |
 | `/brainstorm` | `[disc-id] [name]` | Open-ended ideation — superpowers bridge, alternative to `/discovery` |
 | `/new-sprint` | `[SP[N]] [epic description]` | Create sprint, scaffold tasks as user stories with E2E validation scenarios |

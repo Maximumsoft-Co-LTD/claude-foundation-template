@@ -11,16 +11,26 @@ Autopilot mode is active when ANY of:
 
 Anything else = manual mode (skill behaves as written, BLOCK steps execute as documented).
 
-## The 4 (and only 4) reasons to block in autopilot mode
+## The 3 (and only 3) reasons to block in autopilot mode
 
 | Block reason | Trigger | How to resolve |
 |---|---|---|
 | **Ambiguity** | Skill confidence < 90% on a path that has > 1 viable option | Invoke `ask-choice` (batch all currently-known ambiguities into one question), wait, resume |
 | **Destructive op** | About to: push to `main`/`master`, force-push any branch, drop a Mongo collection, run prod migration, delete a tracked file, run `rm -rf` outside `/tmp` | Show exact action + impact + ask plain yes/no, then proceed or cancel |
-| **Phase boundary** | End of: discovery, sprint plan, each slice, all slices, retro-sprint | Print 5-line summary + `enter to continue / "pause" to stop` |
 | **UI verify fail** | `ui-verify` returns FAIL OR a previously-GREEN test goes RED | Auto-trigger `/debug`. If `/debug` returns RESOLVED with the original test now GREEN → continue. Otherwise BLOCK with the diagnosis. |
 
-If a step would normally BLOCK in manual mode but doesn't match any of the 4 above → in autopilot mode, **emit status line and continue**.
+If a step would normally BLOCK in manual mode but doesn't match any of the 3 above → in autopilot mode, **emit status line and continue**.
+
+### Phase boundary — soft, not blocking
+
+Phase boundaries (end of discovery / sprint plan / each slice / all slices / retro-sprint) are **not** automatic block points in autopilot. At each phase boundary:
+
+1. Emit the 1-line phase-boundary marker (`> [phase boundary] [phase name]`) plus a brief summary (≤ 5 lines).
+2. **Then check the 3 block reasons above.** If any apply → block as defined. If none apply → continue immediately to the next phase, no A/B prompt, no `enter to continue`.
+
+The user can still interrupt at any time by sending a message; the orchestrator treats freeform input as feedback and routes it through `ask-choice`.
+
+Reason: stopping at every phase boundary defeats the purpose of autopilot. The user explicitly asked for "if nothing needs answering and the work is correct, just continue" — phase boundaries with zero pending decisions are exactly that.
 
 ## Progress format (mandatory, every step)
 
@@ -50,23 +60,58 @@ NO multi-paragraph output during pipeline execution. Detail goes to the audit lo
 
 ## Phase boundary summary template
 
-When `/dev` reaches a phase boundary, print:
+When `/dev` reaches a phase boundary AND none of the 3 block reasons apply, print and **continue immediately** (no waiting):
 
 ```
 > [phase boundary] [phase name]
-   ─────────────────────────────────────────
    [3-5 line summary of what just happened]
-
    Next: [what the pipeline will do next, 1 line]
-
-   Press enter to continue, or type "pause" to stop.
 ```
 
-User options at every phase boundary:
-- **enter / blank line** → continue
-- **`pause`** → write checkpoint to `docs/sprints/[sprint-id]/.autopilot-state.json` and stop
-- **`stop`** → same as pause but also clear `AUTOPILOT=1` so subsequent commands run manual
-- **anything else** → treat as freeform feedback; route to `ask-choice` to formalize as a directive, then continue
+After this block the orchestrator MUST immediately spawn the next stage. The very next line in the transcript is the next stage's first status line — never a prompt, never a question, never a reminder.
+
+**Correct (continues automatically):**
+
+```
+> [phase boundary] STAGE 2 — Sprint plan
+   SP2 planned: 5 tasks / 15 SP. Sequential dispatch (payment risk-tagged).
+   Next: STAGE 3 — /requirement SP2-T008
+> requirement: ⏳ scope-check running...
+```
+
+**Wrong (turns the soft boundary into a hard block — FORBIDDEN):**
+
+```
+> [phase boundary] STAGE 2 — Sprint plan
+   ...
+   Next: STAGE 3 — ...
+
+   Press enter to continue, or type pause to stop and write resume state.   ❌
+```
+
+When a block reason DOES apply at a phase boundary (ambiguity / destructive op / ui-verify fail), the relevant block prompt is shown — the phase boundary itself is not what causes the wait. Examples:
+
+- Ambiguity at boundary → emit summary + invoke `ask-choice` with batched questions.
+- Destructive op next → emit summary + show explicit yes/no for the destructive action.
+- ui-verify failed in the slice that just finished → emit summary + auto-`/debug`.
+
+User can interrupt mid-pipeline at any time by sending a message; the orchestrator treats freeform input as feedback and routes it through `ask-choice`. To pause cleanly, the user types `pause` (handled at the next status emission), which writes the checkpoint and stops.
+
+## Forbidden phase-boundary outputs
+
+At a phase boundary where none of the 3 block reasons applies, the orchestrator MUST NOT emit any of these strings (or paraphrases in any language):
+
+- ❌ "Press enter to continue"
+- ❌ "Press any key to continue"
+- ❌ "Type pause to stop" / "Type pause to ..."
+- ❌ "Continue? (y/n)" / "Proceed? (y/n)"
+- ❌ "Should I continue?" / "Ready to continue?"
+- ❌ "Hit enter / press space / ตอบกลับเพื่อไปต่อ"
+- ❌ Any phrase that asks, hints, or reminds the user to confirm continuation
+
+The pause mechanism is documented **once** in `/dev help`. Re-announcing it at every phase boundary turns the soft boundary into a hard block — exactly what this rule prevents. The user already knows they can interrupt at any time by sending a message.
+
+If the orchestrator catches itself about to emit a continuation prompt at a phase boundary AND no block reason applies → suppress the prompt and immediately spawn the next stage.
 
 ## Ambiguity batching
 
@@ -95,7 +140,7 @@ When writing a skill, follow these in EVERY step that says "BLOCK" or "wait for 
 
 **Blocking**: in manual mode, BLOCK as written above.
 In autopilot mode (per autonomous-mode.md):
-  - If condition matches one of the 4 official reasons → BLOCK
+  - If condition matches one of the 3 official reasons → BLOCK
   - Else → emit `> [skill]: [status] ?` (or appropriate marker) and return
 ```
 
@@ -117,7 +162,8 @@ Hook `audit-log.py` already captures every prompt and tool call. Skills do NOT w
 - ❌ Calling `ask-choice` from inside a skill in autopilot — flag `?` and return, let orchestrator batch
 - ❌ Auto-resolving "ambiguous" by picking a default silently — that's the whole problem this rule prevents
 - ❌ Auto-pushing to main "to save time" — destructive-op block is non-negotiable
+- ❌ Re-announcing the pause/resume mechanism at phase boundaries ("type pause to stop", "press enter to continue", etc.) — see Forbidden phase-boundary outputs above
 
 ## Why this exists
 
-Without a single rule, every skill re-invents "should I block here?" and gets it inconsistent. With this rule, the autopilot UX is deterministic: user knows the only 4 reasons execution will pause, and the progress format is uniform across all 20 skills.
+Without a single rule, every skill re-invents "should I block here?" and gets it inconsistent. With this rule, the autopilot UX is deterministic: user knows the only 3 reasons execution will pause, and the progress format is uniform across all 20 skills.
