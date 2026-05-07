@@ -7,6 +7,9 @@
 *.log
 logs/
 
+# Audit log hook output (runtime artifact, append-only per session)
+docs/audit-*.md
+
 # Environment files
 .env
 .env.*
