@@ -65,7 +65,15 @@ For each **failing test**:
 - Do NOT skip, `.only`, or comment out.
 - Code bug → fix the code, not the test.
 - Test misunderstands the spec → correct test to match AC, then fix code.
-- Non-trivial fix → run `/issue [task-id] [description]`.
+
+**Bug-handoff loop (single round-trip with /issue):**
+
+1. When a failure is found, invoke `/issue [task-id] "[concise failure description]"` **once per distinct bug** — pass the failing test name, the AC it violates, and the exact failure message.
+2. `/issue` performs TDD fix (see its Step 3) and at its final step **re-invokes `/testing [task-id]`** automatically — do not call `/testing` yourself a second time.
+3. When `/testing` is re-entered from `/issue`: skip Step 2/Step 2b (env + confidence already verified this run), resume from Step 3 (cross-check coverage) and Step 4 (re-run failing test + full suite).
+4. If the re-run is GREEN → continue to Step 5. If still RED on the same test → escalate to `/debug [task-id] [description]` (root-cause investigation) instead of looping `/issue` a second time on the same symptom.
+
+Only one outstanding `/issue` invocation per failure cycle. Multiple bugs in the same run → batch into multiple `/issue` calls before re-running, but never run `/issue` from inside another `/issue`.
 
 
 ---
@@ -187,8 +195,11 @@ AC coverage:
   ✗ AC-2: unit ✓  integration ✓  e2e ✗ ← missing E2E
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Next:
-  Failing or missing coverage → fix and re-run /testing [task-id]
-  All pass, all ACs covered  → /retro-task [task-id]
+  Failing test → /issue [task-id] [description]   (single round-trip — /issue auto re-runs /testing)
+  Persistent failure on same symptom → /debug [task-id] [description]
+  Missing coverage → write the missing tests then re-run /testing [task-id]
+  All pass, all ACs covered → /retro-task [task-id]   ← recommended (brain-capture)
+                            → /git-commit [task-id]    ← canonical 8-command spec next step
 ```
 
 **Optional skills (insert after all ACs are READY, before /retro-task):**
