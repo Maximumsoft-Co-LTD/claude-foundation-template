@@ -98,7 +98,8 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 - [[01-concepts/developer/CON-concurrency-parallelism]] — Threads, async, mutex, deadlock, race conditions, actor model
 
 ### Architecture Patterns
-- [[01-concepts/architecture/CON-clean-architecture]] — Clean/Hexagonal/Onion, Dependency Rule, folder structure
+- [[01-concepts/architecture/CON-clean-architecture]] — Concentric circles, Dependency Rule, folder structure (Entities → Use Cases → Adapters → Frameworks)
+- [[01-concepts/architecture/CON-hexagonal-architecture]] — Ports & Adapters, driving vs driven, in-memory adapter testing, Clean vs Hex comparison
 - [[01-concepts/architecture/CON-domain-driven-design]] — Strategic DDD (BC, Context Map) + Tactical (Aggregate, Entity, VO)
 - [[01-concepts/architecture/CON-event-driven-architecture]] — EDA, CQRS, Event Sourcing, Saga, broker comparison
 - [[01-concepts/architecture/CON-microservices-patterns]] — API Gateway, Circuit Breaker, Service Mesh, Strangler Fig
