@@ -2,7 +2,7 @@
 type: concept
 tags: [sprint, workflow, lifecycle]
 related: [CON-vertical-slice, CON-story-points, CON-tdd-rules]
-updated: 2026-03-25
+updated: 2026-05-08
 source: template
 ---
 
@@ -10,27 +10,24 @@ source: template
 
 ## In One Sentence
 
-A sprint is an epic broken into E2E-testable vertical slices, each taken through a disciplined design → test → implement → retro cycle before moving on.
+A sprint is an epic broken into E2E-testable vertical-slice tasks, each taken through a disciplined requirement → plan → test → implement → review → verify → retro cycle before moving on.
 
 ## The Full Flow
 
 ```
 /discovery              ← understand the problem deeply first
     ↓
-/new-sprint             ← create sprint, propose + confirm tasks
+/new-sprint             ← create sprint, set Sprint Goal, propose + confirm tasks
     ↓
-/requirement            ← AC + user stories per task
+/requirement            ← one unified task doc: ACs + design + plan + tests + slices
     ↓
-/design fe              ← component plan + TDD test cases (FE)
-/design be              ← endpoint spec + TDD test cases (BE)
-    ↓
-/implement              ← write failing tests → implement → green
+/implement              ← write failing tests → implement planned slice → green
     ↓
 /issue (loop)           ← bug-first: failing test → fix → log
     ↓
-/code-review            ← AC coverage check
+/code-review            ← plan/spec compliance → quality/security
     ↓
-/testing                ← full suite + AC cross-check
+/testing                ← full suite + AC proof + slice proof + ui-verify
     ↓
 /retro-task             ← per-task retro, mark done
 /git-commit             ← selective stage + conventional commit
@@ -42,11 +39,12 @@ A sprint is an epic broken into E2E-testable vertical slices, each taken through
 
 **Sequential** — one task at a time, each command in order.
 
-**Parallel** — `/run-tasks [id] [id]` runs Phase 1 (design) for all tasks, waits for review, then Phase 2 (implement) for all tasks simultaneously using sub-agents.
+**Parallel** — `/run-tasks [id] [id]` runs `/requirement` for all tasks, then `/implement → /code-review → /testing` per task in parallel where contracts do not collide.
 
 ## Hard Rules
 
-- No `/implement` before both `/design fe` AND `/design be` are complete
+- No `/implement` before `/requirement` has a real `Implementation Plan`, `Execution Slices`, and planned tests
+- No `/git-commit` while any execution slice is still open
 - No `/retro-sprint` while any task is not `done`
 - Discovery is **recommended** before every sprint (warn if skipped, don't block)
 

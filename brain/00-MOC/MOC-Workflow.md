@@ -2,7 +2,7 @@
 type: MOC
 topic: workflow
 tags: [sprint, commands, lifecycle, tdd]
-updated: 2026-03-25
+updated: 2026-05-08
 ---
 
 # 🗺️ MOC — Workflow
@@ -14,10 +14,12 @@ updated: 2026-03-25
 ## Core Flow
 
 ```
-/discovery → /new-sprint → /requirement (unified: story + FE design + BE design + Implementation Plan + tests)
+/discovery → /new-sprint → /requirement (unified: story + FE design + BE design + Implementation Plan + TDD plan + Execution Slices + Plan Drift Guard)
     → /implement → /issue (loop) → /code-review → /testing
     → /retro-task → /git-commit → /next-task (loop per task) → /retro-sprint
 ```
+
+`/dev` runs the same pipeline end-to-end and continues automatically unless one of the 3 official block reasons applies: ambiguity, destructive op, or `ui-verify` failure.
 
 **Parallel mode:** `/run-tasks [id] [id] ...` (Agent tool) or `/run-tasks-p [id] [id] ...` (headless `claude -p`) runs the full per-task pipeline across multiple tasks simultaneously, one agent per vertical-slice story.
 
@@ -57,14 +59,15 @@ updated: 2026-03-25
 |---------|---------|
 | `/discovery` | Structured 10-topic exploration before any planning |
 | `/brainstorm` | Open-ended ideation (superpowers bridge — alt to `/discovery`) |
-| `/new-sprint` | Create sprint, propose + confirm task breakdown |
-| `/requirement` | Unified per-task doc: story + FE design + BE design + Implementation Plan + tests |
+| `/new-sprint` | Create sprint, set Sprint Goal, propose + confirm task breakdown |
+| `/requirement` | Unified per-task doc: story + design + Implementation Plan + TDD plan + `Execution Slices` + `Plan Drift Guard` |
 | `/write-plan` | Bite-sized implementation plan (superpowers bridge) |
-| `/implement` | Write failing tests → implement → green |
+| `/implement` | Lock the next planned slice, write failing tests, implement, return to green |
 | `/execute-plan` | Run plan via subagents with worktree isolation (superpowers bridge) |
 | `/issue` | Bug-first: failing test → fix → log |
-| `/code-review` | AC coverage check + quality review |
-| `/testing` | Full suite run + AC-test cross-check |
+| `/code-review` | Plan/AC compliance first, then edge cases, security, and code quality |
+| `/testing` | Full suite + AC proof + slice proof + `ui-verify` when the task touched UI |
+| `/dev` | Orchestrate the full workflow automatically with soft phase boundaries |
 | `/retro-task` | Per-task retrospective, mark done, capture brain entries |
 | `/retro-sprint` | Aggregate retro + consolidate sprint-level brain entries |
 | `/git-commit` | Selective stage + conventional commit |

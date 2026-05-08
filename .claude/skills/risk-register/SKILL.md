@@ -1,7 +1,7 @@
 ---
+name: risk-register
 description: Enumerate risks (data loss, regression, security, performance, reliability) before implementing — stack-aware checklists with mitigation + rollback plan, especially for migrations, auth, and payment changes
 allowed-tools: Read, Grep, Glob, Edit, Write, Bash(git log:*), Bash(git diff:*)
-disable-model-invocation: false
 ---
 
 # risk-register

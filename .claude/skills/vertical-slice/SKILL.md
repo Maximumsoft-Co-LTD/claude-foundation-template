@@ -1,7 +1,7 @@
 ---
+name: vertical-slice
 description: Break a task into 15–45 min shippable vertical slices (FE+BE+test each) — kills "small task takes same time as big task"
 allowed-tools: Read, Grep, Glob, Edit, Write, Bash(git status:*), Bash(git diff:*)
-disable-model-invocation: false
 ---
 
 # vertical-slice

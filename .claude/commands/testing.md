@@ -12,6 +12,7 @@ Parse `[task-id]`, extract `[sprint-id]`.
 
 Read:
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — single unified doc with ACs, TDD + E2E Test Plans (FE and BE), success metrics
+- `Execution Slices` + `Plan Drift Guard` — what proof each slice promised before the task can be considered ready
 
 
 ---
@@ -53,6 +54,11 @@ Key dimensions:
 ## Step 3 — Cross-check TDD coverage
 
 For every row in all TDD and E2E Test Plan tables, verify a corresponding test exists in the codebase. List any **missing tests** — these must be written before proceeding.
+
+Invoke `plan-driven-delivery` in testing mode and verify:
+- every slice is present,
+- every slice still maps to real tests/evidence,
+- there is no unfinished slice hiding behind a green aggregate test run.
 
 
 ---
@@ -136,6 +142,7 @@ Skip 6a-uiverify only for: BE-only tasks, infra/docs-only tasks, or non-interact
 After running tests or manual verification, trace each result against the Feature Flow in the requirement doc:
 - Verified but skips key journey steps → **not production-ready**. Fix the gap.
 - Verified with mocked/stubbed data → **not production-ready**. Fix to use real deps.
+- Verified but a slice still lacks its promised exit evidence → **not production-ready**. The plan contract is still open.
 
 Output format:
 ```
@@ -157,6 +164,7 @@ All ACs must show `READY` before proceeding to `/retro-task`.
 
 Re-read the Production Readiness output just written and verify:
 - [ ] Every AC from `[task-id]-requirement.md` appears in the output — none silently skipped.
+- [ ] Every execution slice from `[task-id]-requirement.md` is either `done` with evidence or explicitly `BLOCKED`.
 - [ ] Every `BLOCKED` entry has a specific reason stated.
 - [ ] No AC is marked `READY` if its E2E / Manual verification used mocked or stubbed data.
 - [ ] **FE-touching tasks:** Step 6a-uiverify ran (`Skill("ui-verify")` invoked) for every AC — visual correctness, all 5 State Inventory states, transition smoothness verified. Screenshots captured under `docs/sprints/[sprint-id]/[task-id]/ui-verify/`. `[task-id]-smoke.md` summary file written. No AC marked `READY` without ui-verify evidence.
@@ -174,7 +182,8 @@ Run the full test suite **NOW** — this is the single authoritative final run:
 1. **Run full suite** — do not rely on memory of Step 4.
 2. **Confirm** exit code 0, zero failures, zero regressions outside this task's scope.
 3. **Trace** every AC to its passing test by name — no AC is "probably covered."
-4. Any newly failing test outside this task's scope → regression → fix before proceeding.
+4. Re-read `Execution Slices` and confirm every slice promised proof that now exists.
+5. Any newly failing test outside this task's scope → regression → fix before proceeding.
 
 If you're about to write "should pass" or "probably fine" → **STOP**. Run the command first.
 
@@ -190,6 +199,7 @@ Test Results: [task-id]
   Unit        : X passed / Y failed
   Integration : X passed / Y failed
   E2E         : X passed / Y failed
+  Plan        : [N]/[N] slices done
 
 AC coverage:
   ✓ AC-1: unit ✓  integration ✓  e2e ✓
@@ -206,4 +216,3 @@ Next:
 **Optional skills (insert after all ACs are READY, before /retro-task):**
 - `/accessibility-review [task-id]` — WCAG 2.1 AA audit (FE tasks)
 - `/test-coverage [task-id]` — coverage gaps mapped to ACs, missing test list
-

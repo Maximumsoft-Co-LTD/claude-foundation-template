@@ -2,7 +2,7 @@
 type: concept
 tags: [tdd, testing, quality]
 related: [PAT-001-tdd-flow, DEC-001-real-deps-integration-tests]
-updated: 2026-03-25
+updated: 2026-05-08
 source: template
 ---
 
@@ -39,7 +39,8 @@ See: [[../03-patterns/PAT-001-tdd-flow]]
 
 ## Hook Enforcement
 
-Tests run automatically after every `Write` or `Edit` via PostToolUse hook.
+Tests get fast-feedback enforcement after relevant `Write` or `Edit` actions via the PostToolUse dispatcher. The hook runs the edited test file or closest related test file when it can.
+This is not the release gate: `/testing` still owns the full-suite check before the task is done.
 See: [[../02-decisions/DEC-002-posttooluse-lint-hooks]]
 
 ## Related

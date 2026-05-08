@@ -1,7 +1,7 @@
 ---
+name: debug
 description: Root-cause investigation protocol — reproduce, isolate, hypothesize, verify, fix with TDD — never workaround
 allowed-tools: Read, Grep, Glob, Edit, Bash(git:*), Bash(go test:*), Bash(npm test:*), Bash(npm run:*), Bash(pytest:*), Bash(curl:*), Bash(mongosh:*), Bash(jq:*), Bash(cat:*)
-disable-model-invocation: false
 ---
 
 # debug

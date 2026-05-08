@@ -1,7 +1,7 @@
 ---
+name: bug-repro
 description: Write the failing test that reproduces a reported bug — minimal input, exact expected, verified RED — before any fix code is written
 allowed-tools: Read, Grep, Glob, Edit, Write, Bash(git log:*), Bash(git diff:*), Bash(npm test:*), Bash(go test:*), Bash(pytest:*)
-disable-model-invocation: false
 ---
 
 # bug-repro

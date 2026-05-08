@@ -26,6 +26,10 @@ Two readiness signals — the first is **mandatory**, the second is **advisory**
   - `docs/BACKLOG.md` status for `[task-id]` is `testing` or later (`review` / `done`).
 - No evidence → **stop**. Run `/testing [task-id]` first. Do not commit untested work.
 
+**Mandatory: the plan contract is closed for this task.**
+- Read `Execution Slices` from `[task-id]-requirement.md`.
+- If any slice is not `done`, or if `Plan Drift Guard` indicates the task should have returned to `/requirement`, **stop**. Do not commit partially-closed planned work as if the task were complete.
+
 **Advisory: task retro is written.**
 - Read `docs/sprints/[sprint-id]/[task-id]/[task-id]-retro.md`.
 - File missing → warn (do not block):
@@ -135,6 +139,7 @@ Read `docs/BACKLOG.md`.
 **If all tasks in `[sprint-id]` are `done`:**
 ```
 ✓ Committed: [commit message]  |  Branch: [branch-name]  |  Action: [merge/PR/keep/discard]
+  Plan: closed
 
 Sprint [sprint-id] complete — run /retro-sprint [sprint-id]
 ```
@@ -169,7 +174,7 @@ Sprint [sprint-id] complete — run /retro-sprint [sprint-id]
      ☐ AC-1: ...
      ☐ AC-2: ...
 
-   Readiness: Requirement [filled/empty] | Implementation Plan [filled/empty]
+   Readiness: Requirement [filled/empty] | Implementation Plan [filled/empty] | Execution Slices [filled/empty]
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    ```
    Suggest ONE next step (same table as `/next-task`): requirement missing or empty → `/requirement`, requirement complete → `/implement`.

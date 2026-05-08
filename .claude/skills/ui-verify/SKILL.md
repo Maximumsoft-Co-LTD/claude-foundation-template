@@ -1,7 +1,7 @@
 ---
+name: ui-verify
 description: Manual UI verification before commit — start dev server, click every AC path in real browser, capture evidence, block /git-commit on failure
 allowed-tools: Read, Grep, Glob, Bash(npm *), Bash(npx *), Bash(yarn *), Bash(pnpm *), Bash(go run:*), Bash(go test:*), Bash(go vet:*), Bash(pytest:*), Bash(ruff:*), Bash(python *), Bash(curl *), Bash(lsof:*), Bash(mkdir:*), Bash(ls:*)
-disable-model-invocation: false
 ---
 
 # ui-verify

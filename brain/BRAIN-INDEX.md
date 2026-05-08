@@ -1,7 +1,7 @@
 # 🧠 Claude Brain — Master Index
 
 > **Entry point for Claude Code.**
-> When starting any session, read this file first to orient yourself.
+> Read this file only when the task requires brain context.
 > Then dive into the relevant MOC for your task.
 
 ---
@@ -313,7 +313,7 @@ Think of it as: `docs/` = *what we built* · `brain/` = *what we learned*
 | [[CON-distributed-transactions]] | [[CON-event-driven-architecture]], [[CON-microservices-patterns]] | Saga is the modern answer |
 | [[CON-load-balancing]] | [[CON-networking-basics]], [[CON-scalability-patterns]], [[CON-deployment-strategies]] | Front door for horizontal scale |
 | [[CON-storage-types]] | [[CON-cloud-fundamentals]], [[CON-disaster-recovery]] | Cloud storage decisions |
-| [[CON-trunk-based-development]] | [[CON-feature-flags]], [[CON-cicd-pipeline]] | TBD + flags + fast CI = continuous delivery |
+| [[CON-trunk-based-development]] | [[CON-feature-flags]], [[CON-cicd-pipeline]] | Small batches + flags + fast CI = continuous delivery |
 | [[CON-feature-flags]] | [[CON-deployment-strategies]], [[CON-metrics-product]] | Decouple deploy from release |
 | [[CON-secrets-management]] | [[CON-security-fundamentals]], [[CON-api-security]] | Identity-bound, dynamic, short-lived secrets |
 

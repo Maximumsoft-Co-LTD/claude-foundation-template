@@ -4,11 +4,36 @@ All notable changes to claude-foundation-template are documented here.
 
 ---
 
+## [0.17.2] — 2026-05-08
+
+### Added
+- **Skill and brain authoring guardrails.** Added `.claude/rules/skill-authoring.md` for `.claude/skills/**` edits and `.claude/rules/hook-authoring.md` for `.claude/hooks/*.py` edits so future changes inherit the current schema, trigger-boundary, and fail-safe hook conventions instead of drifting ad hoc.
+- **Two new dispatcher sub-hooks.** `skill_validate.py` validates project-local `SKILL.md` edits against the active skill schema (and lightly checks `agents/openai.yaml` when present). `brain_note_lint.py` warns on missing frontmatter, dead-end MOCs, orphaned notes, and leftover placeholder text in `brain/**/*.md`.
+
+### Changed
+- **`/new-sprint` is planning-only again.** Removed the contradictory task-doc scaffolding behavior from the command and aligned references so per-task requirement docs are created by `/requirement` or Phase 1 of `/run-tasks`, not during sprint planning.
+- **Sprint overview now carries `Origin` and `Sprint Goal`.** The sprint template, command flow, and workflow rule now make the sprint's why/what trace explicit: discovery doc origin, a single sprint goal, then the selected story set and estimates.
+- **Testing guidance now prefers the smallest sufficient test first.** The testing rule, requirement command, and requirement template now explicitly bias toward unit/integration proof first and reserve E2E rows for critical user journeys and cross-boundary smoke.
+- **Hook and architecture docs match the dispatcher runtime.** README, MOCs, and DEC-002 now reflect source-test feedback, skill validation, brain-note linting, and citation-meter routing as they actually run today.
+- **README inventory and command docs are now accurate.** The README now distinguishes the active 24-skill catalog from `_archive/` reference skills, describes `.claude/hooks/` as dispatcher/audit/validation infrastructure rather than only PostToolUse linting, corrects `/debug` usage text, and fixes the `/dev` blocker count to the current three-condition rule.
+- **Skill authoring checks now match real skill structure.** `plan-driven-delivery` now uses the canonical workflow/invoke/output contract, and `skill_validate.py` accepts either `## Output` or step-oriented `## Step N — Output` sections so advisory warnings stay high-signal instead of noisy.
+- **Python hook cache artifacts are ignored.** `.gitignore` now ignores `__pycache__/` and `*.py[cod]`, which keeps `git status` clean after hook compile checks.
+
+## [0.17.1] — 2026-05-08
+
+### Added
+- **`plan-driven-delivery` skill (`.claude/skills/plan-driven-delivery/`).** Turns the unified requirement doc into a task-level plan contract and aligns `/requirement`, `/implement`, `/issue`, `/code-review`, `/testing`, and `/dev` around `Execution Slices` plus `Plan Drift Guard`.
+
+### Changed
+- **Active skill metadata normalized to the current validator schema.** All 24 active skills now declare `name:` in `SKILL.md` frontmatter and no longer use the legacy `disable-model-invocation` key. Repo-local skill validation now passes cleanly across the full active catalog.
+- **Workflow docs and templates are plan-driven by default.** The quick reference, requirement template, sprint overview template, workflow rule, and command docs now treat the requirement doc as the downstream source of truth instead of letting later phases infer plan state from chat history.
+- **Hook and brain docs now match runtime behavior.** `README.md`, `DEC-002`, hook concept/glossary notes, and architecture/workflow MOCs now describe the real `dispatch.py` routing model, the targeted-test behavior of `run_tests.py`, and the fact that full-suite enforcement still belongs to `/testing`.
+
 ## [0.17.0] — 2026-05-07
 
 ### Added
 - **`/dev` autopilot command (`.claude/commands/dev.md`).** Single-intent autonomous workflow that runs the full Inception → Sprint plan → Per-task → Sprint close pipeline end-to-end, blocking only on the three official conditions (ambiguity, destructive op, ui-verify fail). Phase boundaries are soft — they emit a 1-line marker plus brief summary and continue automatically. Manual slash commands (`/discovery`, `/requirement`, `/implement`, …) remain unchanged — `/dev` is the new autonomous entry point; the manual flow stays available for fine-grained control. Stage 3 auto-picks between `/run-tasks` (parallel) and a per-task for-loop (sequential) based on task count, tier width, risk flags (auth/payment/migration), and explicit user pacing hints. Risk-tagged tasks force sequential to preserve per-slice `ui-verify` boundaries; independent same-tier tasks parallelize.
-- **15 atomic skills (`.claude/skills/`).** Twelve second-batch skills wired into the autopilot pipeline — `prompt-understand`, `ask-choice`, `solution-options`, `brain-capture`, `local-run`, `debug`, `tdd-plan`, `mongo-review`, `skill-evolution`, `agent-routing`, `session-handoff`, `pr-create` — plus three AI-DLC selective additions: `workspace-detect`, `reverse-engineer`, `nfr-plan`. Each ships with `disable-model-invocation: false` so commands can compose them and Claude can pick them up by description match. Total skill catalog now stands at 23 with explicit references in CLAUDE.md.
+- **15 atomic skills (`.claude/skills/`).** Twelve second-batch skills wired into the autopilot pipeline — `prompt-understand`, `ask-choice`, `solution-options`, `brain-capture`, `local-run`, `debug`, `tdd-plan`, `mongo-review`, `skill-evolution`, `agent-routing`, `session-handoff`, `pr-create` — plus three AI-DLC selective additions: `workspace-detect`, `reverse-engineer`, `nfr-plan`. Each ships with model-discoverable metadata so commands can compose them and Claude can pick them up by description match. Total skill catalog now stands at 23 with explicit references in CLAUDE.md.
 - **Three new gate skills + command wiring (`bug-repro`, `impact-map`, `risk-register`).** Gaps that earlier dogfooding surfaced are now mechanical:
   - `bug-repro` — write the failing test that reproduces a bug *before* any fix code. Used by `/issue` Step 3 (replaces inline "write failing test" improvisation) and `/debug` Phase 4 (steps 1–2). Distinct from `tdd-plan` (new features) — this targets regressions.
   - `impact-map` — given a planned change, mechanically enumerate Tier-1 (direct callers), Tier-2 (indirect dependents), Tier-3 (external consumers like webhooks/mobile/OpenAPI). Surfaces contract changes that "just rename this field" usually misses. New `/implement` Step 1e runs it always (unless greenfield-within-brownfield); `/issue` Step 2 runs it after root cause located; `/code-review` Step 2a checks coverage.

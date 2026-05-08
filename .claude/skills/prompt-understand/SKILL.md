@@ -1,7 +1,7 @@
 ---
+name: prompt-understand
 description: Parse freeform user prompt into structured intent, entities, constraints, success criteria, and unknowns — lightweight pre-step before scope-check
 allowed-tools: Read, Grep, Glob
-disable-model-invocation: false
 ---
 
 # prompt-understand

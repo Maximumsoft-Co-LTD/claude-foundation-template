@@ -1,7 +1,7 @@
 ---
+name: pr-create
 description: Open a GitHub PR with structured title (≤70 chars), AC checklist body, design doc links, and test evidence — never "wip" or empty body
 allowed-tools: Read, Grep, Glob, Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git push:*), Bash(git branch:*), Bash(git rev-parse:*), Bash(npm:*), Bash(npx:*), Bash(yarn:*), Bash(pnpm:*), Bash(go test:*), Bash(go vet:*), Bash(go build:*), Bash(pytest:*), Bash(ruff:*), Bash(python:*), mcp__github__create_pull_request, mcp__github__list_pull_requests, mcp__github__get_me, mcp__github__subscribe_pr_activity
-disable-model-invocation: false
 ---
 
 # pr-create

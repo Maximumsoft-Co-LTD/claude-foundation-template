@@ -1,7 +1,7 @@
 # /new-sprint
 Workflow position: **/discovery → START → /requirement**
 
-Break every story out of the discovery doc, scaffold all task directories, and update `BACKLOG.md`. Planning only — **no deep code reading at this stage**; that happens in `/requirement`.
+Break every story out of the discovery doc, draft task estimates, and update `BACKLOG.md`. Planning only — **no deep code reading and no per-task requirement docs at this stage**; that happens in `/requirement`.
 
 Arguments: `[sprint-id] [epic description]`  — e.g. `SP2 Build user authentication with OAuth`
 
@@ -32,7 +32,13 @@ This step enforces `.claude/rules/discovery-epic-mapping.md` — every sprint mu
 
 1. Create `docs/sprints/[sprint-id]/`.
 2. Create `docs/sprints/[sprint-id]/[sprint-id]-overview.md` from `docs/templates/SPRINT-OVERVIEW-TEMPLATE.md`.
-3. Pre-fill: Sprint ID, epic title, Start Date (today), Problem Statement (from discovery or description), Status: `planning`. If a discovery doc was found in Step 1, also pre-fill `Origin: docs/discovery/[disc-id]-[name].md` per `.claude/rules/discovery-epic-mapping.md`.
+3. Pre-fill: Sprint ID, epic title, Start Date (today), Problem Statement (from discovery or description), Status: `planning`.
+   - If a discovery doc was found in Step 1, also pre-fill `Origin: docs/discovery/[disc-id]-[name].md` per `.claude/rules/discovery-epic-mapping.md`.
+   - Pre-fill `Sprint Goal` as one sentence describing the single outcome this sprint should achieve. Derive it from the discovery doc's chosen approach / success target when available; otherwise derive it from the epic description.
+4. Pre-fill the capacity summary if the repo already documents people / available days; otherwise leave names blank but compute:
+   - `Total SP committed`
+   - `Total estimate (ideal days)`
+   - `Buffer` (default 20%)
 
 ---
 
@@ -65,15 +71,16 @@ Rules:
 - **Valid types:** `feat` (user-facing feature) · `fix` (user-facing bug fix) · `chore` (refactor/cleanup with observable validation) · `infra` (infra — only type exempt from user story format).
 - No cap on task count — propose as many as needed to cover full epic scope.
 - Order by dependencies. Task IDs continue from the global counter found in Step 1.
+- Add a draft `Estimate` per task in ideal hours/days. Do **not** mechanically convert story points into time; use points for relative size, then estimate based on risk, dependency shape, and the amount of unknown work still visible from discovery.
 
 Present the breakdown:
 ```
 Proposed stories for [sprint-id] — [epic title]:
 (Last used: T[NNN] → starting from T[NNN+1])
 
-| Task ID  | User Story | Type | Depends On | Points |
-|----------|-----------|------|------------|--------|
-| SP2-T005 | As a [role], I want [X], so that [Y] | feat | — | 3 |
+| Task ID  | User Story | Type | Depends On | Points | Estimate |
+|----------|-----------|------|------------|--------|----------|
+| SP2-T005 | As a [role], I want [X], so that [Y] | feat | — | 3 | 1.5d |
 ```
 
 Then, below the table, write the E2E Validation Scenarios as rendered markdown (NOT inside a code block):
@@ -111,7 +118,7 @@ If ANY check fails → STOP. Fix the table, re-present, wait for confirmation be
 ## Step 3b — Coverage check vs discovery
 
 If a discovery doc was found, cross-check proposed tasks against it:
-- **Goals** — which task covers each Goal / Success Metric? Flag uncovered goals.
+- **Sprint Goal / Goals** — which task set delivers the Sprint Goal, and which task covers each supporting Goal / Success Metric? Flag uncovered goals.
 - **In-scope items** — which task covers each? Flag uncovered items.
 - **User journeys** — which task delivers each To-Be journey end-to-end? Flag uncovered journeys.
 
@@ -124,6 +131,11 @@ Coverage check:
 ➖ Out of scope: [item] — reason: [why]
 ```
 Do NOT silently drop any in-scope item. Add a task or mark explicitly out-of-scope.
+
+Capacity check before confirmation:
+- Sum all task estimates into `Total estimate (ideal days)`.
+- Compare against any known team capacity and keep at least a 20% buffer.
+- If the sprint obviously does not fit, split or move work now; do not hope `/dev` will "go faster."
 
 Ask: "Does this breakdown look right? Rename, add/remove rows, or say 'confirm'."
 Wait for confirmation.
@@ -139,30 +151,10 @@ Wait for confirmation.
 ## [sprint-id] — [Epic Title]
 > `docs/sprints/[sprint-id]/[sprint-id]-overview.md`
 
-| Task | User Story | Depends On | Points | Status | Priority | Assigned |
-|------|-----------|------------|--------|--------|----------|----------|
-| SP2-T005 | As a [role], I want ... | — | 3 | `todo` | — | — |
+| Task | User Story | Depends On | Points | Estimate | Status | Priority | Assigned |
+|------|-----------|------------|--------|----------|--------|----------|----------|
+| SP2-T005 | As a [role], I want ... | — | 3 | 1.5d | `todo` | — | — |
 ```
-
----
-
-## Step 5 — Scaffold task directories
-
-For every confirmed task in the Stories table, create the per-task workspace so `/requirement` has a starting point. This is **scaffolding only — do NOT read source code, do NOT explore the codebase, do NOT fill design sections**. Real code reading and design happen in `/requirement`.
-
-For each `[task-id]`:
-
-1. Create directory `docs/sprints/[sprint-id]/[task-id]/` if it does not exist.
-2. Copy `docs/templates/REQUIREMENT-TEMPLATE.md` to `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`.
-3. Pre-fill ONLY the cheap-to-fill fields directly from the Stories table + sprint overview (no codebase reading required):
-   - Title `# [task-id] — [User Story]`
-   - Metadata: `Sprint`, `Points`, `Priority` (if known), `Status: todo`
-   - Stories table's User Story → `## User Stories` first row
-   - E2E Validation Scenarios for this task → seed `## Acceptance Criteria` (one AC per scenario; mark each `TBD — refine in /requirement` for any field that needs codebase context)
-   - `Origin:` link to the discovery doc (if any)
-4. Leave every other section as-is (template `<!-- comments -->` + `TBD`). `/requirement` is the command that reads the codebase and fills these sections.
-
-If any `[task-id]-requirement.md` already exists (e.g. re-running `/new-sprint` on an existing sprint) → skip that file, do NOT overwrite. Print: `Skipped scaffold for [task-id] — file already exists`.
 
 ---
 
@@ -171,7 +163,7 @@ If any `[task-id]-requirement.md` already exists (e.g. re-running `/new-sprint` 
 ```
 ✓ docs/sprints/[sprint-id]/[sprint-id]-overview.md
 ✓ BACKLOG.md updated — [N] tasks added
-✓ Scaffolded [N] task directories (skeleton requirement docs only — no code read)
+  Total estimate: [N] ideal days  |  Buffer check: pass / needs split
 
 Next: /requirement [task-id]                ← single, sequential
   or: /run-tasks [task-id] [task-id] ...    ← parallel

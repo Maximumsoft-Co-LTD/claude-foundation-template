@@ -1,7 +1,7 @@
 ---
+name: impact-map
 description: Given a planned change (file/function/contract/schema), enumerate every callsite, dependent, and downstream consumer that could break — produces an impact table with risk levels
 allowed-tools: Read, Grep, Glob, Bash(git log:*), Bash(git diff:*), Bash(rg:*)
-disable-model-invocation: false
 ---
 
 # impact-map

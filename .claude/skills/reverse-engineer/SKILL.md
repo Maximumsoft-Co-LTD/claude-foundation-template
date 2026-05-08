@@ -1,7 +1,7 @@
 ---
+name: reverse-engineer
 description: Brownfield deep-scan — generates architecture / components / dependencies / business-flow doc via parallel Explore agents, cached for 30 days
 allowed-tools: Read, Grep, Glob, Edit, Write, Bash(ls:*), Bash(find:*), Bash(stat:*), Bash(git log:*), Bash(wc:*), Agent
-disable-model-invocation: false
 ---
 
 # reverse-engineer

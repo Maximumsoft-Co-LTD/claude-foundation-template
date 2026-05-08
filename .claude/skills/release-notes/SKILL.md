@@ -1,7 +1,7 @@
 ---
+name: release-notes
 description: Generate CHANGELOG.md entry + sync README sections + bump semver at sprint close — no more forgotten release docs
 allowed-tools: Read, Grep, Glob, Edit, Write, Bash(git log:*), Bash(git diff:*), Bash(git tag:*), Bash(git rev-parse:*), Bash(git describe:*), Bash(git add:*), Bash(git status:*), Bash(jq:*), Bash(node:*)
-disable-model-invocation: false
 ---
 
 # release-notes

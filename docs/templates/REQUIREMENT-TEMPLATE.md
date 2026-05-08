@@ -6,6 +6,7 @@
 | Field | Value |
 |-------|-------|
 | **Sprint** | SP[N] |
+| **Origin** | docs/discovery/disc-NNN-[name].md / direct request / follow-up |
 | **Task Type** | fullstack / fe-only / be-only / infra |
 | **Points** | 1 / 2 / 3 / 5 / 8 |
 | **Estimate** | ___ days |
@@ -459,7 +460,7 @@ stateDiagram-v2
 # 5 · Scope Overview & Implementation Plan
 
 ## Scope Overview
-<!-- 2pt+ — 3–6 bullets. High-level scope for orientation BEFORE the detailed Implementation Plan. Group by layer or feature area (FE: Routing / Components / State / API / E2E. BE: DB / Models / Service / Controller / Tests). Each bullet = one paragraph-level chunk of work, not a micro-step. Bullets must match the Implementation Plan's phases. -->
+<!-- 1pt+ — 1–6 bullets. High-level scope for orientation BEFORE the detailed Implementation Plan. Group by layer or feature area (FE: Routing / Components / State / API / E2E. BE: DB / Models / Service / Controller / Tests). Each bullet = one meaningful chunk of work, not a micro-step. Bullets must match the Implementation Plan's phases. -->
 
 ### [FE] Scope
 - **[Area]:** [what gets built at the high level]
@@ -468,7 +469,7 @@ stateDiagram-v2
 - **[Area]:** [what gets built at the high level]
 
 ## Implementation Plan (engineering tasks + subtasks)
-<!-- 3pt+ — each row is a Scrum engineering task (layer-level). Implementers follow checkboxes in sequence. File paths must be REAL paths from Existing Code Context. `/implement` follows this plan exactly. Every subtask = single action, 2–5 min. -->
+<!-- 1pt+ for all non-infra tasks — each row is a Scrum engineering task (layer-level). For 1pt tasks, 1–3 rows is enough. 3pt+ tasks should use a fuller phase breakdown. Implementers follow checkboxes in sequence. File paths must be REAL paths from Existing Code Context. `/implement` follows this plan exactly. Every subtask = single action, 2–5 min. -->
 
 ### [FE] Plan
 
@@ -507,12 +508,26 @@ stateDiagram-v2
 - [ ] Commit: "test: add [X] tests"
 - [ ] ...
 
+## Execution Slices
+<!-- 1pt+ for all non-infra tasks — normalized checkpoints derived from Scope Overview + Implementation Plan. `/implement`, `/code-review`, `/testing`, and `/dev` use this section to follow the plan instead of improvising. One slice = one meaningful checkpoint, not one checkbox. -->
+
+| Slice | Goal | Covers ACs | Planned files | Test-first proof | Exit evidence | Status |
+|-------|------|------------|---------------|------------------|---------------|--------|
+| S1    |      |            |               |                  |               | planned / doing / done |
+
+## Plan Drift Guard
+<!-- 1pt+ for all non-infra tasks — define when a fix stays inside `/issue` and when the task must return to `/requirement` because the plan changed materially. -->
+
+- **In-plan fixes stay in `/issue`:**
+- **Return to `/requirement` when:**
+- **Permitted follow-ups after ship:**
+
 ---
 
 # 6 · Test Plans
 
 ## TDD Test Plan
-<!-- 2pt+ — write BEFORE implementing. Min 1 unit + 1 integration per AC. Integration tests use REAL dependencies (real DB/queue/HTTP). No mocks at integration layer. -->
+<!-- 1pt+ — write BEFORE implementing. Min 1 planned test per AC; 2pt+ should usually have both unit and integration rows. Choose the smallest sufficient test level first: unit for branching/validation/state, integration for persistence/contracts/middleware, E2E only when lower levels cannot prove the journey. Integration tests use REAL dependencies (real DB/queue/HTTP). No mocks at integration layer. -->
 
 ### [FE] TDD Tests
 | Test Case | AC | Type | Description |
@@ -525,7 +540,7 @@ stateDiagram-v2
 |           |    | unit / integration | |
 
 ## E2E Test Plan
-<!-- 3pt+ — minimum 1 scenario per AC. Cross-layer scenarios when both FE and BE exist. -->
+<!-- 3pt+ — focus on critical user journeys and cross-boundary smoke. Cross-layer scenarios when both FE and BE exist. Do NOT mirror every low-level branch already covered by unit/integration rows. -->
 
 | Scenario | AC | Steps | Expected Outcome |
 |----------|----|-------|------------------|

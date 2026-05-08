@@ -6,7 +6,7 @@ date: 2026-03-25
 tags: [hooks, lint, automation, PostToolUse]
 ---
 
-# DEC-002 — Auto-Lint on Every Write/Edit (PostToolUse Hooks)
+# DEC-002 — Path-Aware Validation on Every Write/Edit (PostToolUse Hooks)
 
 ## Status
 `active`
@@ -17,12 +17,16 @@ Without automated lint and test runs, Claude Code can write code that compiles b
 
 ## Decision
 
-**All four hooks fire automatically after every `Write` or `Edit` action:**
+**A single dispatcher hook fires automatically after every `Write` or `Edit` action, then routes to the relevant sub-hooks by edited path.**
 
-1. `lint_go.py` → `golangci-lint`
-2. `lint_ts.py` → `tsc` type check
-3. `lint_js.py` → ESLint
-4. `run_tests.py` → full test suite
+Current routing:
+
+1. Source edit → matching linter(s) (`lint_go.py`, `lint_ts.py`, `lint_js.py`) + `run_tests.py`
+2. Skill definition edit under `.claude/skills/` → `skill_validate.py`
+3. Brain note edit under `brain/` → `brain_note_lint.py`
+4. Workflow markdown under `docs/sprints/` or `docs/discovery/` → `brain_citation_meter.py`
+
+`run_tests.py` runs the edited test file directly, or the closest related test file for an edited source file. If no related test or supported runner exists, it exits silently. The full suite remains the responsibility of `/testing`.
 
 Configured in `.claude/settings.json`:
 ```json
@@ -30,32 +34,32 @@ Configured in `.claude/settings.json`:
   "hooks": {
     "PostToolUse": [{
       "matcher": "Write|Edit",
-      "hooks": [lint_go, lint_ts, lint_js, run_tests]
+      "hooks": [dispatch]
     }]
   }
 }
 ```
 
-Each hook checks if its language is present in the project before running, so non-applicable hooks are no-ops.
+The dispatcher keeps the settings surface small, and each sub-hook still self-filters if its language or file type does not apply.
 
 ## Rationale
 
-- Catches lint errors and broken tests immediately, at the point of creation
-- Prevents "fix lint" commits at the end of a task
-- Keeps CI green by never committing broken code
+- Catches lint errors and nearby test regressions immediately, at the point of creation
+- Avoids wasting time on full-suite runs for every file save
+- Keeps doc-only edits from triggering irrelevant source hooks
 - Claude gets immediate feedback to self-correct before moving on
 
 ## Consequences
 
 **Positive:**
-- Every saved file is lint-clean and test-passing
-- No "oops, forgot to run tests" situations
+- Relevant source edits get lint and nearby-test feedback immediately
+- No "oops, forgot to run the related test" situations during implementation
 - Faster feedback loop for Claude during implementation
 
 **Negative:**
-- Adds 30–120 seconds overhead per Write/Edit
-- Full test suite on every file save can be slow on large projects
-  - Mitigation: `run_tests.py` can be scoped to changed files only
+- Adds overhead to every relevant Write/Edit
+- Targeted tests can miss unrelated regressions
+  - Mitigation: `/testing` still runs the full suite before completion
 
 ## Related
 

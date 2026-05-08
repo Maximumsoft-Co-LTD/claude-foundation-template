@@ -34,8 +34,8 @@ If SP1 ends at T005, SP2 starts at T006. This means:
 Every file in `docs/sprints/` is named with its task ID prefix:
 ```
 SP1-T001-requirement.md
-SP1-T001-frontend.md
-SP1-T001-backend.md
+SP1-T001-issues.md
+SP1-T001-smoke.md
 SP1-T001-retro.md
 ```
 

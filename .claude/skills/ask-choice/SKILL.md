@@ -1,7 +1,7 @@
 ---
+name: ask-choice
 description: Force every ambiguity to be a multi-choice question (2–4 options with tradeoffs) via AskUserQuestion — never open-ended chat
 allowed-tools: Read, Grep, AskUserQuestion
-disable-model-invocation: false
 ---
 
 # ask-choice

@@ -9,6 +9,8 @@ Workflow position: **single entry point — replaces typing `/discovery → /new
 
 User gives one intent. `/dev` runs the entire pipeline. Blocks ONLY on the 3 official conditions per `.claude/rules/autonomous-mode.md` (ambiguity, destructive op, ui-verify fail). Phase boundaries emit a summary and continue automatically unless one of those 3 conditions applies.
 
+After `/requirement` exists for a task, `/dev` treats `Execution Slices` maintained by `plan-driven-delivery` as the task-level source of truth. The orchestrator should not infer slice progress from chat memory when the requirement doc already contains the plan contract.
+
 **Sequential pipeline mode (default for sequential path, N ≥ 2 tasks, no risk flags):**
 After `/implement T_N` finishes, the orchestrator immediately starts `/requirement T_{N+1}` while a separate fork runs `/code-review T_N` in the background. Commits stay in dependency order — `T_{N+1}` cannot commit until `T_N`'s review passes. Net: implement and review of consecutive tasks overlap in wall-clock time without breaking commit ordering.
 
@@ -22,7 +24,7 @@ The main `/dev` session is a **lightweight orchestrator**. It does NOT run heavy
 Why: heavy work in the main session bloats context until `/dev` itself runs out of headroom. With spawning, the main session stays small — just intent, sprint state, fork summaries, and routing decisions.
 
 What the main session does:
-1. Decide which stage runs next (read state file + last fork's summary).
+1. Decide which stage runs next (read state file + last fork's summary + the task's current plan contract when it exists).
 2. Spawn one fork per stage with a self-contained prompt.
 3. Receive the fork's structured result (status, summary ≤10 lines, artifact paths, optional `?` flags).
 4. Answer the user's questions directly when it has the answer.
@@ -34,6 +36,7 @@ What the main session does NOT do:
 - Write or edit project files. (Forks do that — except `.autopilot-state.json` which is orchestrator-owned.)
 - Run tests, linters, or dev servers. (Forks do that.)
 - Hold raw tool output. The fork notification arrives as a single result; main session reads only that.
+- Guess task-level progress from the transcript once `Execution Slices` exists. Read the requirement doc instead.
 
 ### Fork return contract
 
@@ -190,7 +193,8 @@ Create `docs/sprints/[active-or-new]/.autopilot-state.json`:
   "dispatch_mode": null,
   "pipeline_mode": false,
   "review_forks": {},
-  "ready_to_commit": []
+  "ready_to_commit": [],
+  "task_contracts": {}
 }
 ```
 
@@ -199,6 +203,7 @@ Field semantics:
 - `pipeline_mode` — true when sequential path runs implement/review overlap (set after Step 5.0 — sequential + N ≥ 2 + no risk flags)
 - `review_forks` — `{ task_id: { fork_id, status: "pending"|"pass"|"fail", started_at } }`. Tracks background review forks. Cleared per task as commits land
 - `ready_to_commit` — task IDs whose implement is done but commit is held pending review (in pipeline mode). Drained in dependency order
+- `task_contracts` — `{ task_id: { next_slice, slices_done, slices_total, drift } }`. Lightweight summary mirrored from the task's requirement doc so `/dev` can route without rereading the entire task history
 
 This file is updated after every step completion. Single source of truth for `resume`.
 
@@ -238,6 +243,11 @@ Update state: `current_stage = "3"`, `sprint_id = "[SP-N]"`.
 ---
 
 ## Step 5 — Run STAGE 3 (Per-task execution)
+
+Once a task has passed `/requirement`, all later task-level routing decisions should honor `plan-driven-delivery`:
+- `Execution Slices` decide the next implementation unit.
+- `Plan Drift Guard` decides whether a failure stays in `/issue` or re-opens `/requirement`.
+- `/git-commit` is not allowed while slices remain open.
 
 ### Step 5.0 — Dispatch decision (parallel vs sequential)
 
@@ -294,14 +304,14 @@ Two sub-modes: **plain sequential** (`pipeline_mode = false`) and **pipelined se
 
 #### Per-task building blocks (used by both sub-modes)
 
-1. **/requirement** — **spawn fork**. Fork prompt: "Run `/requirement [task-id]` in autopilot mode. Sprint context: `[sprint_id]`. Discovery doc: `docs/discovery/disc-NNN-[name].md`. A skeleton requirement doc may already exist from `/new-sprint` Step 5 — read and refine it; this is the first command that reads real source code. Skills under it (scope-check, api-contract, tdd-plan, nfr-plan) emit status lines. Produce `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`. Return `=== FORK RESULT ===` with artifact path. If any sub-skill flags `?` → return early with `status: ambig`."
+1. **/requirement** — **spawn fork**. Fork prompt: "Run `/requirement [task-id]` in autopilot mode. Sprint context: `[sprint_id]`. Discovery doc: `docs/discovery/disc-NNN-[name].md`. If a draft requirement doc already exists from a prior partial pass, read and refine it; otherwise draft from the sprint plan. This is the first command that reads real source code. Skills under it (scope-check, api-contract, tdd-plan, nfr-plan, plan-driven-delivery) emit status lines. Produce `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` with `Execution Slices` + `Plan Drift Guard`. Return `=== FORK RESULT ===` with artifact path plus slice count / next slice. If any sub-skill flags `?` → return early with `status: ambig`."
 
 2. **local-run** — inline. Invoke `Skill("local-run")` if stack not already up (check `/tmp/local-run-status.json`).
 
 3. **/implement (per slice)** — **spawn one fork per slice**, not one fork for the whole task.
 
-   For each slice in the Implementation Plan:
-   - **Spawn fork** with prompt: "Run the next slice of `/implement [task-id]` in autopilot mode. Slice scope: `[slice description from Implementation Plan]`. Run api-contract (if FE+BE), tdd-plan (slice-scoped), write code RED→GREEN, mongo-review (if Mongo touched). Do NOT run ui-verify — that runs once per task during the `/testing` stage. Return `=== FORK RESULT ===` with tests RED→GREEN counts + build status. **Do NOT commit inside this fork — the orchestrator runs `/code-review` → `/testing` → `/git-commit` after all slices complete, in dependency order per Step 5.B's commit-order rule.**"
+   For each slice in the plan contract:
+   - **Spawn fork** with prompt: "Run the next slice of `/implement [task-id]` in autopilot mode. Use `plan-driven-delivery` in implement mode to select the next slice from `Execution Slices`; do not improvise your own slice boundaries. Slice scope: `[slice description from Execution Slices / Implementation Plan]`. Run api-contract (if FE+BE), tdd-plan (slice-scoped), write code RED→GREEN, mongo-review (if Mongo touched). Do NOT run ui-verify — that runs once per task during the `/testing` stage. Return `=== FORK RESULT ===` with tests RED→GREEN counts, build status, updated slice status, and any drift flag. **Do NOT commit inside this fork — the orchestrator runs `/code-review` → `/testing` → `/git-commit` after all slices complete, in dependency order per Step 5.B's commit-order rule.**"
    - When fork returns: orchestrator reads the result. On `blocked` (build failure or test that won't go GREEN) → surface to user. On `ok` → emit slice phase-boundary 1-liner and continue immediately.
    - Update state file with the slice's progress before spawning the next slice.
 
@@ -463,7 +473,7 @@ Usage:
 Pipeline (5 stages):
   1. Inception      workspace-detect → reverse-engineer (if brownfield)
                     → /discovery
-  2. Sprint plan    /new-sprint  (also scaffolds all task dirs — no code reading)
+  2. Sprint plan    /new-sprint  (planning only — no code reading, no task docs yet)
   3. Per-task work  Dispatch decision → one of:
                     • parallel: /run-tasks [all task-ids]
                     • sequential+pipeline (8-command spec, per task):

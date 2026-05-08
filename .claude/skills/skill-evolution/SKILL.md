@@ -1,7 +1,7 @@
 ---
+name: skill-evolution
 description: Detect repeated friction patterns from sprint and propose new skills or update existing ones — with overlap detector to prevent skill bloat
 allowed-tools: Read, Grep, Glob, Edit, Write, Bash(ls:*), Bash(grep:*), Bash(git log:*), Bash(git diff:*)
-disable-model-invocation: false
 ---
 
 # skill-evolution

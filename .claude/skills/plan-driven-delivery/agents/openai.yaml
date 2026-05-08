@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan-Driven Delivery"
+  short_description: "Keep commands aligned to the task plan."
+  default_prompt: "Use this skill to normalize a task requirement doc into a plan-driven execution contract and keep /implement, /code-review, /issue, /testing, and /dev aligned to it."

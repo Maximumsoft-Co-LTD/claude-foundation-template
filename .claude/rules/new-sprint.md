@@ -4,7 +4,7 @@ When running `/new-sprint`:
 
 - **Do NOT** scaffold per-task files (no `requirement.md`, no task directories).
 - `/new-sprint` scope is planning only:
-  1. Fill the Stories table in the sprint overview doc
+  1. Fill the `Sprint Goal` and Stories table in the sprint overview doc
   2. Add tasks to `docs/BACKLOG.md`
 
 The per-task `[task-id]-requirement.md` is created when that task actually begins (`/requirement`). The unified doc contains story + FE design + BE design + Implementation Plan + tests — there are no separate `-frontend.md` / `-backend.md` files.

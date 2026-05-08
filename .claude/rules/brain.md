@@ -24,4 +24,18 @@ Open only the MOC relevant to your task — never multiple at once:
 - Before implementing a known pattern → check `03-patterns/` for PAT note
 - When an AC matches a past lesson → check `04-lessons/`
 
+## When to write to the brain
+
+Capture a note only when it is **durable enough to change future work**:
+- It will change a future decision, review checklist, test plan, or search path
+- It is reusable beyond the current task or sprint
+- It is specific enough that another engineer can apply it without the original chat history
+
+Do **not** promote these into the brain:
+- One-off task status, handoff notes, or temporary blockers
+- Raw bug chronology without the reusable rule/pattern behind it
+- Vague reminders like "be careful" or "check this next time"
+
+Before creating a new note, search for an existing one and prefer **update + cross-link** over near-duplicate notes.
+
 **Never:** read the entire brain vault. Always navigate MOC → targeted notes only.

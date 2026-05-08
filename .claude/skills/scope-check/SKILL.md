@@ -1,7 +1,7 @@
 ---
+name: scope-check
 description: Restate task scope before any work — block until user confirms understanding, ACs, boundary cases, and time estimate
 allowed-tools: Read, Grep, Glob, Bash(git diff:*), Bash(git log:*), Bash(ls:*)
-disable-model-invocation: false
 ---
 
 # scope-check

@@ -32,7 +32,7 @@ Never let the `using-superpowers` orchestrator intercept a template command. It 
 | Bridge Command | Superpowers Skill(s) | Position in Workflow |
 |----------------|----------------------|----------------------|
 | `/brainstorm` | `superpowers:brainstorming` | Alternative to `/discovery` — open-ended ideation |
-| `/write-plan` | `superpowers:writing-plans` | After `/design be`, before `/execute-plan` or `/implement` |
+| `/write-plan` | `superpowers:writing-plans` | After `/requirement`, before `/execute-plan` or `/implement` |
 | `/execute-plan` | `superpowers:subagent-driven-development` + `superpowers:using-git-worktrees` | After `/write-plan`, replaces `/implement` |
 
 ### Inline Integration Points (inside template commands)
@@ -74,7 +74,7 @@ When invoking superpowers from a template command, always redirect the default s
   → Skill("superpowers:brainstorming") runs
   → Output saved to docs/discovery/disc-007-payment-flow.md
 
-# After /design be completes
+# After /requirement completes
 /write-plan SP2-T042
   → Skill("superpowers:writing-plans") runs with task context injected
   → Output saved to docs/sprints/SP2/SP2-T042/SP2-T042-plan.md

@@ -4,11 +4,15 @@
 | Field | Value |
 |-------|-------|
 | **Sprint** | SP[N] |
+| **Origin** | docs/discovery/disc-NNN-[name].md / direct request |
 | **Status** | planning / active / done |
 | **Start Date** | YYYY-MM-DD |
 | **End Date** | YYYY-MM-DD |
 | **Team** | - |
 | **Epic Owner** | - |
+
+## Sprint Goal
+<!-- One sentence. The single outcome this sprint should achieve. -->
 
 ## Team Capacity
 | Person | Available days | Notes |
@@ -16,11 +20,13 @@
 |        |               |       |
 
 - **Total SP committed:**
+- **Total estimate (ideal days):**
 - **Buffer:** (recommended 20%)
 
 ## Problem Statement
 
 ## Goals
+<!-- 1–3 supporting outcomes that together prove the Sprint Goal. -->
 1.
 2.
 3.
@@ -45,9 +51,9 @@
 <!-- Each row = one Scrum Story (vertical slice). Infra-only tasks use type `infra`. -->
 <!-- mermaid dependency diagram if helpful -->
 
-| Task ID | User Story | Type | Depends On | Points | Status |
-|---------|-----------|------|------------|--------|--------|
-|         | As a [role], I want [X], so that [Y] | feat / fix / chore / infra | — | | `todo` |
+| Task ID | User Story | Type | Depends On | Points | Estimate | Status |
+|---------|-----------|------|------------|--------|----------|--------|
+|         | As a [role], I want [X], so that [Y] | feat / fix / chore / infra | — | | 0.5d / 1d / 2d | `todo` |
 
 ### E2E Validation Scenarios
 <!-- Each non-infra task gets a named block. Minimum 2 scenarios per feat task (happy path + one edge/error). -->
@@ -81,7 +87,8 @@
 
 ## Definition of Done (Sprint Level)
 - [ ] All stories done
-- [ ] All sprint Goals observably achieved
+- [ ] Sprint Goal observably achieved
+- [ ] Supporting Goals observably achieved
 - [ ] Every Success Metric has an actual result
 - [ ] Full regression suite passes
 - [ ] Sprint retro written

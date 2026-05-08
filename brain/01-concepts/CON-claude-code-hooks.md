@@ -2,7 +2,7 @@
 type: concept
 tags: [claude-code, hooks, lifecycle, automation, governance]
 related: [DEC-002-posttooluse-lint-hooks, CON-claude-code-skills, CON-mcp-integration]
-updated: 2026-04-29
+updated: 2026-05-08
 source: template
 ---
 
@@ -12,7 +12,7 @@ source: template
 
 A **hook** is a user-defined handler that runs automatically at a specific lifecycle event. Hooks turn Claude Code from "an LLM with tools" into a **policy-enforced** development environment — they can block actions, modify input, log activity, or trigger downstream automation.
 
-As of 2026, Claude Code exposes 12+ lifecycle events with 4 handler types and async execution support.
+Claude Code exposes multiple lifecycle events with both blocking and non-blocking handler types.
 
 ## Event taxonomy
 
@@ -45,17 +45,26 @@ Hooks can run **sync** (block until done) or **async** (fire-and-forget, availab
 
 ## How this template uses hooks
 
-The primary integration is **PostToolUse for lint and test** — see [[../02-decisions/DEC-002-posttooluse-lint-hooks]]. Concretely, after every Write/Edit on a code file:
+The primary integration is a **single PostToolUse dispatcher plus a multi-event audit hook**.
+
+For `Write|Edit`, `.claude/settings.json` calls `dispatch.py`, which fans out by edited path:
 
 ```
-Write → PostToolUse hook fires → run linter on the file → run relevant tests
-       → if anything fails, surface the error to the next turn
+Write/Edit
+  → PostToolUse hook fires
+  → dispatch.py chooses the relevant sub-hooks
+  → source edits: lint + related-test feedback
+  → workflow docs: brain citation meter
 ```
 
-This makes TDD enforcement mechanical instead of vibes-based. The agent can't "forget" to run tests — the hook runs them.
+This makes fast-feedback validation mechanical instead of vibes-based. The agent can't "forget" to run a relevant test after a source edit, and the docs pipeline can't forget to update citation metrics for sprint/discovery output.
 
 Other hooks present in this template (see `.claude/hooks/`):
-- `brain_citation_meter.py` — tracks brain note references for the `/brain-meter` command
+- `run_tests.py` — runs the edited test file or closest related test file; full-suite enforcement still belongs to `/testing`
+- `skill_validate.py` — validates project-local skill edits against the active skill schema
+- `brain_note_lint.py` — lightweight lint for `brain/**/*.md`
+- `brain_citation_meter.py` — tracks brain note references for workflow docs under `docs/sprints/` and `docs/discovery/`
+- `audit-log.py` — logs prompts, AI turn ends, destructive Bash attempts, and sensitive-file writes
 
 ## PreToolUse — the gate hook
 
@@ -104,7 +113,7 @@ In `.claude/settings.json`:
       {
         "matcher": "Write|Edit",
         "hooks": [
-          { "type": "command", "command": "python .claude/hooks/lint.py" }
+          { "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/dispatch.py\"" }
         ]
       }
     ]
@@ -112,7 +121,7 @@ In `.claude/settings.json`:
 }
 ```
 
-Matchers are tool-name regexes. Order in the array = order of execution.
+Matchers are tool-name regexes. Order in the array = order of execution. `dispatch.py` then decides which sub-hooks actually run.
 
 ## Anti-pattern: making hooks chatty
 

@@ -1,7 +1,7 @@
 ---
+name: tdd-plan
 description: Generate the TDD test plan artifact — every AC mapped to failing tests with explicit boundary cases, before any implementation code
 allowed-tools: Read, Grep, Glob, Edit, Write, Bash(git diff:*)
-disable-model-invocation: false
 ---
 
 # tdd-plan

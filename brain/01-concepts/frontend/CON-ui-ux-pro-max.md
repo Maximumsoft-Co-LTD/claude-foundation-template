@@ -25,10 +25,10 @@ updated: 2026-04-03
 
 ## When to Invoke
 
-Invoke `ui-ux-pro-max` **after** `frontend-design` has scaffolded the component and **before** writing implementation code:
+Invoke `ui-ux-pro-max` **after** `/requirement` has drafted the FE design and **before or during** implementation when you want design QA:
 
 ```
-/design fe  →  frontend-design (scaffold)  →  ui-ux-pro-max (design QA)  →  /implement
+/requirement  →  frontend-design (scaffold)  →  ui-ux-pro-max (design QA)  →  /implement
 ```
 
 Use it when:
@@ -51,11 +51,11 @@ Install if not present: the skill is not bundled in the template — it is provi
 ## Workflow Position
 
 ```
-/design fe task
+/requirement task
   Step 1: Read requirement + brain MOC-Frontend
   Step 2: Invoke frontend-design → generates component scaffold
   Step 3: Invoke ui-ux-pro-max → design QA, palette, guidelines
-  Step 4: Document decisions in frontend.md
+  Step 4: Document decisions back into [task-id]-requirement.md
   Step 5: Hand off to /implement
 ```
 

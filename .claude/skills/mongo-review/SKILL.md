@@ -1,7 +1,7 @@
 ---
+name: mongo-review
 description: Review MongoDB queries, aggregations, indexes, and schema changes before ship — catches missing indexes, unanchored regex, $lookup pitfalls, large $in, projection leaks
 allowed-tools: Read, Grep, Glob, Bash(grep:*), Bash(mongosh:*), Bash(git diff:*)
-disable-model-invocation: false
 ---
 
 # mongo-review

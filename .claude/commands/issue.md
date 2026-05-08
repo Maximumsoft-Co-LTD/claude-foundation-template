@@ -21,6 +21,7 @@ Classify severity:
 
 Read:
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — unified doc: which AC does this violate? Expected behavior from the relevant FE / BE Design section?
+- `Execution Slices` + `Plan Drift Guard` — which slice owns this failure, and does the fix stay inside the current plan?
 
 
 ---
@@ -50,6 +51,11 @@ Do NOT implement the fix yet — that's Step 3.
 
 **Impact assessment** — once the root cause is located (what file/function/contract), invoke the `impact-map` skill scoped to that surface. The Tier-1/Tier-2/Tier-3 table tells you what else the fix might break. Skip only for purely local bugs (single function, no callers outside its own file/test).
 
+Before moving to Step 3, invoke `plan-driven-delivery` in issue mode:
+- map the issue to the owning AC and slice,
+- classify it as `in-plan bug` or `material drift`,
+- if `material drift`, stop and return to `/requirement` before coding.
+
 If stuck after 3 hypotheses → document the blocker and ask the user.
 
 ---
@@ -75,6 +81,7 @@ If the impact-map from Step 2 had any 🔴 row → before merging the fix, also 
 
 Does this bug affect other tasks in the sprint?
 - If yes → update their status to `blocked` in `docs/BACKLOG.md` and note the dependency.
+- If the fix changed the owning slice's proof or exit criteria, update `Execution Slices` before leaving `/issue`.
 
 
 ---
@@ -102,7 +109,8 @@ After Step 3 confirmed GREEN locally (the targeted regression test + the focused
 
 ```
 ✓ Issue logged: docs/sprints/[sprint-id]/[task-id]/[task-id]-issues.md
-  Severity: [level]  |  Test added: yes/no  |  Blocks: [list or none]
+  Severity: [level]  |  Slice: [Sx]  |  Test added: yes/no  |  Blocks: [list or none]
+  Drift: in-plan / return to /requirement
   Auto re-run: /testing [task-id] [skipped — caller controls / executed: PASS / executed: FAIL]
 
 Next:

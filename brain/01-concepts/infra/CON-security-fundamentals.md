@@ -72,7 +72,7 @@ Fix:
 ### A04 — Insecure Design
 ```
 Problem: Security not considered in design phase
-Fix: Threat modeling during /discovery and /design be
+Fix: Threat modeling during /discovery and the BE design section inside /requirement
 ```
 
 ### A05 — Security Misconfiguration

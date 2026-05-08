@@ -77,6 +77,7 @@ Read **in parallel** and store content in memory as `DOC_OVERVIEW`, `DOC_REQ`:
 Validate:
 - Missing requirement or empty ACs → stop: "Run `/requirement [task-id]` first."
 - Implementation Plan empty AND Task Type ≠ infra → stop: "Fill Implementation Plan in `[task-id]-requirement.md` first."
+- Missing `Execution Slices` or `Plan Drift Guard` AND Task Type ≠ infra → stop: "Run `plan-driven-delivery` from `/requirement` first and save the plan contract."
 
 Read `Task Type` from Metadata. Assess parallelization flags:
 - `HAS_FE`: Task Type ∈ {fullstack, fe-only} AND `### [FE] TDD Tests` has rows
@@ -167,19 +168,38 @@ If `impact-map` showed Tier-3 (external consumer) and there is no contract-versi
 
 ---
 
+## Step 1f — Lock the active execution slice
+
+Invoke `plan-driven-delivery` in implement mode before writing or editing any test/code.
+
+It must:
+- read `Execution Slices`,
+- pick the first eligible non-`done` slice,
+- print the slice goal, owning ACs, planned files, and required RED proof,
+- confirm whether any currently changed files sit outside that slice.
+
+Rules:
+- Work one slice at a time.
+- If the next change is outside the active slice but does **not** change ACs/contracts/outcomes, add it to the current slice only if it is a trivial call-site or plumbing adjustment.
+- If the next change materially alters scope, follow `Plan Drift Guard` and return to `/requirement` instead of quietly continuing.
+
+---
+
 ## Step 2 — Write failing tests
 
 **Single-owner-end-to-end:** Per `.claude/rules/parallel-work.md`, one task is owned by one agent (or the main session) end-to-end. Do NOT split FE and BE for the same task between two agents — layer-split agents produce contracts that don't match. The `HAS_FE` / `HAS_BE` flags determine which test plans to write, not how many agents to spawn.
 
+Only write the tests needed for the **active slice** first. Do not jump ahead to a later slice just because the file is already open.
+
 **If `SHARED_TYPES`:** write shared type/interface files first.
 
-Then write failing tests in this order (FE before BE if both, so the FE contract drives the BE test design):
+Then write failing tests in this order for the active slice (FE before BE if both, so the FE contract drives the BE test design):
 
 **For each layer with tests (`HAS_FE`, `HAS_BE`):** write all test files from the corresponding `### [FE] TDD Tests` / `### [BE] TDD Tests` rows in `DOC_REQ`. After writing, run the tests and **confirm every new test fails (red)**. Do NOT write implementation code yet.
 
 If a sub-agent is needed (e.g. context budget concerns or the user explicitly asked), spawn ONE sub-agent that owns BOTH the FE and BE tests for this task — never two parallel agents split by layer. Inject `SCRUM_HIERARCHY` + the full `DOC_REQ` (or both [FE] and [BE] sections if size-extracted).
 
-Wait for red-test confirmation before proceeding.
+Wait for red-test confirmation before proceeding. If the tests you need do not exist in the TDD plan for this slice, stop and update the requirement doc first.
 
 ---
 
@@ -189,7 +209,7 @@ Wait for red-test confirmation before proceeding.
 
 **If `HAS_MIGRATION`:** run DB migrations first in main context.
 
-Then implement in this order:
+Then implement the **active slice only** in this order:
 1. **Shared types/interfaces** (if any).
 2. **Backend layer** (if `HAS_BE`): endpoints, validation, service logic, repository, event publishing, caching, logging, security per the `### [BE] Plan` rows. Run BE tests after each logical unit.
 3. **Frontend layer** (if `HAS_FE`): components, routing, state, API calls, loading/error states, analytics, responsive, accessibility per the `### [FE] Plan` rows. Run FE tests after each logical unit.
@@ -198,7 +218,12 @@ BE-before-FE because FE typically consumes the BE contract; reversing wastes a r
 
 If a sub-agent is needed, spawn ONE sub-agent that owns BOTH layers for this task end-to-end. Inject `SCRUM_HIERARCHY` + the relevant `DOC_REQ` sections.
 
-Implement until all tests are green. Tests are already written — implement what they require, no extras, no shortcuts. Run tests after each logical unit. Log any bugs found (do NOT run /issue inside this step — report in output).
+Implement until the active slice's tests are green. Tests are already written — implement what they require, no extras, no shortcuts. Run tests after each logical unit. Log any bugs found (do NOT run /issue inside this step — report in output).
+
+Before moving to the next slice:
+- invoke `plan-driven-delivery` again,
+- mark the current slice `done` only if its promised exit evidence exists,
+- otherwise keep it `doing` and continue fixing.
 
 If during implementation you uncover a bug that is NOT covered by the existing tests, run `/issue [task-id] [description]` per bug after Step 4 verification.
 
@@ -227,6 +252,7 @@ Run full test suite + build (FE and BE in parallel if separate commands):
 2. **Read** — full output, check exit code, count failures.
 3. **Trace** — for each AC in requirement, name the specific test that covers it.
 4. **Only then** — print the output below.
+5. **Plan gate** — re-read `Execution Slices`. If any slice is not `done`, do not claim implementation complete yet.
 
 **Red flags — STOP if you catch yourself:**
 - Using "should pass", "probably works", "seems correct"
@@ -243,6 +269,7 @@ Run full test suite + build (FE and BE in parallel if separate commands):
   Tests: [N] passing, 0 failing
   Build: exit 0
   Verified: [timestamp of fresh test run]
+  Plan: [N]/[N] slices done
 
 ACs covered:
   ✓ AC-1 → [test name]

@@ -83,12 +83,20 @@ Key dimensions:
 2. Proposed Approaches section: structure at least 2 options. If only one mentioned, add placeholder Option B.
    Each option must have: **Description**, **Pros**, **Cons**, **Recommended** (yes/no with reason).
 3. Unknowns & Open Questions section: mark each as `- [ ]` checkbox.
+   - Tag each question as either `blocking-for-planning` or `carry-forward-to-/requirement`.
+   - `blocking-for-planning` means `/new-sprint` should not commit to task breakdown until answered.
+   - `carry-forward-to-/requirement` means the sprint can be planned, but the owning task must resolve it before implementation.
 4. **Epic Breakdown section** (apply `.claude/rules/discovery-epic-mapping.md`): inspect Scope Estimate → `Estimated sprints`.
    - **= 1 sprint** → leave the Epic Breakdown table empty.
    - **> 1 sprint** → enumerate each epic as a row (E1, E2, ...). Each row: title, one-line scope, `Depends On` (another epic's ID or `—`), priority. Order by dependency (E1 has no epic deps; E2 may depend on E1, etc.). Also fill **Shared entities / cross-epic concerns** with anything used by more than one epic — ownership goes to the first epic that introduces each.
 5. Next Steps section:
    - **Single-epic** → `"/new-sprint [sprint-id] \"[epic description]\""`.
    - **Multi-epic** → one line per epic row in Epic Breakdown, in dependency order, with sequential `[sprint-id]`s (SP[N], SP[N+1], ...).
+6. Add a short **Definition of Ready for /new-sprint** note:
+   - chosen approach,
+   - known scope boundary,
+   - blockers still open,
+   - questions intentionally deferred to `/requirement`.
 
 ---
 
@@ -136,6 +144,7 @@ Before reporting output, re-read `docs/discovery/[disc-id]-[name].md` in full an
 - [ ] At least 2 options exist in Approaches section, each with Description / Pros / Cons / Recommended.
 - [ ] One approach is marked `✓ SELECTED` — approach approval gate was completed.
 - [ ] All open questions are formatted as `- [ ]` checkboxes.
+- [ ] Each open question is labeled `blocking-for-planning` or `carry-forward-to-/requirement`.
 - [ ] If Scope Estimate > 1 sprint → Epic Breakdown has ≥ 2 rows and Next Steps lists one `/new-sprint` per epic in dependency order.
 - [ ] If Scope Estimate = 1 sprint → Epic Breakdown is empty and Next Steps has a single `/new-sprint` invocation.
 

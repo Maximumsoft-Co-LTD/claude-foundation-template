@@ -1,7 +1,7 @@
 ---
+name: nfr-plan
 description: Append explicit NFR targets (perf, security, scalability, reliability) to requirement doc — stack-aware defaults for Go/Vue/Nuxt/Mongo/Socket
 allowed-tools: Read, Grep, Glob, Edit
-disable-model-invocation: false
 ---
 
 # nfr-plan

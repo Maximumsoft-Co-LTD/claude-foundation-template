@@ -2,7 +2,7 @@
 type: MOC
 topic: architecture
 tags: [system-design, tech-stack, structure, conventions]
-updated: 2026-03-25
+updated: 2026-05-08
 ---
 
 # 🗺️ MOC — Architecture
@@ -25,7 +25,7 @@ updated: 2026-03-25
 └── .claude/
     ├── commands/          ← Slash command definitions
     ├── rules/             ← Path-scoped lint rules (auto-loaded)
-    ├── hooks/             ← PostToolUse lifecycle scripts
+    ├── hooks/             ← dispatcher + lifecycle sub-hooks
     └── settings.json      ← Hook trigger config
 ```
 
@@ -36,15 +36,22 @@ updated: 2026-03-25
 | `.claude/rules/testing.md` | All test files |
 | `.claude/rules/backend.md` | `src/api/**`, `internal/**`, `pkg/**`, `server/**` |
 | `.claude/rules/frontend.md` | `src/**/*.{ts,tsx}`, `pages/**`, `app/**` |
+| `.claude/rules/skill-authoring.md` | `.claude/skills/**/SKILL.md`, `.claude/skills/**/agents/openai.yaml` |
+| `.claude/rules/hook-authoring.md` | `.claude/hooks/*.py` |
 
 ## Lifecycle Hooks
 
 | Hook | Trigger | Script |
 |------|---------|--------|
-| Lint Go | `Write\|Edit` | `lint_go.py` → `golangci-lint` |
-| Lint TS | `Write\|Edit` | `lint_ts.py` → `tsc` |
-| Lint JS | `Write\|Edit` | `lint_js.py` → ESLint |
-| Run Tests | `Write\|Edit` | `run_tests.py` → full test suite |
+| Dispatch | `Write\|Edit` | `dispatch.py` → routes by edited path to the right sub-hooks in parallel |
+| Audit log | `UserPromptSubmit` + selected `PreToolUse` + `Stop` | `audit-log.py` → append-only audit trail with destructive-op and secret redaction guards |
+
+Sub-hooks behind `dispatch.py`:
+- `lint_go.py` / `lint_ts.py` / `lint_js.py` — language-specific lint/type checks for source edits
+- `run_tests.py` — edited test file or closest related test file only; fast feedback, not the full-suite gate
+- `skill_validate.py` — validates `.claude/skills/**/SKILL.md` edits against the active skill schema
+- `brain_note_lint.py` — lightweight structure/lint checks for `brain/**/*.md`
+- `brain_citation_meter.py` — only for workflow docs under `docs/sprints/` and `docs/discovery/`
 
 ## Conventions
 

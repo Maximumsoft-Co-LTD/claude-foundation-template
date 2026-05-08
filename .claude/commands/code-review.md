@@ -35,7 +35,7 @@ Parse `[task-id]`, extract `[sprint-id]`.
 Read:
 - `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md` — single unified doc containing ACs, FE design, BE design, TDD test plans, Implementation Plan
 
-Validate: missing requirement, empty ACs, or empty Implementation Plan → stop with specific message.
+Validate: missing requirement, empty ACs, empty Implementation Plan, or missing `Execution Slices` / `Plan Drift Guard` → stop with specific message.
 
 Run `git diff main...HEAD` to identify all changed files.
 
@@ -65,6 +65,12 @@ Key dimensions:
 
 Check every changed file against requirement + design docs:
 
+**Plan-driven conformance**
+- Invoke `plan-driven-delivery` in review mode.
+- Compare the diff against `Execution Slices`, `Implementation Plan`, and `Plan Drift Guard`.
+- Flag any changed file that is not covered by a slice or clearly justified by an in-plan bug fix.
+- If the diff materially changed scope but the requirement doc was not updated, this is **Critical**.
+
 **AC Coverage**
 - Every AC has working code that satisfies it?
 - No AC silently skipped or partially implemented?
@@ -86,7 +92,7 @@ Check every changed file against requirement + design docs:
 - Tier-3 rows (external consumers) → check that the diff includes the contract-versioning artifact promised (new endpoint version, Sunset header, OpenAPI bump, schema migration with rolling read).
 - **Missing impact-map → Critical** ONLY when the change meets the same trigger as `/implement` Step 1e (non-trivial existing surface, shared contracts, or external-consumer impact). For purely local fixes explicitly allowed to skip in `/issue` Step 2, mark Impact-map coverage as N/A with rationale instead of Critical.
 
-**Spec verdict:** `PASS` (all ACs covered, design matched, impact-map honored) or `FAIL` (list gaps).
+**Spec verdict:** `PASS` (all ACs covered, design matched, slices honored, impact-map honored) or `FAIL` (list gaps).
 If FAIL → stop. Fix spec gaps before proceeding to Stage 2.
 
 ---
@@ -116,15 +122,28 @@ If context7 is not available, proceed using codebase patterns and existing knowl
 - Authorization checks present (not just authentication)?
 - User input validated at system boundary?
 
+**Complexity**
+- Is the change more complex than the ACs require?
+- Any speculative abstraction, generic helper, or config surface added without a second use case?
+- Any control flow that is harder to review than the simpler alternative?
+
 **Code Quality**
 - No `console.log`, `debugger`, `.only` left in.
 - No premature abstractions. 3 similar lines > a utility.
 - New packages added? Justified, license acceptable?
 - All async operations have error handling?
 
+**Tests**
+- Do tests fail for the right reason, or only because of incidental setup?
+- Does the change rely on E2E/browser coverage where a smaller unit/integration test should exist?
+- Are assertions tied to ACs and contract behavior instead of implementation trivia?
+
 **Edge Cases**
 - Empty states, null/undefined, boundary values handled?
 - Errors surfaced to the user — not silently swallowed?
+
+**Style / nits**
+- Pure naming/formatting nits are suggestions, not blockers, unless they hide a design or readability problem.
 
 **Risk-register evidence**
 - **Required-but-missing → Critical:** if `/implement` Step 1e triggers apply (migration · auth · payment · public API · removed cron · destructive/irreversible op) but no `## Risk Register` section exists in the requirement doc → automatic Critical finding.
@@ -162,6 +181,7 @@ Suggestions (non-blocking):
 
 Re-read the review report just written and verify:
 - [ ] Every AC from the requirement doc is addressed — none silently skipped.
+- [ ] Every changed file is either covered by an `Execution Slice` or explicitly justified as an in-plan bug fix.
 - [ ] Critical / Minor / Suggestions sections are present; none left empty if issues were found.
 - [ ] Result (`APPROVED` / `REQUEST CHANGES`) is consistent with the issues listed.
 - [ ] No changed file from `git diff` was omitted from the review.
@@ -217,6 +237,7 @@ Major and Minor findings stay logged inline (Step 3) and are surfaced in the out
 Update `[task-id]-requirement.md`:
 - Mark each AC: `✓` fully implemented + tested · `✗` critical issue · `~` partial.
 - Add **Review Summary** section: date, result, one-line note per AC.
+- If review found material plan drift, update `Plan Drift Guard` or return the task to `/requirement` instead of silently accepting the drift.
 
 Update BACKLOG.md status to `review`.
 
@@ -228,6 +249,7 @@ Update BACKLOG.md status to `review`.
 Result: APPROVED / REQUEST CHANGES
 
 ACs: ✓ AC-1  ✗ AC-2 ← [reason]  ✓ AC-3
+Plan drift: none / return to /requirement
 Critical issues filed: [N] (auto via /issue)
 
 Next:

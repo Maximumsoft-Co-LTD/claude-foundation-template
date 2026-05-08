@@ -26,18 +26,24 @@ Copies `.claude/`, `brain/`, `docs/`, and a new stack-aware `CLAUDE.md` into the
     → /git-commit
 ```
 
+**Plan-driven execution contract (authoritative after `/requirement`):**
+- `/requirement` writes the task contract in one `[task-id]-requirement.md`.
+- `Execution Slices` + `Plan Drift Guard` make later phases deterministic.
+- `/implement`, `/code-review`, `/issue`, `/testing`, and `/dev` must follow that plan contract.
+- If work materially changes the task contract, return to `/requirement` instead of silently expanding scope.
+
 `/dev` runs this end-to-end for every task in dependency order without stopping (see `dev.md`). Each command's responsibility:
 
 | Command | Reads code? | Writes code? | Notes |
 |---|---|---|---|
 | `/discovery` | no | no | Gather requirements only |
-| `/new-sprint` | no | scaffold dirs only | Break down all tasks, scaffold `[task-id]/` + skeleton requirement docs |
-| `/requirement` | **yes — first command that does** | no | Turn skeleton into concrete plan grounded in the codebase |
-| `/implement` | yes | yes (RED→GREEN) | Write tests then implementation |
-| `/code-review` | yes (diff) | no | Review `git diff` against ACs + design |
-| `/testing` | yes | no (delegates to /issue) | Full suite + AC coverage; on bug → `/issue` once |
+| `/new-sprint` | no | no | Planning only: define Sprint Goal, stories, estimates, and backlog entries |
+| `/requirement` | **yes — first command that does** | no | Turn the sprint plan into a concrete implementation contract grounded in the codebase; write `Execution Slices` + `Plan Drift Guard` |
+| `/implement` | yes | yes (RED→GREEN) | Write tests then implement the next planned slice |
+| `/code-review` | yes (diff) | no | Review `git diff` against ACs + design + planned slices |
+| `/testing` | yes | no (delegates to /issue) | Full suite + AC coverage + slice evidence; on bug → `/issue` once |
 | `/issue` | yes | yes (TDD fix) | Repro test → minimal fix → re-runs `/testing` once |
-| `/git-commit` | no | no | Stage, commit, finishing-branch options |
+| `/git-commit` | no | no | Stage, commit, finishing-branch options; blocked if slices remain open |
 
 **Single task (sequential, full template flow with retros):**
 ```
@@ -75,7 +81,7 @@ Use `/run-tasks-p` when running many tasks and parent context size is a concern.
 | Command | Args | When to use |
 |---------|------|-------------|
 | `/discovery` | `[disc-id] [name]` | Before planning anything — understand the problem first |
-| `/new-sprint` | `[sprint-id] [epic description]` | Turn a discovered epic into a sprint with scaffolded stories |
+| `/new-sprint` | `[sprint-id] [epic description]` | Turn a discovered epic into a sprint plan with stories, estimates, and backlog entries |
 | `/requirement` | `[task-id]` | Write the unified story doc: requirement + FE design + BE design + Implementation Plan + TDD test plan |
 | `/implement` | `[task-id]` | Write failing tests then implement following the unified requirement doc |
 | `/issue` | `[task-id] [description]` | Write failing test → fix → log during implementation |
@@ -112,6 +118,7 @@ Use `/run-tasks-p` when running many tasks and parent context size is a concern.
 ### Quality & Review
 | Skill | Args | Insert after |
 |-------|------|--------------|
+| `/plan-driven-delivery` | `[task-id]` | `/requirement` and every downstream task phase — normalize plan, select next slice, detect scope drift |
 | `/db-schema-review` | `[task-id]` | during `/requirement` (BE tasks) — review schema design before writing any code |
 | `/security-review` | `[task-id]` | `/implement` — secrets, injection, insecure defaults, dep risk |
 | `/accessibility-review` | `[task-id]` | `/testing` — WCAG 2.1 AA audit for FE tasks |
@@ -184,9 +191,9 @@ discovery → backlog → todo → in-progress → review → testing → done
 
 | Points | Size | Rule |
 |--------|------|------|
-| **1** | Trivial | Minimal docs — what changes + ACs + brief approach |
-| **2** | Small | Core docs — ACs + user stories + approach + basic tests |
-| **3** | Medium-small | Standard docs — full requirement + core design sections + Implementation Plan |
+| **1** | Trivial | Minimal docs — ACs + brief approach + minimal plan contract |
+| **2** | Small | Core docs — ACs + user stories + approach + test plan + explicit slices |
+| **3** | Medium-small | Standard docs — full requirement + core design sections + full Implementation Plan |
 | **5** | Medium | Extended docs — most sections, system-level design |
 | **8** | Large | All sections + full rigor (ADRs, perf benchmarks, analytics, a11y) |
 | **13** | Too big | ⛔ Block — break into smaller tasks before proceeding |
@@ -201,8 +208,8 @@ The unified doc includes Story & Requirements + FE Design (if applicable) + BE D
 | **Existing Code Context** | reuse-first minimal | + Project patterns | | | |
 | **FE Design** | Approach + Component list + State Inventory skeleton | + Component Breakdown + API Contracts + State & Data Flow + **State Inventory (5-state table + transition diagram)** + FE Env/Config | + UI/UX Overview + Loading States + Async Sequence + Fail Case Matrix | + User Journey + Behavior Mapping + Routing + Responsive + Edge Cases + Accessibility + FE Performance | + FE Design Decisions (ADRs) |
 | **BE Design** | API Endpoints + Error responses | + API Versioning + Input Validation | + Data Models + Service Layer + Business Logic + Error Handling | + Auth Matrix + Sequence Diagram + Data Contracts + Events + Security + Logging + Env Vars + Migrations + External Deps + BE Performance | + Class Diagram + Caching + BE Design Decisions (ADRs) |
-| **Scope Overview & Implementation Plan** | (skip or minimal) | Scope Overview (3–6 bullets) | Full Implementation Plan + Subtask checkboxes | | |
-| **Test Plans** | 1 TDD per AC | Full TDD Test Plan (unit + integration) | + E2E Test Plan + Test Data | | |
+| **Scope Overview & Implementation Plan** | Minimal Scope Overview + minimal Implementation Plan + Execution Slices + Plan Drift Guard | Fuller Scope Overview + explicit slice proof | Full Implementation Plan + Subtask checkboxes + explicit slice ordering | | |
+| **Test Plans** | 1 planned TDD test per AC | Full TDD Test Plan (unit + integration preferred) | + E2E Test Plan + Test Data | | |
 
 ## Superpowers-Inspired Principles
 

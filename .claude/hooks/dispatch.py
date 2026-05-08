@@ -3,7 +3,7 @@
 PostToolUse dispatcher: routes a Write|Edit event to the relevant sub-hooks
 based on the edited file path, and runs them in parallel.
 
-Replaces the previous 5-entry hook array in settings.json. Two wins:
+Replaces the previous multi-entry hook array in settings.json. Two wins:
   1. Source linters never run on docs / brain notes / .claude config.
   2. The remaining sub-hooks run in parallel instead of sequentially.
 
@@ -37,6 +37,10 @@ except Exception:
     sys.exit(0)
 
 file_path = payload.get("tool_input", {}).get("file_path", "")
+rel = ""
+if file_path:
+    rel = os.path.relpath(file_path, PROJECT_DIR) if os.path.isabs(file_path) else file_path
+    rel = rel.replace(os.sep, "/")
 
 hooks_to_run: list[str] = []
 
@@ -49,11 +53,15 @@ if file_path and file_path.endswith(SOURCE_EXTS) and not is_docs_or_config(file_
         hooks_to_run.append("lint_js.py")
     hooks_to_run.append("run_tests.py")
 
+if rel.startswith(".claude/skills/") and (rel.endswith("/SKILL.md") or rel.endswith("/agents/openai.yaml")):
+    hooks_to_run.append("skill_validate.py")
+
+if rel.startswith("brain/") and file_path.endswith(".md") and not rel.startswith("brain/.metrics/"):
+    hooks_to_run.append("brain_note_lint.py")
+
 # Brain citation meter only acts on workflow output docs (docs/sprints/, docs/discovery/).
 # Filter here so we don't even spawn the meter for unrelated markdown.
 if file_path.endswith(".md"):
-    rel = os.path.relpath(file_path, PROJECT_DIR) if os.path.isabs(file_path) else file_path
-    rel = rel.replace(os.sep, "/")
     if rel.startswith(("docs/sprints/", "docs/discovery/")):
         hooks_to_run.append("brain_citation_meter.py")
 

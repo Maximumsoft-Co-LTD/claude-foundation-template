@@ -1,400 +1,235 @@
 # Workflow Quick Reference
 
-One-page manual for the Claude Code workflow template.
-Full command details: `.claude/commands/`. Full rules: `CLAUDE.md` + `.claude/rules/`.
+One-page manual for the current workflow template.
+Authoritative command details live in `.claude/commands/`. The sequence contract lives in `.claude/rules/workflow.md`.
 
 ---
 
-## A. FLOW DIAGRAM
+## A. Flow
 
-### Visual Flow (Mermaid)
+### Canonical Single-Task Flow
 
 ```mermaid
 flowchart TD
-    A([/discovery]) --> B([/new-sprint\nscaffold tasks\nSP-N-T-NNN global IDs])
-
-    B --> C
-
-    subgraph TASK ["↻ repeat per task"]
-        C([/next-task\nreconcile statuses\npick next todo]) --> R([/requirement\ndraft ACs +\nrequirement doc])
-        R --> D([/design fe\nFE design + TDD plan])
-        R --> E([/design be\nBE design + TDD plan])
-        D --> F
-        E --> F
-        F([/implement\nwrite failing tests\nthen implement]) -->|bugs found| G([/issue\nTDD fix + log])
-        G -->|more bugs| G
-        G --> H
-        F -->|no bugs| H
-        H([/code-review\nreview code\nupdate requirement.md ✓/✗]) -->|critical issues| G
-        H -->|approved| I([/testing\nfull suite\nAC coverage check])
-        I -->|failing| G
-        I -->|all pass| J([/retro-task\nwrite retro\nmark done])
-        J --> K([/git-commit\nstage + commit])
-        K -->|more tasks| C
-    end
-
-    K -->|all tasks done| L([/retro-sprint\naggregate retros\nevaluate goals\nupdate brain ✦])
+    A([/discovery]) --> B([/new-sprint])
+    B --> C([/requirement\nstory + design + plan + tests])
+    C --> D([/implement\nRED -> GREEN by planned slice])
+    D --> E([/code-review\nspec -> quality])
+    E --> F([/testing\nsuite + ACs + slice evidence + ui-verify])
+    F -->|bug or gap| G([/issue\nTDD fix])
+    G --> F
+    F --> H([/retro-task])
+    H --> I([/git-commit])
+    I --> J([/next-task or /retro-sprint])
 ```
 
-> **Design layer skipping:** FE-only tasks → run only `/design fe`. BE-only tasks → run only `/design be`. Infra/docs tasks → skip `/design` entirely.
+### Plan-Driven Rule
+
+After `/requirement`, one file becomes the task contract:
+- `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`
+
+That doc must contain:
+- story + ACs
+- FE/BE design as applicable
+- `Implementation Plan`
+- `Execution Slices`
+- `Plan Drift Guard`
+- `TDD Test Plan`
+- `E2E Test Plan` where applicable
+
+From that point on:
+- `/implement` works one slice at a time
+- `/code-review` checks the diff against the plan
+- `/issue` decides `in-plan bug` vs `return to /requirement`
+- `/testing` requires both AC proof and slice proof
+- `/git-commit` is blocked while slices remain open
+- `/dev` uses the plan contract, not transcript memory, to keep going
+
+### Parallel Flow
+
+Use `/run-tasks` or `/run-tasks-p` only when stories are independent.
+
+```text
+/discovery -> /new-sprint -> /run-tasks [task-id...]
+  Phase 1: /requirement per task
+  Phase 2: /implement -> /code-review -> /testing per task
+  Phase 3: /git-commit per task -> /retro-sprint
+```
+
+Never split one task across FE and BE agents. Split the task itself instead.
 
 ---
 
-### Single-Task Flow (Sequential)
+## B. Commands
 
-```
-START
-  │
-  ▼
-/discovery [disc-id] [name]
-  │  Step 3b ── HARD-GATE: pick approach ──▶ wait for user choice
-  ▼
-/new-sprint [sprint-id] "epic description"
-  │  Step 3 ── confirms task breakdown ──▶ wait for user confirm
-  ▼
-/requirement [task-id]
-  │  Step 3 ── presents drafted ACs ──▶ wait for user confirm
-  ▼
-/design fe [task-id]          ← skip if BE-only task (no UI changes)
-  │  Step 1b ── clarify gaps ──▶ wait if ambiguities found
-  ▼
-/design be [task-id]          ← skip if FE-only task (no API changes)
-  │  Step 1b ── clarify gaps ──▶ wait if ambiguities found
-  ▼
-/implement [task-id]
-  │  Step 2: write all failing tests (RED first, always)
-  │  Step 3: implement until all tests GREEN
-  │  Step 4: fresh full-suite verification (no exceptions)
-  │
-  │  bug found? ──▶ /issue [task-id] [desc] ──▶ fix ──▶ return here
-  ▼
-/code-review [task-id]
-  │  Stage 1: spec compliance (ACs + design match)
-  │  Stage 2: code quality (perf, security, edge cases)
-  │
-  │  critical issues? ──▶ /issue [task-id] [desc] ──▶ fix ──▶ re-review
-  ▼ (APPROVED)
-/testing [task-id]
-  │  Steps 3-4: every TDD/E2E plan row → verify test exists, run suite
-  │  Step 6: production readiness gate (E2E or manual browser verify)
-  │
-  │  failures or missing tests? ──▶ /issue [task-id] [desc] ──▶ re-run
-  ▼ (all ACs: READY)
-/retro-task [task-id]
-  ▼
-/git-commit [task-id]
-  │  Step 5 ── HARD-GATE: confirm staged files ──▶ wait for yes/no/edit
-  │  Step 8: choose merge / PR / keep / discard
-  │
-  ├──▶ more tasks in sprint? ──▶ /next-task ──▶ /requirement [next-id]
-  │
-  ▼  all tasks done
-/retro-sprint [sprint-id]
-  │  (brain update runs as Step 6 — no separate command)
-  ▼
-END → /discovery [next-disc-id] (next epic)
-```
+| Command | Purpose | Output that must exist before next step |
+|---------|---------|-----------------------------------------|
+| `/discovery` | Understand problem, users, constraints, options | discovery doc with chosen approach |
+| `/new-sprint` | Break discovery into sprint tasks, set Sprint Goal, draft estimates | sprint overview + BACKLOG update |
+| `/requirement` | Read codebase and write the unified task doc | requirement doc with plan + slices + tests |
+| `/implement` | Execute the next planned slice with TDD | code + green tests + closed slices |
+| `/issue` | Fix a bug with verified RED before the fix | issue log + fix + updated slice/drift state |
+| `/code-review` | Check spec compliance first, then quality/security | review summary with no unresolved criticals |
+| `/testing` | Verify suite, AC coverage, slice proof, journey evidence | production readiness PASS |
+| `/retro-task` | Capture what mattered from one task | retro doc |
+| `/git-commit` | Stage selectively and commit with Conventional Commits | commit created; branch action chosen |
+| `/next-task` | Load the next eligible todo task | task context card |
+| `/retro-sprint` | Close sprint, evaluate outcomes, capture knowledge | sprint retro |
+| `/dev` | Run the whole flow end-to-end with minimal interruption | completes sprint flow or stops on one of 3 official blockers |
 
-### Multi-Task Flow (Parallel)
-
-```
-/new-sprint → /run-tasks [task-id] [task-id] ...        ← Agent tool (default)
-           → /run-tasks-p [task-id] [task-id] ...       ← claude -p subprocesses (leaner context)
-     │
-     ├── Phase 1: PLAN (all tasks in parallel per tier)
-     │     requirement → cross-task alignment
-     │     → fe-design  → cross-task alignment
-     │     → be-design  → final consistency check
-     │     ── ⏸ HARD-GATE: user reviews all plans
-     │        "go" | "edit [task-id] [instruction]" | "skip [task-id]"
-     │
-     └── Phase 2: IMPLEMENT (all tasks in parallel per tier)
-           implement → spec review → quality review + testing → retro-task
-           (3-subprocess pipeline per task — no separate /code-review needed)
-           │
-           └── /git-commit per task → /retro-sprint when all done
-```
+Optional bridges:
+- `/write-plan` if you want a second explicit plan file
+- `/execute-plan` if you want superpowers-driven plan execution
 
 ---
 
-## B. COMMAND CHEAT SHEET
+## C. Hard Gates
 
-| Command | When | Args | Gate (must be true to run) | Next |
-|---------|------|------|---------------------------|------|
-| `/discovery` | Before any sprint planning | `[disc-id] [name]` | None | User picks approach → `/new-sprint` |
-| `/new-sprint` | After approach approved | `[sprint-id] "epic"` | Discovery doc exists (or explicit override) | User confirms tasks → `/requirement` or `/run-tasks` |
-| `/requirement` | Before designing any task | `[task-id]` | Task exists in BACKLOG.md | User confirms ACs → `/design fe` |
-| `/design fe` | After requirement confirmed | `[task-id]` | `[task-id]-requirement.md` has non-empty ACs | Clarifications answered (if any) → `/design be` |
-| `/design be` | After FE design saved | `[task-id]` | `[task-id]-requirement.md` has non-empty ACs | Clarifications answered (if any) → `/implement` |
-| `/implement` | After design docs complete | `[task-id]` | Design docs exist with TDD test plans | All tests green → `/code-review` |
-| `/issue` | Bug with known cause, during impl or review | `[task-id] [desc]` | Inside an active sprint task | Returns to calling command (implement or code-review) |
-| `/debug` | Unknown root cause, flaky test, regression | `[task-id?] [desc]` | None — standalone | After fix: `/issue [task-id]` if sprint task |
-| `/code-review` | After impl verified | `[task-id]` | Build passes, unit tests green | APPROVED → `/testing`; critical issues → `/issue` |
-| `/testing` | After code-review approved | `[task-id]` | Status is `review` | All ACs READY → `/retro-task`; failures → `/issue` |
-| `/retro-task` | After all tests pass | `[task-id]` | Status is `testing` | `/git-commit` |
-| `/git-commit` | After retro written | `[task-id]` | `[task-id]-retro.md` exists | Merge/PR/keep/discard → `/next-task` or `/retro-sprint` |
-| `/next-task` | After committing, to pick up next task | `[task-id?]` | Previous task committed | → `/requirement [next-id]` |
-| `/retro-sprint` | After ALL tasks in sprint are `done` | `[sprint-id]` | Every task in sprint is `done` | Brain update runs as Step 6 → `/discovery` (next epic) |
-| `/run-tasks` | To run multiple tasks in parallel | `[task-id] [task-id]...` | Tasks exist in BACKLOG.md as `todo` | Phase 1 → user "go" → Phase 2 → `/git-commit` per task |
+These stop the workflow on purpose.
 
-### When to use `/issue` vs `/debug`
+### 1. Discovery Gate
 
-| Situation | Command |
-|-----------|---------|
-| Bug found during active implementation — you know what broke | `/issue [task-id] [desc]` |
-| Bug found after code-review — specific failing check | `/issue [task-id] [desc]` |
-| Unknown root cause — symptom without clear origin | `/debug [task-id] [desc]` |
-| Flaky test, intermittent failure, unexpected regression | `/debug [task-id] [desc]` |
-| Production incident — no sprint context | `/debug [desc]` (no task-id) |
+`/new-sprint` must not start until `/discovery` has:
+- a chosen approach
+- clear scope boundary
+- blockers marked as either `blocking-for-planning` or `carry-forward-to-/requirement`
 
-**Rule:** `/debug` is investigation-first. `/issue` is fix-first (calls `/debug` Phases 1-3 internally). When in doubt: if you can name the likely root cause, use `/issue`. If you're guessing, use `/debug` first.
+### 2. Requirement Gate
 
----
+`/implement` must not start until `/requirement` has:
+- measurable ACs
+- real code-context paths
+- non-empty `Implementation Plan`
+- non-empty `Execution Slices`
+- non-empty `Plan Drift Guard`
+- planned tests
 
-## C. HARD GATES
+### 3. TDD Gate
 
-Every gate below is a mandatory stop. Do not proceed until the condition is met.
+No production code before:
+- test written
+- RED verified
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│ GATE 1 — Approach Approval                                       │
-│ Command: /discovery Step 3b                                      │
-│ Stop: until user explicitly picks an approach (number, alt, or   │
-│ "go with recommendation"). "skip gate" is valid only if obvious. │
-└──────────────────────────────────────────────────────────────────┘
+### 4. Review Gate
 
-┌──────────────────────────────────────────────────────────────────┐
-│ GATE 2 — Task Breakdown Confirmation                             │
-│ Command: /new-sprint Step 3                                      │
-│ Stop: present stories table, wait for user to confirm or edit.   │
-│ Do not write docs until user says "confirm."                     │
-└──────────────────────────────────────────────────────────────────┘
+`/testing` must not start while `/code-review` still has:
+- unresolved critical findings
+- unresolved material plan drift
 
-┌──────────────────────────────────────────────────────────────────┐
-│ GATE 3 — Requirement AC Confirmation                             │
-│ Command: /requirement Step 3                                     │
-│ Stop: print full drafted requirement, wait for "confirm" or      │
-│ edits. Do not save until explicitly confirmed.                   │
-└──────────────────────────────────────────────────────────────────┘
+### 5. Testing Gate
 
-┌──────────────────────────────────────────────────────────────────┐
-│ GATE 4 — Design Clarification (FE and BE)                        │
-│ Command: /design fe Step 1b, /design be Step 1b                  │
-│ Stop: if ambiguities exist, collect ALL into one message, wait   │
-│ for answers before writing any design. Never ask one-by-one.     │
-└──────────────────────────────────────────────────────────────────┘
+`/git-commit` must not start until `/testing` shows:
+- `Production Readiness: PASS`
+- every AC `READY`
+- every execution slice `done`
+- FE tasks: `ui-verify` evidence exists
 
-┌──────────────────────────────────────────────────────────────────┐
-│ GATE 5 — Plan Review (run-tasks only)                            │
-│ Command: /run-tasks Step 5                                       │
-│ Stop: show all plans. Wait for user reply.                       │
-│   "go"                        → start Phase 2                   │
-│   "edit [task-id] [instr]"    → revise plan, re-show gate       │
-│   "skip [task-id]"            → drop task from Phase 2          │
-└──────────────────────────────────────────────────────────────────┘
+### 6. Commit Gate
 
-┌──────────────────────────────────────────────────────────────────┐
-│ GATE 6 — Staging Confirmation                                    │
-│ Command: /git-commit Step 5                                      │
-│ Stop: show exact file list, wait for "yes / no / edit."          │
-│ NEVER run git add -A or git add . without user confirmation.     │
-└──────────────────────────────────────────────────────────────────┘
-```
+Never:
+- `git add -A`
+- `git add .`
+- destructive branch cleanup
+
+without explicit confirmation.
 
 ---
 
-## D. ESCAPE HATCHES
+## D. `/dev` Autopilot
 
-Standard flow deviations — documented patterns for common real-world scenarios.
+`/dev "intent"` runs:
+
+```text
+intent
+-> /discovery
+-> /new-sprint
+-> for each task:
+     /requirement
+     /implement
+     /code-review
+     /testing
+     /retro-task
+     /git-commit
+-> /retro-sprint
+```
+
+`/dev` asks only when:
+- ambiguity remains
+- a destructive operation is next
+- `ui-verify` failed
+
+If `Plan Drift Guard` clearly says the task must return to `/requirement`, reroute there automatically. Ask only if the drift decision itself is ambiguous.
+
+Budget rule:
+- target 30 minutes per sprint
+- warn around 70% and 90%
+- do not auto-pause; user decides whether to continue or scope down
 
 ---
 
-### Hotfix (urgent production bug, no sprint context)
+## E. Plan Drift
 
-```
-1. /debug [description]                 ← root cause first, always
-2. Write failing test (RED) → implement fix → GREEN → full suite
-3. git checkout -b hotfix/[desc]
-4. /git-commit (no task-id — commit manually with type: fix)
-5. /pr-create skill → merge to main
-6. Post-fix: create a 1pt task in nearest sprint to track the fix
-   and run /retro-task for it
-```
+Use `/issue` when the fix stays inside the current task contract:
+- same ACs
+- same user-visible outcome
+- same API/public contract
+- same rollout/risk shape
 
----
+Return to `/requirement` when any of these changes:
+- AC text
+- user-visible workflow
+- public/shared contract
+- migration/auth/payment/risk surface
+- task estimate or dependency shape
+- file surface far beyond the planned slice
 
-### FE-Only Task (no backend changes)
-
-```
-1. /requirement [task-id]               ← scope ACs to UI only
-2. /design fe [task-id]                 ← full FE design
-3. SKIP /design be                      ← no [task-id]-backend.md needed
-4. /implement [task-id]                 ← HAS_BE=false; BE agents not launched
-5. /code-review → /testing → /retro-task → /git-commit  ← as normal
-
-Notes:
-- E2E tests still required. Call real API (existing endpoints, test env).
-- /implement validation: missing backend.md is expected — not an error.
-- If /implement warns "missing design docs": reply "BE-only skip, continue."
-```
+Shortcut rule:
+- small bug = `/issue`
+- changed task contract = `/requirement`
 
 ---
 
-### BE-Only Task (pure API, infrastructure, no UI changes)
+## F. Test Mix
 
-```
-1. /requirement [task-id]               ← scope ACs to API behavior only
-2. SKIP /design fe                      ← no [task-id]-frontend.md needed
-3. /design be [task-id]                 ← full BE design
-4. /implement [task-id]                 ← HAS_FE=false; FE agents not launched
-5. /code-review → /testing → /retro-task → /git-commit  ← as normal
+Prefer:
+- many small unit tests
+- targeted integration tests with real dependencies
+- a small number of end-to-end or journey tests
 
-Notes:
-- Integration tests MUST use real DB. No mocks at integration layer.
-- E2E: test via real HTTP calls to the API (Postman, curl, or test client).
-- Mark task type=infra in BACKLOG.md if no user-visible outcome.
-```
+Do not rely mostly on E2E for feature completion. They are slower, harder to debug, and hide smaller bugs behind larger failures.
 
 ---
 
-### Exploratory Spike (research task, no deliverable code)
+## G. Estimates
 
-```
-1. Create spike task in BACKLOG.md: type=spike, points=2-3
-2. /requirement [task-id]
-   Frame ACs as questions: "Given [problem], when [explored],
-   then [decision documented with evidence and rationale]."
-3. SKIP /design fe, /design be, /implement, /code-review, /testing
-4. Conduct research: read docs, prototype throwaway code, compare options
-5. Write findings as:
-   - docs/discovery/[disc-id]-[name].md  (if leading to a sprint), OR
-   - brain/02-decisions/DEC-NNN-[slug].md  (if a settled decision)
-6. /retro-task [task-id]
-7. /git-commit [task-id]  ← commit docs only, no production code
+Sprint planning now captures both:
+- story points for relative sizing
+- draft ideal-day estimate for schedule awareness
 
-Result: a discovery doc or brain DEC note that informs the next sprint.
-Throwaway prototype code is NOT committed.
-```
+Do not mechanically convert points to time.
+Use the estimate to:
+- compare against team capacity
+- keep a 20% buffer
+- split obviously oversized sprints before implementation starts
 
 ---
 
-### Blocked Task (waiting on external dependency)
+## H. Quick Decisions
 
-```
-1. /issue [task-id] [blocker description]   ← log with severity=critical
-2. Update BACKLOG.md status to `blocked`, note dependency
-3. /next-task                               ← pick up next todo task
-4. When blocker resolves:
-   - Update /issue log (add resolution note)
-   - Revert status to `in-progress` in BACKLOG.md
-   - Continue from the step where you stopped
-   - If blocker caused design changes → update design doc, re-run /code-review
-```
+**When do I read code deeply?**
+- `/requirement` is the first deep code-reading step.
 
----
+**When does design happen?**
+- inside `/requirement`, not in separate `/design fe` or `/design be` commands.
 
-### Multi-Sprint Epic (scope too large for one sprint)
+**When do I run `ui-verify`?**
+- in `/testing`, once the whole task is assembled.
 
-```
-1. /discovery [disc-id] [name]             ← covers full epic
-2. /new-sprint SP1                         ← scope to first deliverable
-   vertical slice only ("User can do X end-to-end")
-3. Complete SP1 fully: /retro-sprint (includes brain update)
-4. /new-sprint SP2                         ← next slice
-   Read SP1 brain decisions before designing SP2 tasks.
+**When do I commit?**
+- after `/testing` PASS and closed slices.
 
-Rules:
-- Task IDs never reset. SP2 tasks start from (highest SP1 task number + 1).
-- Each sprint must be independently deployable — no "SP1 sets up, SP2 delivers."
-- If SP1 task has an 8pt task: break it before starting, do not carry it to SP2.
-```
+**When do I use `/run-tasks`?**
+- only when tasks are independent and do not share files/contracts.
 
----
-
-## E. TDD CHEAT SHEET
-
-### Iron Law (no exceptions, ever)
-
-```
-1. Write the failing test FIRST — before any implementation code.
-2. Run it. Confirm it FAILS with an expected message (not a crash).
-   If it passes immediately: you are testing existing behavior. Fix the test.
-3. Implement the MINIMUM code to make it pass.
-4. Run FULL suite. Confirm GREEN with zero regressions.
-5. Found code written before its test? DELETE IT.
-   Rewrite implementation fresh, starting from Step 1.
-   "Keeping as reference" biases the test — it is not allowed.
-```
-
-### Integration Tests: No Mocks
-
-```
-Integration layer = real DB, real queue, real HTTP.
-Unit layer = mocks allowed for external calls.
-Never mock at integration layer. If setup is hard, fix the setup — not the rule.
-```
-
-### Rationalization Red Flags
-
-Stop if you hear yourself think any of these:
-
-| Excuse | Why it's wrong |
-|--------|----------------|
-| "Too simple to test" | Simple code breaks. The test takes 30 seconds. |
-| "I'll write tests after" | Tests that pass immediately prove nothing — they test existing behavior. |
-| "Already manually tested" | Ad-hoc ≠ systematic. No record, no re-run, not trusted. |
-| "Deleting X hours of work is wasteful" | Sunk cost. Unverified code is hidden tech debt with interest. |
-| "Need to explore first" | Fine — throw away the exploration. Then start with TDD. |
-| "Test is hard to write" | Listen: hard to test = hard to use. Simplify the design first. |
-| "Just this once" | No exceptions. Each skip makes the next skip feel easier. |
-
----
-
-## F. STORY POINT QUICK GUIDE
-
-### Size → Required Documents
-
-| Points | Size | Docs Required |
-|--------|------|---------------|
-| **1** | Trivial | Req: Problem + ACs (min 2-3) + Out of Scope + DoD<br>FE: Approach + Component list + 1 TDD test/AC<br>BE: Endpoint spec + 1 TDD test/AC |
-| **2** | Small | + User Stories + Dependencies<br>+ Component Breakdown + API Contracts + State flow + Fail State table<br>+ Input Validation + TDD (happy path + key error/AC) |
-| **3** | Medium | + Feature Flow (mermaid) + Business Rules + Success Metrics<br>+ UI/UX Overview + Loading States + Impl Plan + E2E Tests + Fail Case Matrix<br>+ Data Models + Service Layer + Business Logic + Error Handling + Impl Plan |
-| **5** | Large | All sections (most required)<br>+ User Journey + Behavior Mapping + Routing + Analytics + A11y + Perf<br>+ Auth Matrix + Sequence Diagram + Security + Logging + Env Vars + Migrations |
-| **8** | X-Large | All sections + ADR entries for non-obvious choices + Perf benchmarks<br>All sections + Class Diagram + Caching + Rollback Plan |
-| **13** | ⛔ Too Big | STOP. Break into smaller tasks before any work begins. |
-
-### Required Documents by Task Type
-
-| Task Type | Requirement | FE Design | BE Design |
-|-----------|-------------|-----------|-----------|
-| Full-stack | ✓ | ✓ | ✓ |
-| FE-only | ✓ | ✓ | — |
-| BE-only / infra | ✓ | — | ✓ |
-| Spike | ✓ (questions as ACs) | — | — |
-| Hotfix | — | — | — (use /debug directly) |
-
-### Common Sizing Mistakes
-
-| Mistake | Fix |
-|---------|-----|
-| "Auth system" (8pt as single task) | Split: login AC / token refresh / logout / session expiry |
-| "Build dashboard" (13pt) | Split by widget or data domain |
-| "API endpoint + FE form" — called 1pt | Usually 3pt — form state, validation, error display, API integration |
-| Any task touching >3 files across layers | Likely 3pt minimum |
-
----
-
-## G. OPTIONAL SKILLS — WHERE TO INSERT
-
-Skills extend the workflow with optional quality gates. See `_WORKFLOW-REF.md` for full list.
-
-| Skill | Insert After | Purpose |
-|-------|-------------|---------|
-| `/db-schema-review [task-id]` | `/design be` | Review schema before writing any code |
-| `/security-review [task-id]` | `/implement` | Secrets, injection, insecure defaults, dep risk |
-| `/accessibility-review [task-id]` | `/testing` | WCAG 2.1 AA audit for FE tasks |
-| `/test-coverage [task-id]` | `/testing` | Coverage gaps mapped to ACs |
-| `/adr [task-id] [title]` | During `/design fe` or `/design be` | Record a non-trivial architectural decision |
-| `/pr-create [task-id]` | `/git-commit` (Option 2) | Push branch + open PR with pre-filled body |
-| `/session-handoff [task-id]` | End of any mid-task session | Serialize context for resumption |
-| `/refactor [task-id]` | After `/retro-task` | Safe, test-first tech-debt restructuring |
+**When do I use `/write-plan` / `/execute-plan`?**
+- when the embedded Implementation Plan is not enough and you want a second explicit plan/executor flow.

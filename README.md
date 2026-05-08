@@ -74,9 +74,9 @@ Or adopt manually — see [Manual Adoption](#manual-adoption) below.
 | `.claude/commands/` | Slash command definitions (`/discovery`, `/implement`, etc.) |
 | `.claude/commands/_WORKFLOW-REF.md` | Full workflow reference: commands, status lifecycle, story points, TDD rules |
 | `.claude/rules/` | Path-scoped convention files auto-loaded when Claude edits matching files (includes confidence gate) |
-| `.claude/hooks/` | Python scripts for PostToolUse automation (lint + TDD test enforcement) |
+| `.claude/hooks/` | Dispatcher, audit, and validation hooks for lint/test/skill/brain/citation feedback |
 | `.claude/settings.json` | Hook wiring — connects lifecycle events to hook scripts |
-| `.claude/skills/` | Optional skill commands that extend the core workflow |
+| `.claude/skills/` | Active workflow skills used by commands and `/dev`; legacy reference skills live under `_archive/` |
 | `brain/` | Living knowledge vault — decisions, patterns, lessons, sprint summaries |
 | `docs/templates/` | Skeleton document templates for every workflow stage |
 | `docs/BACKLOG.md` | Living backlog, auto-updated by workflow commands |
@@ -144,7 +144,7 @@ Replace the placeholder conventions with your team's actual standards (naming, i
 
 ### Step 3 — Configure hooks for your stack
 
-`.claude/settings.json` ships with a single `dispatch.py` entry that routes Write/Edit events to the right sub-hooks based on the edited file path — language linters (`lint_ts.py`, `lint_go.py`, `lint_js.py`), the targeted test runner (`run_tests.py`), and the brain citation meter (`brain_citation_meter.py`):
+`.claude/settings.json` ships with a single `dispatch.py` entry that routes Write/Edit events to the right sub-hooks based on the edited file path — language linters (`lint_ts.py`, `lint_go.py`, `lint_js.py`), the targeted test runner (`run_tests.py`), skill validation (`skill_validate.py`), brain-note linting (`brain_note_lint.py`), and the brain citation meter (`brain_citation_meter.py`):
 
 ```json
 // .claude/settings.json — single dispatcher; sub-hooks live in .claude/hooks/
@@ -166,6 +166,8 @@ The dispatcher:
 - skips source linters on docs / brain notes / `.claude/` config edits
 - runs only the linter(s) matching the edited file extension (Go vs TS vs JS) — no work for languages you don't use
 - runs the targeted test for the edited file (vitest auto-detected from `package.json` even without a config file; jest as fallback)
+- validates project-local skills when `SKILL.md` or `agents/openai.yaml` changes
+- lint-checks `brain/**/*.md` for frontmatter / cross-link / placeholder drift
 - updates the brain citation meter only when a workflow output doc under `docs/sprints/` or `docs/discovery/` is written
 
 If your stack isn't covered, drop a new sub-hook in `.claude/hooks/` and add the routing rule in `dispatch.py` (one `if`).
@@ -189,7 +191,8 @@ The brain fills up naturally as you run `/retro-sprint` — brain update is buil
 /new-sprint SP1 "My first sprint"
 
 # Work a single task — /requirement produces ONE unified doc
-# that includes story + FE design + BE design + Implementation Plan + tests.
+# that includes story + FE design + BE design + Implementation Plan + tests
+# plus Execution Slices + Plan Drift Guard for downstream phases.
 # Sections tagged [FE] are skipped for BE-only tasks (and vice versa) via Task Type.
 /requirement SP1-T001
 /implement SP1-T001
@@ -220,11 +223,14 @@ The brain fills up naturally as you run `/retro-sprint` — brain update is buil
 
 **Single task (sequential, manual):**
 ```
-/discovery → /new-sprint → /requirement (unified story + FE design + BE design + Implementation Plan + tests) → /implement
+/discovery → /new-sprint → /requirement (unified story + FE design + BE design + Implementation Plan + tests + plan contract) → /implement
     → /issue (loop) → /code-review → /testing
     → /retro-task → /git-commit → /next-task (repeat per task)
     → /retro-sprint (once ALL tasks done)
 ```
+
+**Plan contract after `/requirement`:**
+`Execution Slices` choose the next implementation unit, and `Plan Drift Guard` decides when a fix stays in `/issue` versus returning to `/requirement`.
 
 **Multiple tasks in parallel:**
 ```
@@ -246,17 +252,17 @@ Full quick reference (flow diagram, hard gates, escape hatches): `docs/WORKFLOW-
 | `/dev` | `"intent"` | **Autopilot** — runs the full pipeline end-to-end; blocks only on the 3 official conditions (ambiguity / destructive op / ui-verify fail) |
 | `/discovery` | `[disc-id] [name]` | Understand problem before planning |
 | `/brainstorm` | `[disc-id] [name]` | Open-ended ideation — superpowers bridge, alternative to `/discovery` |
-| `/new-sprint` | `[SP[N]] [epic description]` | Create sprint, scaffold tasks as user stories with E2E validation scenarios |
-| `/requirement` | `[task-id]` | Unified story doc: requirement + FE design + BE design + Scope Overview + Implementation Plan (with subtasks) + TDD & E2E test plans |
+| `/new-sprint` | `[SP[N]] [epic description]` | Create sprint plan, define Sprint Goal, and break work into user stories with E2E validation scenarios |
+| `/requirement` | `[task-id]` | Unified story doc: requirement + FE design + BE design + Scope Overview + Implementation Plan (with subtasks) + Execution Slices + Plan Drift Guard + TDD & E2E test plans |
 | `/run-tasks` | `[task-id] [task-id] ...` | Run multiple tasks in parallel (2-phase pipeline); MAX_PARALLEL cap + context pre-loading |
 | `/run-tasks-p` | `[task-id] [task-id] ...` | Headless variant — spawns `claude -p` subprocesses; parent context stays lean; file-based context injection |
 | `/write-plan` | `[task-id]` | Standalone bite-sized implementation plan — superpowers bridge, use after `/requirement` |
-| `/implement` | `[task-id]` | Write failing tests → implement → verify |
+| `/implement` | `[task-id]` | Write failing tests → implement the next planned slice → verify |
 | `/execute-plan` | `[task-id]` | Execute plan via subagents with worktree isolation — superpowers bridge |
 | `/issue` | `[task-id] [desc]` | TDD bug fix + log (known root cause during active sprint task) |
-| `/debug` | `[task-id?] [desc]` | 4-phase root cause investigation (unknown cause, flaky test, regression) |
+| `/debug` | `[task-id] [desc]` | 4-phase root cause investigation (unknown cause, flaky test, regression; omit task-id outside sprint context) |
 | `/code-review` | `[task-id]` | Two-stage review: spec compliance → code quality |
-| `/testing` | `[task-id]` | Full suite + E2E production readiness gate |
+| `/testing` | `[task-id]` | Full suite + E2E production readiness gate + slice proof |
 | `/retro-task` | `[task-id]` | Write retro, mark task done |
 | `/retro-sprint` | `[sprint-id]` | Sprint retro + brain update (after ALL tasks done) |
 | `/git-commit` | `[task-id]` | Stage selectively + commit + choose merge/PR/keep/discard |
@@ -339,14 +345,14 @@ Full section requirements per point level: `.claude/commands/_WORKFLOW-REF.md`
 
 ## Skills (`.claude/skills/`)
 
-Skills come in two flavours.
+Skills come in two buckets.
 
-**1. Atomic skills (model-invocable building blocks).** Used internally by commands and by `/dev` autopilot. Each ships with `disable-model-invocation: false` so Claude composes them by description match. Total catalog: 23 skills, grouped by purpose.
+**1. Atomic skills (model-invocable building blocks).** Used internally by commands and by `/dev` autopilot. Each is designed to be discoverable by description match. Total catalog: 24 skills, grouped by purpose.
 
 | Category | Skills | Used by |
 |----------|--------|---------|
 | **Intent atom** | `prompt-understand` · `scope-check` · `ask-choice` · `solution-options` | `/dev`, `/discovery`, `/requirement` |
-| **Pre-implementation gates** | `workspace-detect` · `reverse-engineer` · `impact-map` · `risk-register` · `nfr-plan` · `api-contract` · `vertical-slice` · `tdd-plan` | `/dev`, `/requirement`, `/implement` |
+| **Pre-implementation gates** | `workspace-detect` · `reverse-engineer` · `impact-map` · `risk-register` · `nfr-plan` · `api-contract` · `vertical-slice` · `tdd-plan` · `plan-driven-delivery` | `/dev`, `/requirement`, `/implement`, `/code-review`, `/issue`, `/testing` |
 | **Bug & quality** | `bug-repro` · `debug` · `mongo-review` · `ui-verify` | `/issue`, `/debug`, `/code-review` |
 | **Delivery** | `pr-create` · `release-notes` · `local-run` | `/git-commit`, `/retro-sprint` |
 | **Meta** | `skill-evolution` · `brain-capture` · `agent-routing` · `session-handoff` | `/retro-sprint`, `/run-tasks`, mid-session |
@@ -355,13 +361,14 @@ Skills come in two flavours.
 
 | Skill | Trigger | Where it runs |
 |-------|---------|---------------|
+| `plan-driven-delivery` | Requirement doc exists → downstream phases must follow the same plan contract | `/requirement` · `/implement` · `/code-review` · `/issue` · `/testing` · `/dev` |
 | `bug-repro` | Any bug fix → produce verified-RED failing test before code | `/issue` Step 3 · `/debug` Phase 4 |
 | `impact-map` | Change touches existing code → enumerate Tier-1/2/3 dependents | `/issue` Step 2 · `/implement` Step 1e · `/code-review` Step 2a |
 | `risk-register` | Migration · auth · payment · public API · removed cron → mitigation + rollback required | `/implement` Step 1e · `/code-review` Step 2b |
 
 `/code-review` treats missing `impact-map` coverage or missing `risk-register` verification on a Must-mitigate row as an automatic Critical finding.
 
-**2. Optional slash-command skills.** Insert these where they add value for your project type — invoke as a slash command.
+**2. Archived skill patterns (`.claude/skills/_archive/`).** These are legacy slash-command-style skills kept as reference implementations. They are **not** part of the active 24-skill catalog and will not trigger by default; promote or reinstall them only if your team wants that workflow surface back.
 
 **Frontend Design**
 
@@ -407,19 +414,21 @@ Skills come in two flavours.
 |-------|-------------|--------------|
 | `/session-handoff [task-id]` | end of mid-task session | Serialize context (stopping point, next action, git state) for seamless resumption |
 
-Skills live in `.claude/skills/<name>/SKILL.md` and use the same frontmatter as commands (`allowed-tools`, `disable-model-invocation`, `context: fork`). They can be invoked as slash commands or triggered automatically when context matches.
+Active skills live in `.claude/skills/<name>/SKILL.md` and use YAML frontmatter plus a focused Markdown body. Archived reference skills live in `.claude/skills/_archive/`. Only the active set participates in automatic triggering and validation.
 
 ---
 
 ## Path-Scoped Rules (`.claude/rules/`)
 
-Rules extend `CLAUDE.md` with **path-specific conventions** auto-loaded when Claude edits matching files — so FE agents only see frontend rules and BE agents only see backend rules.
+Rules extend `CLAUDE.md` with **path-specific conventions** auto-loaded when Claude edits matching files — so FE agents only see frontend rules, BE agents only see backend rules, and skill/hook edits pick up their own authoring guardrails.
 
 ```
 .claude/rules/
 ├── testing.md       # no frontmatter → always loaded (TDD rules)
 ├── frontend.md      # loaded only when editing src/**/*.{ts,tsx}, pages/**, etc.
-└── backend.md       # loaded only when editing src/api/**, internal/**, etc.
+├── backend.md       # loaded only when editing src/api/**, internal/**, etc.
+├── skill-authoring.md # loaded for .claude/skills/** edits
+└── hook-authoring.md  # loaded for .claude/hooks/*.py edits
 ```
 
 Files **without** frontmatter load on every session alongside `CLAUDE.md`.  
@@ -450,7 +459,7 @@ Common glob patterns:
 |------|------------------|
 | `testing.md` | TDD Iron Law — fail-first, real-deps integration, no `.only`/`.skip`, audit-in-transaction |
 | `confidence-gate.md` | AI must be ≥ 90% confident before proceeding with any workflow command |
-| `autonomous-mode.md` | The 4 (and only 4) reasons `/dev` blocks; one-line `> [skill]: status [marker]` progress format |
+| `autonomous-mode.md` | The 3 (and only 3) reasons `/dev` blocks; one-line `> [skill]: status [marker]` progress format |
 | `completion-format.md` | Every artifact-step exit uses 2-option `A) Request changes / B) Continue` template — no third options |
 | `metric-instrumentation.md` | 3-gate enforcement: every Success Metric must trace target → instrumented artifact → measured actual at `/new-sprint`, `/requirement`, and `/retro-sprint` |
 | `parallel-work.md` | Unit of split for parallel sub-agents is one user story per agent — never one layer per agent |
@@ -464,12 +473,14 @@ Hooks run shell commands automatically at Claude Code lifecycle events — makin
 
 | Hook file | Trigger | What it does |
 |-----------|---------|--------------|
-| `dispatch.py` | `PostToolUse(Write\|Edit)` | Single entry that routes to the right sub-hook(s) by file path and runs them in parallel. Sub-hooks: `lint_ts.py` / `lint_go.py` / `lint_js.py` / `run_tests.py` / `brain_citation_meter.py`. Skips docs and `.claude/` config edits. |
+| `dispatch.py` | `PostToolUse(Write\|Edit)` | Single entry that routes to the right sub-hook(s) by file path and runs them in parallel. Sub-hooks: `lint_ts.py` / `lint_go.py` / `lint_js.py` / `run_tests.py` / `skill_validate.py` / `brain_note_lint.py` / `brain_citation_meter.py`. |
 | `audit-log.py` | `UserPromptSubmit` + `PreToolUse(Bash)` + `Stop` | Writes a per-day compliance trail to `docs/audit-YYYY-MM-DD.md` (gitignored). Catches destructive Bash patterns (`rm -rf`, force push, `drop*`, `deleteMany`, `truncate`, `docker rm -f`) and sensitive-file writes (`.env`, `credentials.json`). Redacts `api_key`, `token`, `password`, `Bearer`, JWT, AWS-AKIA, and URI credentials before any value is appended. |
 
 ### TDD enforcement
 
-`run_tests.py` auto-detects the project's test runner (Jest/Vitest, Go test, pytest, RSpec). When Claude edits a source file it first tries to run only the related test file (e.g. `bar.test.ts` for `bar.ts`) for fast feedback, falling back to the full suite when no related test is found.
+`run_tests.py` auto-detects the project's test runner (Jest/Vitest, Go test, pytest, RSpec). When `dispatch.py` routes a source edit to it, the hook runs the edited test file directly or the closest related test file (for example `bar.test.ts` for `bar.ts`) for fast feedback. If no related test exists, or no supported runner is detected, it exits silently and leaves the full-suite gate to `/testing`.
+
+`skill_validate.py` watches project-local skills under `.claude/skills/` and runs the shared skill validator after `SKILL.md` edits. `brain_note_lint.py` watches `brain/**/*.md` and warns on missing frontmatter, dead-end MOCs, orphaned notes, and obvious placeholder text before those notes fossilize.
 
 ```json
 // .claude/settings.json
@@ -479,16 +490,16 @@ Hooks run shell commands automatically at Claude Code lifecycle events — makin
       "matcher": "Write|Edit",
       "hooks": [{
         "type": "command",
-        "command": "python3 .claude/hooks/run_tests.py",
+        "command": "python3 .claude/hooks/dispatch.py",
         "timeout": 120,
-        "statusMessage": "Running tests..."
+        "statusMessage": "Running PostToolUse checks..."
       }]
     }]
   }
 }
 ```
 
-This makes the TDD rule mechanical: Claude cannot finish an edit and move on without seeing test results.
+This makes the fast-feedback part of TDD mechanical: Claude gets an immediate RED or regression signal while implementing, and `/testing` remains the authoritative full-suite gate before completion.
 
 > **Note:** The test hook skips docs and config files. When a test file itself is edited, it runs that test file directly. Adjust `SKIP_PATTERNS` and `SOURCE_EXTS` in `run_tests.py` for your stack.
 

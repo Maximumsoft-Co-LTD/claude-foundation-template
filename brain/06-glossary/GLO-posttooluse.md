@@ -2,18 +2,18 @@
 type: glossary
 term: PostToolUse Hook
 tags: [claude-code, automation, linting, testing, ci-cd]
-updated: 2026-03-25
+updated: 2026-05-08
 ---
 
 # PostToolUse Hook
 
-A Claude Code lifecycle event that fires automatically after every Write or Edit tool call, enabling automated checks (linting, formatting, testing) without manual invocation.
+A Claude Code lifecycle event that fires automatically after a successful tool call, enabling automated checks, logging, or fan-out without manual invocation.
 
-**How it works:** When Claude edits a file, matching scripts in `.claude/hooks/PostToolUse/` execute with the file path as argument. Exit code 0 = pass, non-zero = fail and report to user.
+**How it works in this repo:** `.claude/settings.json` routes `Write|Edit` through `dispatch.py`, which then runs only the relevant sub-hooks for that path. Source edits trigger lint and related-test feedback; workflow docs under `docs/sprints/` and `docs/discovery/` trigger the brain citation meter.
 
-**This project uses it for:** Auto-lint on every file edit (see [[DEC-002-posttooluse-lint-hooks]])
+**This project uses it for:** Path-aware lint/test feedback on source edits plus citation tracking for workflow docs (see [[DEC-002-posttooluse-lint-hooks]])
 
-**Key constraint:** Keep hooks fast (< 5 seconds). Use CI for heavyweight tests (integration, E2E).
+**Key constraint:** Keep hooks fast. Use targeted feedback here, and reserve heavyweight/full-suite verification for `/testing` or CI.
 
 **Contrast with:** Manual `npm run lint` or `pytest` invocations
 

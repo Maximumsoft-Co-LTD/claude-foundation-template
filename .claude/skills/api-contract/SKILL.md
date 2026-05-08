@@ -1,7 +1,7 @@
 ---
+name: api-contract
 description: Lock FE↔BE contract before code — Go handler ↔ Vue/Nuxt/Next composable ↔ MongoDB shape ↔ Socket event must agree by construction
 allowed-tools: Read, Grep, Glob, Edit, Write, Bash(go *), Bash(npm *), Bash(npx *), Bash(curl *), Bash(jq *)
-disable-model-invocation: false
 ---
 
 # api-contract

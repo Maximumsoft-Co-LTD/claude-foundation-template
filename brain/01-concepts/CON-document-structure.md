@@ -20,17 +20,14 @@ docs/
 │       ├── SP1-overview.md             ← /new-sprint output
 │       ├── SP1-retro.md                ← /retro-sprint output
 │       └── SP1-T001/
-│           ├── SP1-T001-requirement.md ← /requirement output
-│           ├── SP1-T001-frontend.md    ← /design fe output
-│           ├── SP1-T001-backend.md     ← /design be output
+│           ├── SP1-T001-requirement.md ← /requirement output (story + design + plan + tests + slices)
 │           ├── SP1-T001-issues.md      ← /issue output (auto-created)
+│           ├── SP1-T001-smoke.md       ← /testing ui-verify summary
 │           └── SP1-T001-retro.md       ← /retro-task output
 └── templates/
     ├── DISCOVERY-TEMPLATE.md
     ├── SPRINT-OVERVIEW-TEMPLATE.md
     ├── REQUIREMENT-TEMPLATE.md
-    ├── FRONTEND-DESIGN-TEMPLATE.md
-    ├── BACKEND-DESIGN-TEMPLATE.md
     ├── ISSUE-TEMPLATE.md
     ├── RETRO-TASK-TEMPLATE.md
     └── RETRO-SPRINT-TEMPLATE.md
@@ -62,9 +59,8 @@ brain/                                  ← 🧠 knowledge vault
 | `disc-NNN-name.md` | `/discovery` |
 | `SP[N]-overview.md` | `/new-sprint` |
 | `SP[N]-T[NNN]-requirement.md` | `/requirement` |
-| `SP[N]-T[NNN]-frontend.md` | `/design fe` |
-| `SP[N]-T[NNN]-backend.md` | `/design be` |
 | `SP[N]-T[NNN]-issues.md` | `/issue` (auto) |
+| `SP[N]-T[NNN]-smoke.md` | `/testing` |
 | `SP[N]-T[NNN]-retro.md` | `/retro-task` |
 | `SP[N]-retro.md` | `/retro-sprint` |
 

@@ -76,20 +76,22 @@ Agents that run template commands inherit this vocabulary. "Task" in this repo A
 
 ### Command chain
 
-Single task: `/discovery → /new-sprint → /requirement (unified story + FE design + BE design + Implementation Plan + tests) → /implement → /issue (loop) → /code-review → /testing → /retro-task → /git-commit → /next-task (repeat per task) → /retro-sprint (once ALL tasks done, includes brain update)`
+Single task: `/discovery → /new-sprint → /requirement (unified story + FE design + BE design + Implementation Plan + tests + Execution Slices + Plan Drift Guard) → /implement → /issue (loop) → /code-review → /testing → /retro-task → /git-commit → /next-task (repeat per task) → /retro-sprint (once ALL tasks done, includes brain update)`
 
 Multiple tasks in parallel: `/run-tasks [task-id] [task-id] ...` (Agent tool) or `/run-tasks-p [task-id] [task-id] ...` (headless `claude -p` — leaner parent context)
+
+After `/requirement`, the task-level source of truth is the requirement doc itself. `plan-driven-delivery` keeps `/implement`, `/issue`, `/code-review`, `/testing`, and `/dev` aligned to that plan contract instead of letting downstream phases improvise new work.
 
 Full workflow reference: `.claude/commands/_WORKFLOW-REF.md` — see **Superpowers-Inspired Principles** table for enforcement details.
 
 ## Atomic Skills (`.claude/skills/`)
 
-Skills are model-invocable building blocks that commands compose. Each skill is `disable-model-invocation: false` so Claude picks them up by description match — but every command file also explicitly references the skills it depends on. See the skill's own `SKILL.md` for steps, inputs/outputs, and autopilot status-line format.
+Skills are model-invocable building blocks that commands compose. Each skill is designed to be discoverable by description match, and every command file also explicitly references the skills it depends on. See the skill's own `SKILL.md` for steps, inputs/outputs, and autopilot status-line format.
 
 | Category | Skills | Used by |
 |---|---|---|
 | **Intent atom** | `prompt-understand` · `scope-check` · `ask-choice` · `solution-options` | `/dev`, `/discovery`, `/requirement` |
-| **Pre-implementation gates** | `workspace-detect` · `reverse-engineer` · `impact-map` · `risk-register` · `nfr-plan` · `api-contract` · `vertical-slice` · `tdd-plan` | `/dev`, `/requirement`, `/implement` |
+| **Pre-implementation gates** | `workspace-detect` · `reverse-engineer` · `impact-map` · `risk-register` · `nfr-plan` · `api-contract` · `vertical-slice` · `tdd-plan` · `plan-driven-delivery` | `/dev`, `/requirement`, `/implement`, `/code-review`, `/issue`, `/testing` |
 | **Bug & quality** | `bug-repro` · `debug` · `mongo-review` · `ui-verify` | `/testing`, `/issue`, `/debug`, `/code-review` |
 | **Delivery** | `pr-create` · `release-notes` · `local-run` | `/git-commit`, `/retro-sprint` |
 | **Meta** | `skill-evolution` · `brain-capture` · `agent-routing` · `session-handoff` | `/retro-sprint`, `/run-tasks`, mid-session |
@@ -98,6 +100,7 @@ Skills are model-invocable building blocks that commands compose. Each skill is 
 
 | Skill | Trigger | Where |
 |---|---|---|
+| `plan-driven-delivery` | Requirement doc exists → downstream phases must follow the same plan contract | `/requirement` · `/implement` · `/code-review` · `/issue` · `/testing` · `/dev` |
 | `bug-repro` | Any bug fix → must produce verified-RED failing test before code | `/issue` Step 3, `/debug` Phase 4 |
 | `impact-map` | Change touches existing code → enumerate Tier-1/2/3 dependents | `/issue` Step 2, `/implement` Step 1e, `/code-review` Step 2a |
 | `risk-register` | Migration · auth · payment · public API · removed cron → mitigation + rollback required | `/implement` Step 1e, `/code-review` Step 2b |

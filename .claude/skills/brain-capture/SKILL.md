@@ -1,7 +1,7 @@
 ---
+name: brain-capture
 description: Write atomic notes (LES/PAT/DEC/GLO) to brain/ vault with proper frontmatter, IDs, and MOC linkage — the only sanctioned writer for brain
 allowed-tools: Read, Grep, Glob, Edit, Write, Bash(ls:*), Bash(grep:*)
-disable-model-invocation: false
 ---
 
 # brain-capture
@@ -11,6 +11,16 @@ Workflow position: **invoke when a novel insight, decision, pattern, or term eme
 The only place that writes to `brain/`. Enforces atomic-note discipline so the vault doesn't decay into a dump.
 
 Arguments: `[content summary]` or context from caller (`/retro-task`, `/retro-sprint`, etc.)
+
+## High bar for capture
+
+Write a brain note only if it will change what someone does on a later task:
+- a future decision,
+- a review/test checklist,
+- a reusable implementation pattern,
+- or the vocabulary/search path engineers use to find the right note.
+
+If the insight is useful only for the current task, keep it in the retro / issue / handoff doc instead of promoting it.
 
 ---
 
@@ -25,6 +35,7 @@ Arguments: `[content summary]` or context from caller (`/retro-task`, `/retro-sp
 Skip:
 - Insight is task-specific only — it goes in the retro doc, not brain
 - Already exists — `grep` first, don't duplicate
+- It does not change a future decision or checklist — leave it in task docs
 
 ---
 
@@ -189,6 +200,7 @@ Before declaring done:
 | Body matches type template? | yes |
 | Title ≤ 60 chars? | yes |
 | Atomic? | one idea per note — if 2 → split |
+| Durable? | would this change what someone does next time? |
 
 ---
 

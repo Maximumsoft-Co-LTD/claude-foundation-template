@@ -7,6 +7,10 @@
 *.log
 logs/
 
+# Python runtime artifacts
+__pycache__/
+*.py[cod]
+
 # Audit log hook output (runtime artifact, append-only per session)
 docs/audit-*.md
 

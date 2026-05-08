@@ -1,7 +1,7 @@
 ---
+name: solution-options
 description: For any non-trivial decision, generate 2–3 viable approaches with tradeoff matrix and a recommended default — pairs with ask-choice
 allowed-tools: Read, Grep, Glob, Bash(git log:*), Bash(git diff:*)
-disable-model-invocation: false
 ---
 
 # solution-options

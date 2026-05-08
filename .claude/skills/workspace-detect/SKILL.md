@@ -1,7 +1,7 @@
 ---
+name: workspace-detect
 description: Detect greenfield vs brownfield + stack inventory + paused autopilot session — first call in every /dev pipeline
 allowed-tools: Read, Grep, Glob, Bash(ls:*), Bash(test:*), Bash(cat:*), Bash(git status:*), Bash(git rev-parse:*), Bash(git log:*)
-disable-model-invocation: false
 ---
 
 # workspace-detect

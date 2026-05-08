@@ -20,6 +20,23 @@ For the user-facing reference (command list, args, status lifecycle, story-point
 
 **1 task = 1 user story = 1 unified `[task-id]-requirement.md`.** That single doc contains: story · FE design · BE design · Implementation Plan · TDD test plan · NFR/rollout. There is no separate `/design fe`, `/design be`, `-frontend.md`, or `-backend.md`. `/requirement` is the only command that writes this doc; everything else reads from it.
 
+## Plan-driven execution contract
+
+After `/requirement`, downstream phases must treat the requirement doc as a **plan contract**, not just a narrative spec.
+
+Minimum required control surfaces for all non-infra tasks:
+- `Implementation Plan`
+- `Execution Slices`
+- `Plan Drift Guard`
+- `TDD Test Plan`
+
+Interpretation:
+- `/implement` executes the next planned slice.
+- `/code-review` checks the diff against the plan contract.
+- `/issue` decides in-plan fix vs return to `/requirement`.
+- `/testing` requires both AC evidence and slice evidence.
+- `/git-commit` is blocked while planned slices remain open.
+
 ## Canonical sequence
 
 ### Single task (sequential)
@@ -46,11 +63,11 @@ Each row is a contract: the phase produces a named artifact, and the next phase 
 | Phase | Artifact required to advance | Enforced by |
 |---|---|---|
 | Discovery | `docs/discovery/disc-NNN-[name].md` with explicit Epic Breakdown + Next Steps | `.claude/rules/discovery.md`, `.claude/rules/discovery-epic-mapping.md` |
-| Sprint planning | Sprint overview with filled Stories table + Success Metrics (Gate 1) + BACKLOG.md updated | `.claude/rules/new-sprint.md`, `.claude/rules/metric-instrumentation.md` |
-| Requirement | `[task-id]-requirement.md` confirmed by user (HARD-GATE) — story + design + Impl Plan + TDD plan, every AC mapped to ≥1 test row, Success Metric ACs propagated (Gate 2) | `.claude/rules/testing.md`, `.claude/rules/metric-instrumentation.md`, `.claude/rules/clarification.md` |
+| Sprint planning | Sprint overview with `Sprint Goal` + filled Stories table + Success Metrics (Gate 1) + BACKLOG.md updated | `.claude/rules/new-sprint.md`, `.claude/rules/metric-instrumentation.md` |
+| Requirement | `[task-id]-requirement.md` confirmed by user (HARD-GATE) — story + design + Impl Plan + `Execution Slices` + `Plan Drift Guard` + TDD plan, every AC mapped to ≥1 test row, Success Metric ACs propagated (Gate 2) | `.claude/rules/testing.md`, `.claude/rules/metric-instrumentation.md`, `.claude/rules/clarification.md` |
 | Implementation | All tests written and verified RED before any production code; tests GREEN; build exit 0 | `.claude/rules/testing.md` |
 | Code review | Two-stage review (spec compliance → code quality), missing impact-map / risk-register coverage = automatic Critical | `.claude/rules/superpowers.md` |
-| Testing | Full suite green; every AC has at least one passing test; **ui-verify PASS for FE-touching tasks** | `.claude/rules/testing.md` |
+| Testing | Full suite green; every AC has at least one passing test; every execution slice has its promised evidence; **ui-verify PASS for FE-touching tasks** | `.claude/rules/testing.md` |
 | Retro-task | Task retro written; BACKLOG.md status = `done` | — |
 | Git commit | File list confirmed (HARD-GATE — no silent `git add -A`); commit message matches `[task-id] type: ...` ≤72 chars | — |
 | Retro-sprint | Every Success Metric has Actual + Source artifact + Verdict (Gate 3) | `.claude/rules/metric-instrumentation.md` |
@@ -109,6 +126,7 @@ Every artifact-producing step ends with the 2-option message defined in `.claude
 
 - ❌ No direct commits to `main` — always branch per task (`[sprint-id]/[task-id]-[short]`).
 - ❌ No skipping `/requirement` to "save time" — implementation without the unified doc has no AC contract.
+- ❌ No silent plan drift — if the task contract changes materially, return to `/requirement`.
 - ❌ No code before test (Iron Law) — code written before its test must be **deleted**, not "kept as reference."
 - ❌ No silent `git add -A` — file list must be confirmed before commit.
 - ❌ No `--no-verify`, no `--no-gpg-sign` unless the user explicitly asks.

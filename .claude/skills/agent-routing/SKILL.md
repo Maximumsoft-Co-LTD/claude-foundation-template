@@ -1,7 +1,7 @@
 ---
+name: agent-routing
 description: Pick the right model (Haiku/Sonnet/Opus), agent type (Explore/general/Plan), and isolation (worktree y/n) for each spawned agent — kills "Opus for grep" waste
 allowed-tools: Read, Grep, Glob, Bash(git status:*), Bash(git log:*)
-disable-model-invocation: false
 ---
 
 # agent-routing

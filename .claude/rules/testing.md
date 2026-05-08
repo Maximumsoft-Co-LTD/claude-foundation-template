@@ -24,6 +24,17 @@ After writing a failing test, **run it and watch it fail** before writing any im
 
 Never skip this step. If you didn't see it fail, you don't know if it tests the right thing.
 
+## Prefer the smallest sufficient test
+
+Choose the **lowest test level that can falsify the AC**:
+
+- **Unit** — branching, calculation, formatting, validation, pure state transitions
+- **Integration** — DB/repository behavior, auth middleware, queue/HTTP boundaries, contract shape, transactionality
+- **E2E / journey** — critical user journeys and cross-system smoke only
+
+Do **not** duplicate the same assertion at all three layers just to feel safer.
+Each E2E row must prove something lower-level tests cannot prove as cheaply or as reliably.
+
 ## Rationalization red flags
 
 If you catch yourself thinking any of these — STOP. You are about to skip TDD:

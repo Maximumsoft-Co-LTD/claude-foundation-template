@@ -1,7 +1,7 @@
 ---
+name: local-run
 description: Start the project's full local dev stack (docker-compose / Go / FE / Mongo / Socket) with healthchecks and seed data — dependency of ui-verify
 allowed-tools: Read, Grep, Glob, Bash(docker:*), Bash(docker compose:*), Bash(npm:*), Bash(npx:*), Bash(yarn:*), Bash(pnpm:*), Bash(go run:*), Bash(go build:*), Bash(python:*), Bash(uvicorn:*), Bash(curl:*), Bash(lsof:*), Bash(ss:*), Bash(nc:*), Bash(mongosh:*), Bash(ls:*), Bash(cat:*), Bash(env:*), Bash(diff:*), Bash(grep:*), Bash(sort:*), Bash(cp:*), Bash(node:*), Bash(tail:*)
-disable-model-invocation: false
 ---
 
 # local-run

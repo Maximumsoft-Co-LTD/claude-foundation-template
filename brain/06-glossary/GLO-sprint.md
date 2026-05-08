@@ -2,7 +2,7 @@
 type: glossary
 term: Sprint
 tags: [agile, scrum, planning, iteration, team]
-updated: 2026-03-25
+updated: 2026-05-08
 ---
 
 # Sprint
@@ -16,7 +16,7 @@ A fixed-length iteration (typically 1-4 weeks) in Scrum during which a cross-fun
 
 **Most common:** 2-week sprints
 
-**In this template:** A sprint corresponds to an epic broken down into tasks. Each task follows the full workflow: `/requirement` → `/design` → `/implement` → `/code-review` → `/testing` → `/retro-task`. The sprint closes with `/retro-sprint`.
+**In this template:** A sprint corresponds to an epic broken down into tasks. Each task follows the full workflow: `/requirement` → `/implement` → `/issue` (if needed) → `/code-review` → `/testing` → `/retro-task`. The sprint closes with `/retro-sprint`.
 
 **Contrast with:** Release (may span 1-4 sprints, ships to production)
 

@@ -3,9 +3,9 @@ Workflow position: **/new-sprint → START → /implement**
 
 Write the **single requirement doc** for a task. This one doc contains: story + ACs + FE design (if any) + BE design (if any) + implementation plan with subtasks + test plans. Run BEFORE `/implement`.
 
-**This is the first command that reads the actual codebase.** `/discovery` and `/new-sprint` operate at the planning level (no deep code reading). `/requirement` is where you open real source files, learn the conventions, and turn the scaffolded skeleton into a concrete implementation plan grounded in the codebase.
+**This is the first command that reads the actual codebase.** `/discovery` and `/new-sprint` operate at the planning level (no deep code reading). `/requirement` is where you open real source files, learn the conventions, and turn the sprint plan into a concrete implementation plan grounded in the codebase.
 
-A skeleton `[task-id]-requirement.md` may already exist from `/new-sprint` (Step 5 scaffolding) — read it first and treat it as a starting point. Pre-filled fields (User Story, seeded ACs, Metadata) are inputs to refine, not work to redo.
+If a draft `[task-id]-requirement.md` already exists from a prior partial `/requirement` pass or manual draft, read it first and treat it as an input to refine rather than work to redo.
 
 Arguments: `[task-id]`  — e.g. `SP1-T001`
 
@@ -90,9 +90,9 @@ Write `"N/A — Xpt task"` for sections not required at this point level. Sectio
 
 | Points | Required sections |
 |--------|-------------------|
-| **1pt** | Metadata, Problem Statement, Overview, Value, Acceptance Criteria (min 2–3), Definition of Done, Out of Scope, Existing Code Context (minimal), [FE] Approach / Component list, [BE] API Endpoints, 1 TDD test per AC |
-| **2pt** | + User Stories, Dependencies, Scope Overview (3–6 bullets), [FE] State Inventory (5-state table + transition diagram), Component Breakdown, API Contracts Consumed, State & Data Flow, Fail State Summary, [FE] FE Environment / Config, [BE] Input Validation Rules, full TDD Test Plan |
-| **3pt** | + Feature Flow, System Behavior, Data & Business Rules, Success Metrics, Implementation Plan (engineering tasks + subtasks), [FE] UI/UX Overview, Loading & Skeleton States, Async Interaction Sequence, E2E Test Plan, Fail Case Matrix, [BE] Data Models, Service/Layer Breakdown, Business Logic, Error Handling Strategy |
+| **1pt** | Metadata, Problem Statement, Overview, Value, Acceptance Criteria (min 2–3), Definition of Done, Out of Scope, Existing Code Context (minimal), minimal Scope Overview, minimal Implementation Plan (1–3 rows), Execution Slices, Plan Drift Guard, [FE] Approach / Component list, [BE] API Endpoints, 1 planned TDD test per AC |
+| **2pt** | + User Stories, Dependencies, fuller Scope Overview, [FE] State Inventory (5-state table + transition diagram), Component Breakdown, API Contracts Consumed, State & Data Flow, Fail State Summary, [FE] FE Environment / Config, [BE] Input Validation Rules, full TDD Test Plan |
+| **3pt** | + Feature Flow, System Behavior, Data & Business Rules, Success Metrics, fuller Implementation Plan (engineering tasks + subtasks), [FE] UI/UX Overview, Loading & Skeleton States, Async Interaction Sequence, E2E Test Plan, Fail Case Matrix, [BE] Data Models, Service/Layer Breakdown, Business Logic, Error Handling Strategy |
 | **5pt+** | All sections — User Journey Map, Behavior Mapping, Routing, Responsive, Analytics, Performance, Fail Flows, Accessibility, Authorization & Roles, Sequence Diagram, Event Publishing, Security, Logging, Env Vars, Caching, DB Migrations, External Deps, Non-Functional Requirements, UI Copy, DO/DON'T, Rollout, Open Questions |
 | **8pt** | All sections + FE/BE Design Decisions (ADR entries), Class Diagram, extra edge cases and constraints |
 
@@ -167,8 +167,8 @@ Fill every section required at this point level using the unified template.
 - **Authorization & Roles (5pt+)** — explicit per-endpoint role matrix.
 
 ### Scope Overview & Implementation Plan
-- **Scope Overview (2pt+)** — 3–6 bullets. High-level scope for orientation BEFORE the detailed Implementation Plan. Each bullet = one paragraph-level chunk of work, not a micro-step. Must match Implementation Plan phases.
-- **Implementation Plan (3pt+)** — each row is a Scrum engineering task (layer-level work, NOT a story). File paths must be **real paths** from Existing Code Context. `/implement` follows this exactly.
+- **Scope Overview (1pt+)** — 1–6 bullets. High-level scope for orientation BEFORE the detailed Implementation Plan. Each bullet = one meaningful chunk of work, not a micro-step. Must match Implementation Plan phases.
+- **Implementation Plan (1pt+ for non-infra tasks)** — each row is a Scrum engineering task (layer-level work, NOT a story). File paths must be **real paths** from Existing Code Context. `/implement` follows this exactly.
 - **Subtasks** — every subtask checkbox = single action, 2–5 min. Never combine "write test AND implement." Format:
   ```
   - [ ] Write failing test for [AC] → [file path] → run: [test command]
@@ -177,10 +177,14 @@ Fill every section required at this point level using the unified template.
   - [ ] Run test — confirm GREEN → [test command]
   - [ ] Commit: "test: add [X] tests"
   ```
+- **Execution Slices + Plan Drift Guard (1pt+ for non-infra tasks)** — invoke `plan-driven-delivery` after drafting the Implementation Plan. It must:
+  - collapse the plan into 1–7 `Execution Slices`,
+  - name the ACs, files, proof, and exit evidence for each slice,
+  - define when `/issue` is enough vs when the task must return to `/requirement`.
 
 ### Test Plans
-- **TDD Test Plan (2pt+)** — min 1 unit + 1 integration per AC. Written BEFORE code. Integration tests use real dependencies — no mocks.
-- **E2E Test Plan (3pt+)** — min 1 scenario per AC. Format: GIVEN → WHEN → THEN.
+- **TDD Test Plan (1pt+)** — min 1 planned test per AC; 2pt+ should usually include both unit and integration rows. Choose the **smallest sufficient test level first**. Written BEFORE code. Integration tests use real dependencies — no mocks.
+- **E2E Test Plan (3pt+)** — cover the critical user journeys and cross-boundary smoke only. Do not mirror every low-level branch that should already be proven by unit/integration tests.
 - **[BE]** TDD Test Plan must include 401, 403, 429, and validation error test cases.
 
 ### Non-Functional, Rollout, Open Items
@@ -208,7 +212,7 @@ Fill every gap immediately. Do NOT silently drop in-scope items.
 Re-read the full doc and verify:
 
 **Universal:**
-- [ ] Metadata filled: Task Type, Points, Status.
+- [ ] Metadata filled: Task Type, Points, Status, and `Origin` when discovery context exists.
 - [ ] No section required at this point level is empty, `TBD`, or placeholder.
 - [ ] Every AC uses GIVEN/WHEN/THEN and is specific + testable.
 - [ ] At least one failure-path AC exists.
@@ -217,6 +221,10 @@ Re-read the full doc and verify:
 - [ ] **Metric instrumentation propagated** (per `.claude/rules/metric-instrumentation.md` Gate 2): for every sprint Success Metric whose Measurement column references THIS task, the doc has (a) an Implementation Plan row that produces the artifact (write the log line / add the column / fire the event), (b) an AC asserting the artifact is emitted, (c) a TDD Test Plan row verifying emission. If any leg is missing → block until fixed.
 - [ ] Value: user impact + business outcome are filled, concrete, do NOT just restate the user story.
 - [ ] Sections that don't apply to this Task Type are marked `N/A — [reason]`.
+- [ ] `Execution Slices` exists for this non-infra task, with 1–7 rows, and every slice names ACs + files + proof + exit evidence.
+- [ ] `Plan Drift Guard` clearly says what stays in `/issue` and what returns to `/requirement`.
+- [ ] TDD rows use the smallest sufficient test level first (unit/integration before E2E when possible).
+- [ ] E2E plan focuses on unique journeys/cross-layer proof, not a browser copy of every low-level case.
 
 **If Task Type includes FE (2pt+):**
 - [ ] State Inventory table: every interactive component appears, all 5 state cells filled or `N/A — [reason]`.
@@ -228,11 +236,12 @@ Re-read the full doc and verify:
 - [ ] Error envelope + error codes defined.
 - [ ] TDD includes 401/403/validation error cases per endpoint (2pt+).
 
-**Implementation Plan (3pt+):**
-- [ ] Every AC has at least one unit + one integration test in TDD Test Plan.
+**Implementation Plan (all non-infra tasks):**
+- [ ] Every AC has at least one planned test in TDD Test Plan.
 - [ ] Every file path in Implementation Plan is a real path from Existing Code Context.
 - [ ] Every subtask is a single action (2–5 min).
-- [ ] Scope Overview: 3–6 bullets, each maps to at least one phase. No orphan bullet, no orphan phase.
+- [ ] Scope Overview: 1–6 bullets, each maps to at least one phase. No orphan bullet, no orphan phase.
+- [ ] Every slice maps to at least one Implementation Plan row; no orphan slice, no orphan phase.
 
 **Plan size advisory (5pt+):**
 - [ ] If `Points >= 5` and no `docs/sprints/[sprint-id]/[task-id]/[task-id]-plan.md` exists, print to the user:
@@ -277,6 +286,7 @@ Wait for response. Apply any edits.
   Points: [N]
 
 ACs: AC-1: [summary]  |  AC-2: [summary]  |  ...
+Execution slices: S1: [goal]  |  S2: [goal]
 
 TDD Test Plan — write these failing tests BEFORE implementing:
 [print TDD test plan rows]
