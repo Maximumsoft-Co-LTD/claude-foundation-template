@@ -50,7 +50,8 @@ Copies `.claude/`, `brain/`, `docs/`, and a new stack-aware `CLAUDE.md` into the
 /discovery → /new-sprint → /requirement → /implement
     → /issue (loop) → /code-review → /testing
     → /retro-task → /git-commit → /next-task (→ repeat per task)
-    → /retro-sprint (once ALL tasks in sprint are done — includes brain update)
+    → /sprint-report (once ALL tasks done — delivery + manual test checklist)
+    → /retro-sprint (lessons + brain update)
 ```
 `/retro-task` is recommended but `/git-commit` warn-not-blocks if it is missing.
 
@@ -62,6 +63,7 @@ Copies `.claude/`, `brain/`, `docs/`, and a new stack-aware `CLAUDE.md` into the
         Implementer agent → Spec Reviewer agent → Quality Reviewer agent
         (loops back on failure, proceeds on pass)
     → /git-commit (per task, with branch finish options)
+    → /sprint-report (once ALL tasks done)
     → /retro-sprint (includes brain update)
 ```
 
@@ -70,7 +72,7 @@ Copies `.claude/`, `brain/`, `docs/`, and a new stack-aware `CLAUDE.md` into the
 /discovery → /new-sprint → /run-tasks-p [task-id] [task-id] ...
     Same Phase 1 + Phase 2 structure as /run-tasks, but uses claude -p subprocesses
     instead of Agent tool — outputs go to .claude/rtp/[run-id]/ logs, not parent context.
-    → /git-commit (per task) → /retro-sprint
+    → /git-commit (per task) → /sprint-report → /retro-sprint
 ```
 Use `/run-tasks-p` when running many tasks and parent context size is a concern.
 
@@ -91,6 +93,7 @@ Use `/run-tasks-p` when running many tasks and parent context size is a concern.
 | `/git-commit` | `[task-id]` | Stage, commit, then choose: merge / PR / keep / discard |
 | `/next-task` | `[task-id]` _(optional)_ | Load next todo task; auto-reconcile stale BACKLOG statuses; show task context card |
 | `/status` | _(none)_ | Read-only sprint progress card — current task, last step, suggested next action |
+| `/sprint-report` | `[sprint-id]` | After ALL tasks done — delivery report (what shipped per task) + manual test checklist (golden paths · edge cases · cross-task scenarios · regression spot-checks) |
 | `/retro-sprint` | `[sprint-id]` | Aggregate all task retros → sprint retro, evaluate goals + extract brain knowledge |
 | `/debug` | `[description]` | 4-phase systematic debugging — for standalone incidents outside sprint context |
 | `/run-tasks` | `[task-id] [task-id] ...` | Run multiple tasks in parallel through the full flow (Agent tool) |
@@ -277,6 +280,7 @@ docs/
 ├── sprints/
 │   └── SP1/
 │       ├── SP1-overview.md             ← /new-sprint output (epic doc)
+│       ├── SP1-report.md               ← /sprint-report output (delivery + manual test checklist)
 │       ├── SP1-retro.md                ← /retro-sprint output
 │       ├── SP1-T001/
 │       │   ├── SP1-T001-requirement.md ← /requirement output (ONE unified doc: story + FE design + BE design + Implementation Plan + tests)

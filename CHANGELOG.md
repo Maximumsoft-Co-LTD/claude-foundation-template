@@ -4,6 +4,21 @@ All notable changes to claude-foundation-template are documented here.
 
 ---
 
+## [0.17.4] — 2026-05-08
+
+### Added
+- **`/sprint-report` command (`.claude/commands/sprint-report.md`).** New phase between the last task's `/git-commit` and `/retro-sprint`. Runs once after every task in a sprint is `done` and committed; aggregates per-task requirement / retro / smoke / issues docs and produces a stakeholder-and-QA-facing delivery report at `docs/sprints/[sprint-id]/[sprint-id]-report.md`. The report has four parts: A) stakeholder summary (executive bullets, deliverables-at-a-glance table, sprint-goal outcome), B) per-task technical detail (story · ACs delivered with evidence · files / API / DB / config changed · known limitations from Out of Scope + Open Questions), C) manual test checklist (per-task golden paths sourced from `[task-id]-smoke.md`, per-task edge cases sourced from TDD boundary rows, cross-task integration scenarios derived from shared entities / API consumer chains / sequential flows / events, regression spot-checks derived from impact-map evidence), and D) sign-off table for QA / PO / Tech Lead. Self-check enforces full task coverage, AC→test mapping, ≥1 edge-case row per task, explicit cross-task statement (filled or "all tasks are independent"), and plain-language stakeholder bullets. Manual mode ends with the standard A/B exit; autopilot emits the single-line status `> sprint-report: [N] tasks · [M] cross-task · [K] regressions ✓` and continues to `/retro-sprint`.
+- **`SPRINT-REPORT-TEMPLATE.md` (`docs/templates/`).** Template backing the new command — Part A stakeholder summary, Part B per-task detail block (copyable per task), Part C four-section manual test checklist, Part D sign-off table.
+
+### Changed
+- **Workflow chain advances through `/sprint-report` before `/retro-sprint`.** `CLAUDE.md` command chain, `.claude/commands/_WORKFLOW-REF.md` (full flow for sequential / parallel / headless variants + commands table + docs structure tree), and `.claude/rules/workflow.md` (canonical sequence + new `Sprint report` phase-gate row between Git commit and Retro-sprint) now route through `/sprint-report` once all tasks in a sprint are `done` and committed.
+- **`/retro-sprint` Step 1 hints (does not block) when no sprint-report exists.** If `[sprint-id]-report.md` is missing, retro-sprint warns the user and recommends running `/sprint-report` first so delivery / manual-test artifacts are not skipped, then continues only on explicit confirmation. Retro-sprint remains the owner of brain capture, success-metric Gate 3, and BACKLOG sprint-done status.
+
+### Rationale
+- **Sprint-level QA handoff was missing.** Per-task `ui-verify` covers golden paths inside one story, but cross-task integration (story A's endpoint consumed by story B's UI, sequential user flows that touch three tasks, shared entities mutated from multiple places) had no single source of truth before sign-off. `/retro-sprint` is backward-facing (lessons + brain) and the wrong place to put a QA checklist. `/sprint-report` is the dedicated forward-facing artifact: stakeholder visibility on top, QA checklist and regression spot-checks below, sign-off row at the bottom — all derived mechanically from artifacts the prior phases already produced (requirement docs · retros · smoke files · issues files · impact-map output).
+
+---
+
 ## [0.17.3] — 2026-05-08
 
 ### Added

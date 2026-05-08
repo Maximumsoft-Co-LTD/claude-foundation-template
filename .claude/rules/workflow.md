@@ -44,14 +44,15 @@ Interpretation:
 /discovery → /new-sprint → /requirement → /implement
   → /issue (loop, optional) → /code-review → /testing
   → /retro-task → /git-commit → /next-task (repeat per task)
-  → /retro-sprint   (only after ALL tasks in sprint are done)
+  → /sprint-report  (once ALL tasks in sprint are done — delivery report + manual test checklist)
+  → /retro-sprint   (lessons + brain update)
 ```
 
 ### Multiple tasks in parallel
 - `/run-tasks [task-id]...` — Agent tool, full subagent pipeline
 - `/run-tasks-p [task-id]...` — `claude -p` headless, leaner parent context
 
-Both follow `/discovery → /new-sprint → /run-tasks{,-p} → /git-commit (per task) → /retro-sprint`.
+Both follow `/discovery → /new-sprint → /run-tasks{,-p} → /git-commit (per task) → /sprint-report → /retro-sprint`.
 
 ### Autopilot
 `/dev` runs the full pipeline with minimal blocks. Behavior of every block point is governed by `.claude/rules/autonomous-mode.md` (3 official block reasons — ambiguity, destructive op, ui-verify fail; status-line format; phase-boundary continue-by-default template). Skills MUST honor that rule when autopilot is active.
@@ -70,6 +71,7 @@ Each row is a contract: the phase produces a named artifact, and the next phase 
 | Testing | Full suite green; every AC has at least one passing test; every execution slice has its promised evidence; **ui-verify PASS for FE-touching tasks** | `.claude/rules/testing.md` |
 | Retro-task | Task retro written; BACKLOG.md status = `done` | — |
 | Git commit | File list confirmed (HARD-GATE — no silent `git add -A`); commit message matches `[task-id] type: ...` ≤72 chars | — |
+| Sprint report | `[sprint-id]-report.md` with Per-Task Detail (one block per task) + Manual Test Checklist (golden paths · edge cases · cross-task scenarios · regression spot-checks) — runs once after all tasks in the sprint are `done` and committed | `.claude/commands/sprint-report.md` |
 | Retro-sprint | Every Success Metric has Actual + Source artifact + Verdict (Gate 3) | `.claude/rules/metric-instrumentation.md` |
 
 If a phase gate cannot be satisfied → STOP. Returning to the prior phase to fix the artifact is always cheaper than carrying the gap forward.

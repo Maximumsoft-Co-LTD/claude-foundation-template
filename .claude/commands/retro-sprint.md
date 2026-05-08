@@ -11,6 +11,9 @@ Arguments: `[sprint-id]`  — e.g. `SP1`
 Parse `[sprint-id]`. Read `docs/BACKLOG.md`:
 - Any task NOT `done` → stop: "Tasks still open: [list]. Complete all before running /retro-sprint."
 
+Check that `docs/sprints/[sprint-id]/[sprint-id]-report.md` exists (produced by `/sprint-report`).
+- Missing → warn (do not block): "No sprint-report found. Recommended: run `/sprint-report [sprint-id]` first to capture delivery + manual test checklist before retro." Continue if user confirms; otherwise STOP and route to `/sprint-report`.
+
 Read `docs/sprints/[sprint-id]/[sprint-id]-overview.md` — Goals, Success Metrics, Stories, Definition of Done.
 
 ---

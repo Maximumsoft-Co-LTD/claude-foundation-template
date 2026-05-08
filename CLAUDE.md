@@ -76,7 +76,7 @@ Agents that run template commands inherit this vocabulary. "Task" in this repo A
 
 ### Command chain
 
-Single task: `/discovery → /new-sprint → /requirement (unified story + FE design + BE design + Implementation Plan + tests + Execution Slices + Plan Drift Guard) → /implement → /issue (loop) → /code-review → /testing → /retro-task → /git-commit → /next-task (repeat per task) → /retro-sprint (once ALL tasks done, includes brain update)`
+Single task: `/discovery → /new-sprint → /requirement (unified story + FE design + BE design + Implementation Plan + tests + Execution Slices + Plan Drift Guard) → /implement → /issue (loop) → /code-review → /testing → /retro-task → /git-commit → /next-task (repeat per task) → /sprint-report (once ALL tasks done — delivery summary + manual test checklist) → /retro-sprint (lessons + brain update)`
 
 Multiple tasks in parallel: `/run-tasks [task-id] [task-id] ...` (Agent tool) or `/run-tasks-p [task-id] [task-id] ...` (headless `claude -p` — leaner parent context)
 
