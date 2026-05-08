@@ -4,6 +4,18 @@ All notable changes to claude-foundation-template are documented here.
 
 ---
 
+## [0.17.3] — 2026-05-08
+
+### Added
+- **`CON-hexagonal-architecture` brain note (`brain/01-concepts/architecture/CON-hexagonal-architecture.md`).** Promoted Hexagonal Architecture from a sub-section of `CON-clean-architecture` to its own atomic concept note. Covers driving vs driven ports, ports & adapters folder layout, port/adapter code example, in-memory adapter test strategy (vs mocks at the port boundary), Hex vs Clean comparison, when-to-use checklist, and common mistakes. Improves discoverability for the recurring "do I want Clean or Hexagonal here?" question.
+
+### Changed
+- **`CON-clean-architecture` trimmed and re-linked.** The inline Hexagonal section is now a one-paragraph pointer to the new note; the comparison table (Layered vs Clean vs Hexagonal) stays in place as the side-by-side reference. Removed the `hexagonal` tag and added `CON-hexagonal-architecture` to `related`.
+- **`MOC-Architecture-Patterns` includes the new note as a peer entry.** Added a dedicated `CON-hexagonal-architecture` row with tags + key insight + when-to-read, and extended the "How Should I Organize My Code?" decision tree with a Hexagonal branch for multi-channel / swappable-persistence cases.
+- **`BRAIN-INDEX` Architecture Patterns section.** New line for `CON-hexagonal-architecture`; the `CON-clean-architecture` description no longer claims to cover Hexagonal so the two notes own non-overlapping scope.
+
+---
+
 ## [0.17.2] — 2026-05-08
 
 ### Added

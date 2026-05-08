@@ -1,8 +1,8 @@
 ---
 type: concept
-tags: [architecture, clean-architecture, hexagonal, onion, SOLID]
-related: [CON-solid-principles, CON-domain-driven-design, CON-backend-layers, CON-microservices-patterns]
-updated: 2026-03-25
+tags: [architecture, clean-architecture, onion, SOLID]
+related: [CON-hexagonal-architecture, CON-solid-principles, CON-domain-driven-design, CON-backend-layers, CON-microservices-patterns]
+updated: 2026-05-08
 source: template
 ---
 
@@ -49,25 +49,7 @@ source: template
 
 ## Hexagonal Architecture (Ports & Adapters)
 
-A variant emphasizing external dependencies:
-
-```
-┌─────────────────────────────────────┐
-│        Application (Domain)         │
-│  ┌──────────────────────────────┐   │
-│  │   Use Cases & Entities       │   │
-│  └──────────────────────────────┘   │
-│         ↑            ↑              │
-│      PORT 1       PORT 2            │
-└──────────┼─────────┼────────────────┘
-           │         │
-    ADAPTER 1    ADAPTER 2
-    (REST API)   (Database)
-```
-
-- **Ports:** interfaces that define contracts (UserRepository, PaymentGateway)
-- **Adapters:** implementations (PostgresUserRepository, StripePaymentGateway)
-- Database adapter swapped → use cases unchanged
+Sibling pattern with the same Dependency Rule but a different vocabulary (**ports** = interfaces in the core, **adapters** = implementations on the outside) and a 2-layer mental model instead of 4. See [[CON-hexagonal-architecture]] for the full treatment, including driving vs driven ports, hexagonal-flavored folder structure, port/adapter code examples, in-memory adapter test strategy, and a comparison with Clean.
 
 ## Folder Structure Example
 
@@ -204,6 +186,7 @@ async createUser(req: Request): Promise<Response> {
 
 ## Related Notes
 
+- [[CON-hexagonal-architecture]] — sibling pattern (ports & adapters); same Dependency Rule, different vocabulary
 - [[CON-solid-principles]] — principles that Clean Architecture enables
 - [[CON-domain-driven-design]] — DDD entities & aggregates fit cleanly here
 - [[CON-backend-layers]] — how layers are structured in practice

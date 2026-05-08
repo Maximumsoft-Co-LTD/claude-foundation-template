@@ -1,7 +1,7 @@
 ---
 type: moc
 tags: [MOC, architecture]
-updated: 2026-03-25
+updated: 2026-05-08
 ---
 
 # 🗺️ MOC — Architecture Patterns
@@ -17,13 +17,24 @@ updated: 2026-03-25
 These notes cover the major architectural philosophies and how they guide organization of code and systems.
 
 ### [[01-concepts/architecture/CON-clean-architecture]]
-**Tags:** architecture, clean-architecture, hexagonal, onion, SOLID
+**Tags:** architecture, clean-architecture, onion, SOLID
 
 How to organize code in concentric circles where dependencies point inward. Entities → Use Cases → Adapters → Frameworks. Domain logic stays framework-independent.
 
 **Key insight:** The Dependency Rule prevents outer layers from forcing changes on inner logic.
 
 **When to read:** Starting a backend service, refactoring legacy code, wanting framework independence.
+
+---
+
+### [[01-concepts/architecture/CON-hexagonal-architecture]]
+**Tags:** architecture, hexagonal, ports-adapters, onion, testability
+
+Ports & Adapters style — the application core defines ports (interfaces), the outside world plugs in via adapters (implementations). Same Dependency Rule as Clean, different vocabulary, 2-layer mental model. Driving ports (HTTP/CLI/gRPC drive the core) vs driven ports (core drives DB/queue/email).
+
+**Key insight:** In-memory adapters beat mocks — both prod and test honor the same port contract.
+
+**When to read:** Same domain exposed via multiple delivery channels (REST + gRPC + CLI), persistence layer might change, plugin-style systems, or pairing with DDD bounded contexts.
 
 ---
 
@@ -95,9 +106,13 @@ Simple CRUD app?
 Complex domain with business rules?
   └─ Use [[CON-clean-architecture]] + [[CON-domain-driven-design]]
 
+Same domain exposed via many channels (REST + gRPC + CLI + jobs)?
+Or persistence layer that may swap (Postgres/Mongo/in-memory)?
+  └─ [[CON-hexagonal-architecture]] (ports & adapters)
+
 Multiple services?
   └─ Service boundary = DDD Bounded Context
-  └─ Internal service code: [[CON-clean-architecture]]
+  └─ Internal service code: [[CON-clean-architecture]] or [[CON-hexagonal-architecture]]
   └─ Inter-service communication: [[CON-event-driven-architecture]]
 ```
 
