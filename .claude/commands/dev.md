@@ -48,11 +48,14 @@ status: ok | blocked | ambig
 summary: <≤ 10 lines, what changed, key counts, artifact paths>
 artifacts: [<file paths produced or modified>]
 flags: [<? items the orchestrator must batch into ask-choice>]
+task_state: { slices_done: N, slices_total: N, acs_with_passing_test: "M/M", ui_verify: "pass|fail|n/a" }   # /requirement, /implement, /code-review, /testing forks MUST include this; others omit
 next_recommendation: <1 line — what stage the orchestrator should run next>
 === END ===
 ```
 
 Anything verbose belongs in the audit log (handled by `audit-log.py` hook), never in the fork's return message.
+
+**Trust rule (load-bearing):** `task_state` is the fork's claim, not the truth. The orchestrator MUST verify against the requirement doc (`Execution Slices` table, AC coverage rows) before advancing. If fork's `task_state` disagrees with the doc, the doc wins and the orchestrator emits `> dev: state reconciled [task-id] [field] [fork-value]→[doc-value]  ⚠️`.
 
 ### When to spawn (decision table)
 
@@ -83,7 +86,7 @@ After every fork:
 1. Read the `=== FORK RESULT ===` block.
 2. If `status: blocked` → fork hit a destructive-op or ui-verify-fail block; surface to user per `autonomous-mode.md`.
 3. If `status: ambig` → push fork's `flags` into `pending_questions`. If next stage needs an answer, batch into `ask-choice` now; else carry forward.
-4. If `status: ok` → emit the phase-boundary 1-liner + the fork's summary, update state, spawn next stage.
+4. If `status: ok` → **verify `task_state` against the requirement doc per the trust rule above**. If verification reveals incomplete work (e.g. `slices_done` overstated), DO NOT advance — re-spawn the producer with a continuation prompt (see Step 5.B.3b for the slice gate, Step 5.B.7 for the commit gate). If verification passes, emit the phase-boundary 1-liner + the fork's summary, update state, spawn next stage.
 
 The user can interrupt mid-pipeline; the main session is small enough to respond instantly without waiting for the in-flight fork. (If the user's question can't be answered without the fork's output, tell them the fork is still running and give status.)
 
@@ -256,6 +259,10 @@ Read `docs/BACKLOG.md` + sprint overview. Compute:
 - `N` = number of non-done tasks in this sprint
 - `MAX_TIER_WIDTH` = largest count of independent tasks at any tier (from `depends_on` graph)
 - `RISK_FLAGS` = true if any non-done task is tagged auth / payment / migration / removed cron / public-API change (per `risk-register` taxonomy; check task title/tags in BACKLOG)
+- `SHARED_FILE_RISK` = true if ANY of:
+  - The original intent contains a refactor / cross-cutting word: `refactor` / `redesign` / `rework` / `revamp` / `ปรับ ux` / `ปรับ ui ทั้ง` / `overhaul` / `migrate to` / `เปลี่ยน design`
+  - ≥ 2 non-done tasks declare overlapping `Planned files` rows in their `Execution Slices` (when requirement docs already exist — orchestrator reads them)
+  - The sprint overview's `Sprint Goal` mentions a shared concern: design tokens / theme / base components / shared layout / global state shape
 - `USER_HINT` = original intent contains an explicit pacing word: `ทีละ task` / `step by step` / `one by one` / `ดู phase boundary`
 
 Choose mode (first match wins):
@@ -266,8 +273,9 @@ Choose mode (first match wins):
 | `MAX_TIER_WIDTH == 1` AND `N == 1` | sequential | no | only one task |
 | `USER_HINT == true` | sequential | no | honor explicit user pacing — don't overlap |
 | `RISK_FLAGS == true` | sequential | no | review + testing must be sync; per-task ui-verify (in `/testing`) + risk-register evidence are the safety net for risk-tagged work |
-| sequential AND `N ≥ 2` AND no risk flags | sequential | **yes — pipeline mode** | implement T_{N+1} overlaps with review+testing T_N; commit order preserved |
-| else (≥ 2 tasks share a tier, no risk flags) | **parallel** | n/a | real speedup via /run-tasks |
+| `SHARED_FILE_RISK == true` | sequential | no | parallel forks would race on the same files; pipeline overlap risks reading uncommitted code from a pending-review task. Refactor / theme / token sprints fall here |
+| sequential AND `N ≥ 2` AND no risk flags AND no shared-file risk | sequential | **yes — pipeline mode** | implement T_{N+1} overlaps with review+testing T_N; commit order preserved |
+| else (≥ 2 tasks share a tier, no risk flags, no shared-file risk) | **parallel** | n/a | real speedup via /run-tasks |
 
 Set `dispatch_mode` and `pipeline_mode` in state file. Emit one status line:
 
@@ -275,6 +283,7 @@ Set `dispatch_mode` and `pipeline_mode` in state file. Emit one status line:
 > dev: dispatch=parallel via /run-tasks (3 tasks, 2 tiers)  ✓
 > dev: dispatch=sequential+pipeline (4 tasks, no risk flags)  ✓
 > dev: dispatch=sequential (auth task present, per-slice gates needed)  ✓
+> dev: dispatch=sequential (refactor intent — shared-file risk)  ✓
 > dev: dispatch=sequential (1 task)  ✓
 ```
 
@@ -317,6 +326,30 @@ Two sub-modes: **plain sequential** (`pipeline_mode = false`) and **pipelined se
 
    **Why fork-per-slice and not fork-per-task:** a single task can have 4–8 slices, each heavy (RED tests + code + GREEN tests + build). One mega-fork would bloat its own context near task end. Per-slice forks keep each fork small enough that the slice's context is fully evicted from main session by the time it returns. ui-verify runs once per task at `/testing` time — not per slice — because partial UI from an in-progress task is rarely click-through ready, and a single browser walk after all slices land is cheaper and more accurate than N partial walks. Commit happens once per task (Step 7) after `/code-review` + `/testing` confirm the task as a whole is shippable — not per-slice.
 
+3b. **Slice-completeness verification gate (mandatory before /code-review).**
+
+   Per slice fork's `task_state` is a *claim*, not the truth. After every implement-fork return AND before the orchestrator advances to step 4 (`/code-review`), it MUST verify:
+
+   1. Re-read `docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md`'s `## Execution Slices` table.
+   2. Count rows where `Status` ∈ `{planned, doing}` (i.e. NOT `done`). Call this `slices_remaining`.
+   3. Cross-check against `Implementation Plan` checkboxes — every checkbox referenced by an unfinished slice must remain unchecked. If a slice is `done` but its plan rows are unchecked, treat it as `doing` (proof missing per `plan-driven-delivery` Mode 5).
+   4. Decision:
+      - `slices_remaining == 0` → advance to step 4 (`/code-review`).
+      - `slices_remaining > 0` → DO NOT advance. Re-spawn the implement fork with prompt: "Continue `/implement [task-id]`. Slices remaining: `[list with goals]`. Pick the next non-`done` slice from `Execution Slices` whose dependencies are closed; do not improvise. Same fork return contract."
+   5. Stuck-detection guard: if 3 consecutive re-spawns do NOT decrement `slices_remaining` (orchestrator compares against state file's last-known value), STOP the loop and emit `?` flag → batch into `ask-choice` with options:
+      - A) Open `/issue [task-id] [stuck-slice-id]` to root-cause the blocker
+      - B) Re-scope the stuck slice via `/requirement` (treat as material drift)
+      - C) Mark as known limitation, ship without the slice (only if AC coverage allows)
+
+   Emit one status line per verification:
+   ```
+   > dev: slice gate T012 — 3/5 done, re-spawning for S4  ⏳
+   > dev: slice gate T012 — 5/5 done, advance to /code-review  ✓
+   > dev: slice gate T012 — stuck on S4 (3 attempts, no progress)  ?
+   ```
+
+   **Why this gate is non-negotiable:** trusting `next_recommendation: "advance to code-review"` from a fork that quietly returned with 3/5 slices done is the #1 cause of "/dev ทำงานไม่เสร็จ". The fork's own context is gone; the requirement doc is the only durable record of what was promised. Verify the doc, not the chat.
+
 4. **/code-review** — **spawn fork** (background in pipeline mode, foreground in plain sequential). Fork prompt: "Run `/code-review [task-id]` in autopilot mode. All slices for this task are complete and tests are GREEN per the implement forks. Run Stage 1 spec compliance against `[task-id]-requirement.md` ACs, then Stage 2 code quality on `git diff main...HEAD`. Auto-handoff Critical findings to `/issue` per the command's Step 3d. Return `=== FORK RESULT ===` with `result: APPROVED | REQUEST CHANGES`, count of Critical/Minor/Suggestion findings, and which ACs flipped to ✓ vs ✗."
 
    On `REQUEST CHANGES` with Critical findings → `/code-review` already triggered `/issue` for each Critical; orchestrator reads those `/issue` results from the fork's summary, treats them as part of this stage, then re-spawns `/code-review` once. Two consecutive REQUEST CHANGES → block per autopilot rule (ambiguity → escalate via `ask-choice`).
@@ -327,7 +360,24 @@ Two sub-modes: **plain sequential** (`pipeline_mode = false`) and **pipelined se
 
 6. **/retro-task** — inline. Short summary writer; invoke `Skill("brain-capture")` only if a lesson surfaced from any slice or issue. Optional — skip if no notable lesson and the user's intent was speed-focused.
 
-7. **/git-commit** — inline (small writer, but block on destructive ops per autopilot rule). Orchestrator-owned: stage by explicit file list (no `git add -A`), draft commit message `[task-id] type: ...` ≤ 72 chars, commit, run finishing-branch flow. Retro-doc absence at this point only warns; does not block. The final commit SHA is the task's deliverable. **Commit ordering** is gated by Step 5.B's commit-order rule — in pipeline mode, the commit runs only when `/code-review` + `/testing` for this task have both returned PASS *and* every earlier task is already committed.
+7. **/git-commit** — inline (small writer, but block on destructive ops per autopilot rule).
+
+   **Pre-commit verification gate (orchestrator MUST satisfy ALL FOUR before staging):**
+   1. **Slices closed** — re-read `Execution Slices` table; every row `Status: done`. (Same check as the slice gate at step 3b.)
+   2. **Review APPROVED** — `/code-review` fork returned `result: APPROVED`, OR all Critical findings were resolved by `/issue` and a single re-review fork returned APPROVED. Two REQUEST CHANGES in a row = block per autopilot rule (escalate via `ask-choice`).
+   3. **Testing PASS** — `/testing` fork returned `production_readiness: PASS` AND every AC in the AC coverage table has at least one ✓ AND `ui-verify` verdict = `PASS` for FE-touching tasks. Any AC ✗ or `ui-verify: FAIL` → DO NOT commit; route through `/issue` (single round-trip) or auto-`/debug` per testing's existing rules.
+   4. **Plan-contract intact** — `Plan Drift Guard` did not trip during this task. If material drift was detected, requirement doc must show the updated contract before commit.
+
+   Any precondition unmet → emit:
+   ```
+   > dev: commit gate T012 BLOCKED — AC3 ✗ in /testing, opening /issue  ✗
+   > dev: commit gate T012 BLOCKED — slice S4 still `doing`, re-spawning /implement  ✗
+   ```
+   Then route to the matching recovery (re-spawn /testing, open /issue, re-spawn /implement). Do NOT commit a task that fails any gate "to keep the pipeline moving" — partial commits are how scope leaks across sprints.
+
+   **All four gates green → commit.** Orchestrator-owned: stage by explicit file list (no `git add -A`), draft commit message `[task-id] type: ...` ≤ 72 chars, commit, run finishing-branch flow. Retro-doc absence at this point only warns; does not block. The final commit SHA is the task's deliverable.
+
+   **Commit ordering** is gated by Step 5.B's commit-order rule — in pipeline mode, the commit runs only when `/code-review` + `/testing` for this task have both returned PASS *and* every earlier task is already committed.
 
    **Why commits move out of the slice fork:** in pipeline mode, commit order depends on review + testing of the *previous* task. Letting the slice fork commit immediately would break that ordering. Commits are now collected by the orchestrator and applied via Step 7 (`/git-commit`) once both `/code-review` and `/testing` for the task return PASS.
 
@@ -411,6 +461,18 @@ If triggered:
 
 Phase boundaries are NOT a block condition — they emit a 1-line marker + brief summary and continue. Anything else: continue without asking.
 
+## Plan-contract gates (orchestrator self-verification, NOT user blocks)
+
+These gates fire automatically and route to internal recovery (re-spawn, /issue, auto-/debug) without involving the user UNLESS recovery itself gets stuck. They prevent the "fork said done but it wasn't" failure mode.
+
+| Gate | When | Verifies | Recovery if it fails |
+|---|---|---|---|
+| Slice-completeness (Step 5.B.3b) | After every `/implement` fork return | `Execution Slices` table — every row `Status: done` | Re-spawn `/implement` with continuation prompt; 3 stuck attempts → batch as `?` |
+| Commit pre-flight (Step 5.B.7) | Before `/git-commit` stages files | All 4 preconditions: slices done · review APPROVED · testing PASS · plan-contract intact | Route to `/issue`, re-spawn `/testing`, or re-spawn `/implement` for the missing slice |
+| Resume reconciliation (Pause/resume) | On every `/dev resume` | State file vs requirement doc agree on slice progress and AC coverage | Doc wins, overwrite state, roll `current_step` back if needed |
+
+These are internal correctness checks, not user gates. Status lines are emitted (`> dev: slice gate ... ⏳`) so the user sees what's happening, but the user is only asked when recovery itself can't make progress (e.g. 3 stuck implement re-spawns → `ask-choice`).
+
 ## Sprint budget hint (soft, never blocks)
 
 Track `elapsed = now - state.started_at`. At every phase boundary AND after every fork return, emit ONE budget line **before** the next stage's first status line:
@@ -437,10 +499,18 @@ The user can interrupt at any time by sending a message — `/dev` does not stop
 
 `/dev resume`:
 1. Read state file.
-2. Re-establish: re-read discovery doc, requirement doc, current branch, git status.
-3. Continue from `current_step` + 1.
+2. **Reconcile state vs reality (mandatory).** The state file is the orchestrator's memory of what *should* be true; the requirement doc is what *is* true. On every resume:
+   - For each task in `task_contracts`:
+     - Re-read `[task-id]-requirement.md`'s `## Execution Slices` table; recompute `slices_done` and `slices_total` from the `Status` column.
+     - Re-read AC coverage; recompute `acs_with_passing_test` from any test-result artifacts referenced by the doc.
+     - If state file's `task_contracts[task-id]` disagrees with the doc → **doc wins**, overwrite the state file, emit `> dev: resume reconciled [task-id] slices_done [old]→[new]  ⚠️`.
+   - For tasks listed in `review_forks` or `testing_forks` with `status: pending`: check the most recent fork notification in the audit log. If a result already arrived but state wasn't persisted (e.g. session crashed mid-update), apply it now.
+   - If the reconciliation reveals a task that was *advanced past* `/implement` despite open slices → roll the task's `current_step` back to `5.B.3` and emit `> dev: resume rollback [task-id] code-review→implement (S4 still planned)  ⚠️`. Do not skip to `/code-review` on a partial implementation.
+3. Re-establish: re-read discovery doc, requirement doc, current branch, git status. Verify the branch matches the state file's `branch`. If mismatch → BLOCK and ask the user.
+4. Continue from the reconciled `current_step` (which may have been rolled back in step 2). The reconciled state file determines the next stage, NOT chat memory or the previous `next_recommendation`.
 
 If state missing → "no resumable session, please start fresh with /dev [intent]".
+If state older than 7 days → warn user, ask whether to resume anyway or start fresh (via `ask-choice`).
 
 ---
 
@@ -546,6 +616,11 @@ replace them.
 - ❌ **Auto-pausing at the 30-min budget** — the user explicitly chose soft hint. Past 30 min, keep reporting elapsed time; do not pause unless the user types `pause`
 - ❌ **Hiding the budget marker after 30 min "to avoid noise"** — the marker is the one signal the user opted into. Keep emitting at every phase boundary
 - ❌ **Letting the slice fork run `/git-commit`** — in pipeline mode, commits move to the orchestrator (Step 7 `/git-commit`) so commit order can match review + testing order. The slice fork only writes code + runs tests (ui-verify is per-task in `/testing`, not per-slice)
+- ❌ **Trusting `next_recommendation: advance to /code-review` while `Execution Slices` still has rows with `Status` ≠ `done`** — the slice-completeness gate (Step 5.B.3b) is non-negotiable. Re-read the doc, count un-`done` rows, re-spawn `/implement` until zero. The fork's claim about its own progress is unreliable once its context is gone
+- ❌ **Committing a task while AC coverage shows any ✗ or `ui-verify` = FAIL** — the commit gate (Step 5.B.7) requires all four preconditions green. Route the gap through `/issue` or re-spawn `/testing`. Never "commit and clean up next sprint" — that scope leaks
+- ❌ **Forcing parallel mode on a refactor / shared-file sprint** — refactor / theme / token / cross-cutting intents trigger `SHARED_FILE_RISK` → force sequential. Parallel forks racing on the same files produce conflicting partial work
+- ❌ **Resuming `/dev` without reconciling state vs the requirement doc** — the state file may be stale (session crashed, fork not persisted, manual edits to docs). Always re-read `Execution Slices` on resume, doc wins, roll back `current_step` if a task was advanced past `/implement` with open slices
+- ❌ **Reporting fork's `task_state` in status lines as if it were verified truth** — the trust rule (fork return contract) says `task_state` is a claim, not the truth. Verify against the doc before propagating to user-facing summaries
 
 ---
 

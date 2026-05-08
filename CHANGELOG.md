@@ -4,6 +4,23 @@ All notable changes to claude-foundation-template are documented here.
 
 ---
 
+## [0.17.5] — 2026-05-08
+
+### Changed
+- **`/dev` tightened with four plan-contract verification gates so large multi-slice tasks no longer skip steps.** The orchestrator now treats fork-returned progress as a *claim* and verifies it against the requirement doc before advancing.
+  - **Fork return contract gains `task_state`.** `/requirement`, `/implement`, `/code-review`, and `/testing` forks must return `{ slices_done, slices_total, acs_with_passing_test, ui_verify }`. The orchestrator MUST verify against the requirement doc (`Execution Slices` table, AC coverage); doc wins on disagreement and the orchestrator emits a reconciliation status line.
+  - **Step 5.0 dispatch decision gains `SHARED_FILE_RISK`.** Refactor / theme / token / cross-cutting intents (`refactor`, `redesign`, `revamp`, `ปรับ ux`, `ปรับ ui ทั้ง`, `migrate to`, `เปลี่ยน design`) — and sprints whose tasks declare overlapping `Planned files` rows or whose Sprint Goal mentions design tokens / theme / base components / shared layout / global state — force sequential mode. Pipeline overlap is also disabled, since the next task's implement fork would otherwise read uncommitted code from a pending-review task.
+  - **New Step 5.B.3b — Slice-completeness verification gate.** After every `/implement` fork return AND before advancing to `/code-review`, the orchestrator re-reads `Execution Slices` and counts un-`done` rows. If `slices_remaining > 0`, it re-spawns `/implement` with a continuation prompt naming the remaining slices; it does NOT advance. Stuck-detection: 3 consecutive re-spawns with no progress → batch as `?` via `ask-choice` (open `/issue` for the stuck slice, re-scope via `/requirement`, or ship-without as a known limitation).
+  - **Step 5.B.7 commit pre-flight gate is now four mandatory preconditions.** Slices closed (`Status: done` for every row) · review APPROVED · testing PASS with every AC ✓ and `ui-verify: PASS` for FE-touching tasks · plan-contract intact (no unresolved drift). Any precondition unmet → DO NOT commit; route to the matching recovery (re-spawn `/testing`, open `/issue`, or re-spawn `/implement` for the missing slice).
+  - **`/dev resume` now reconciles state vs reality.** Re-reads each task's `Execution Slices` and AC coverage on resume; if the state file disagrees with the doc, the doc wins, the state file is overwritten, and `current_step` is rolled back if the task was advanced past `/implement` while slices were still planned. Pending review/testing forks are also reconciled against audit-log notifications.
+  - **New "Plan-contract gates" recap section.** Clarifies that the slice gate, commit gate, and resume reconciliation are *internal correctness checks*, NOT the three official user-facing block conditions from `autonomous-mode.md`. They auto-recover (re-spawn / route to `/issue` / auto-`/debug`) and only escalate to `ask-choice` when recovery itself gets stuck.
+  - **Six new orchestrator-level anti-patterns** spell out the failure modes each gate prevents (trusting `next_recommendation` past open slices, committing with AC ✗, parallel mode on refactor sprints, resuming without reconciliation, reporting fork's `task_state` as verified truth).
+
+### Rationale
+- **Large UX/UI refactor sprints surfaced a "fork-said-done-but-it-wasn't" failure mode.** Real dogfood: a whole-system UX/UI refactor task with 5+ slices ran under `/dev`; an `/implement` fork returned `status: ok` after closing only 3 of 5 slices, the orchestrator trusted `next_recommendation: advance to /code-review`, and `/dev` proceeded past `/implement` despite open slices in `Execution Slices`. By the time the user noticed, several tasks had committed with partial implementations. Root cause: the orchestrator had no second-source verification — it trusted the fork's claim about its own progress. The four gates make the requirement doc the authoritative second source: slice statuses, AC coverage, and `ui-verify` verdict are checked against the doc on every fork return, every commit, and every resume. The `SHARED_FILE_RISK` heuristic prevents the related failure mode where parallel/pipeline forks race on the same FE files during a refactor sprint. Net effect: `/dev` self-detects and self-recovers from incomplete work without involving the user, except when recovery itself is genuinely stuck (3 implement re-spawns without progress).
+
+---
+
 ## [0.17.4] — 2026-05-08
 
 ### Added
