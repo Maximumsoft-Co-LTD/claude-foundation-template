@@ -91,12 +91,12 @@ Skills are model-invocable building blocks that commands compose. Each skill is 
 | Category | Skills | Used by |
 |---|---|---|
 | **Intent atom** | `prompt-understand` · `scope-check` · `ask-choice` · `solution-options` | `/dev`, `/discovery`, `/requirement` |
-| **Pre-implementation gates** | `workspace-detect` · `reverse-engineer` · `impact-map` · `risk-register` · `nfr-plan` · `api-contract` · `vertical-slice` · `tdd-plan` · `plan-driven-delivery` | `/dev`, `/requirement`, `/implement`, `/code-review`, `/issue`, `/testing` |
+| **Pre-implementation gates** | `workspace-detect` · `reverse-engineer` · `impact-map` · `risk-register` · `nfr-plan` · `api-contract` · `vertical-slice` · `tdd-plan` · `ddd` · `plan-driven-delivery` | `/dev`, `/discovery`, `/new-sprint`, `/requirement`, `/implement`, `/code-review`, `/issue`, `/testing` |
 | **Bug & quality** | `bug-repro` · `debug` · `mongo-review` · `ui-verify` | `/testing`, `/issue`, `/debug`, `/code-review` |
 | **Delivery** | `pr-create` · `release-notes` · `local-run` | `/git-commit`, `/retro-sprint` |
 | **Meta** | `skill-evolution` · `brain-capture` · `agent-routing` · `session-handoff` | `/retro-sprint`, `/run-tasks`, mid-session |
 
-**Three new gates wired into the core flow:**
+**Five gates wired into the core flow:**
 
 | Skill | Trigger | Where |
 |---|---|---|
@@ -104,8 +104,9 @@ Skills are model-invocable building blocks that commands compose. Each skill is 
 | `bug-repro` | Any bug fix → must produce verified-RED failing test before code | `/issue` Step 3, `/debug` Phase 4 |
 | `impact-map` | Change touches existing code → enumerate Tier-1/2/3 dependents | `/issue` Step 2, `/implement` Step 1e, `/code-review` Step 2a |
 | `risk-register` | Migration · auth · payment · public API · removed cron → mitigation + rollback required | `/implement` Step 1e, `/code-review` Step 2b |
+| `ddd` | Multi-context discovery · cross-context task · new aggregate or domain term · invariants beyond field validation | `/discovery` Step 3c, `/new-sprint` Step 3 hard-gate (Check C), `/requirement` Step 2 (before `plan-driven-delivery`), `/code-review` Step 2b |
 
-Code review now treats missing `impact-map` coverage or missing `risk-register` verification evidence as automatic Critical findings.
+Code review now treats missing `impact-map` coverage, missing `risk-register` verification evidence, or `ddd review` Critical findings (cross-aggregate transaction, repository inside aggregate) as automatic Critical findings.
 
 ## Superpowers Integration
 

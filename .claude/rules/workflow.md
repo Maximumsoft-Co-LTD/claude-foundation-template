@@ -120,15 +120,16 @@ After every Write or Edit on a workflow file (`docs/sprints/**`, `docs/discovery
 
 Every artifact-producing step ends with the 2-option message defined in `.claude/rules/completion-format.md` (A = Request changes, B = Continue to [next-step-name]). No 3+ option menus. No "looks good?".
 
-## Three skill gates wired into the core flow
+## Four skill gates wired into the core flow
 
 | Skill | Trigger | Hooked at |
 |---|---|---|
 | `bug-repro` | Any bug fix → produce verified-RED failing test before any fix code | `/issue` Step 3, `/debug` Phase 4 |
 | `impact-map` | Change touches existing code → enumerate Tier-1/2/3 dependents | `/issue` Step 2, `/implement` Step 1e, `/code-review` Step 2a |
 | `risk-register` | Migration · auth · payment · public API · removed cron → mitigation + rollback evidence | `/implement` Step 1e, `/code-review` Step 2b |
+| `ddd` | Multi-context discovery · cross-context task · new aggregate / domain term · invariants beyond field validation | `/discovery` Step 3c, `/new-sprint` Step 3 hard-gate (Check C), `/requirement` Step 2 (before `plan-driven-delivery`), `/code-review` Step 2b |
 
-`/code-review` treats missing `impact-map` coverage or missing `risk-register` evidence as automatic Critical findings.
+`/code-review` treats missing `impact-map` coverage, missing `risk-register` evidence, or `ddd review` Critical findings (cross-aggregate transaction, repository inside aggregate) as automatic Critical findings.
 
 ## Hard rules — never violate
 

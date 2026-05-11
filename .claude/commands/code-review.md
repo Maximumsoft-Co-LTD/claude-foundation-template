@@ -111,6 +111,13 @@ For each library that appears in the diff (max 3), follow `.claude/rules/context
 
 If context7 is not available, proceed using codebase patterns and existing knowledge.
 
+**DDD violations (conditional):**
+Invoke `ddd` in `review` mode when the diff touches any file under `src/domain/`, `internal/domain/`, `pkg/model/`, or equivalent — OR when the requirement doc contains a `## Domain Model` section. Skip for pure plumbing / config / docs diffs.
+
+The skill scans for 6 violations: anemic model (Major), repository inside aggregate (Critical), cross-aggregate transaction (Critical), mutable value object (Minor), leaky language vs the requirement doc's UL Delta (Minor; Major if the term IS in the UL Delta), log-style event name (Major). Critical findings here auto-trigger `/issue` per Step 3d.
+
+If the requirement doc has NO `## Domain Model` section but the diff introduces invariants, new domain terms, or events → return the task to `/requirement` to add the section. Do NOT silently approve.
+
 **Performance**
 - N+1 query risk (loops triggering DB calls)?
 - Unnecessary re-renders or missing memoization on FE?

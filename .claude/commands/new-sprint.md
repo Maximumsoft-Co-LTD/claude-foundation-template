@@ -110,6 +110,8 @@ Points: 1 trivial · 2 small · 3 medium-small · 5 medium · 8 large · **13 = 
 
 Common violations to catch: "Set up DB schema" → merge into the first feature using it · "Create API endpoint" → merge into the story calling it · "Build X component" → merge into the story displaying it.
 
+**Check C — DDD context ownership (conditional):** Skip if the originating discovery has only one bounded context, OR if `## Bounded Contexts (DDD)` does not exist in the discovery doc. Otherwise invoke `ddd` in `slice` mode — it produces a per-task verdict (`OK` / `OK — cross-context` / `SMELL — cross-aggregate transaction`). Any task flagged `SMELL` blocks confirmation: split the task or use a domain event + eventual consistency instead of a cross-aggregate transaction. Tasks flagged `OK — cross-context` proceed but must declare the integration pattern (ACL / domain event / shared kernel) in their `/requirement` doc.
+
 If ANY check fails → STOP. Fix the table, re-present, wait for confirmation before Step 3b.
 </HARD-GATE>
 

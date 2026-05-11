@@ -126,7 +126,22 @@ Which approach? (pick number, suggest alternative, or "go with recommendation")
 
 Wait for user's choice. Once chosen:
 - Update Section 8 in the discovery doc — mark chosen option as `✓ SELECTED`, others as `✗ Not chosen`.
-- Proceed to Step 4.
+- Proceed to Step 3c.
+
+---
+
+## Step 3c — DDD bounded contexts (conditional)
+
+Invoke `ddd` in `discovery` mode when ANY of:
+- Scope Estimate > 1 sprint (multi-epic discovery), OR
+- Problem statement names ≥ 2 distinct stakeholder roles, OR
+- Epic Breakdown lists shared concepts between epics.
+
+Otherwise skip and proceed to Step 4 — single-team utility discoveries do not need a bounded-context exercise.
+
+The skill identifies candidate bounded contexts from the problem statement, classifies each as core/supporting/generic, and lists shared concepts with their owning context + integration pattern. Output is appended as a `## Bounded Contexts (DDD)` section before "Definition of Ready for /new-sprint" — `/new-sprint` Step 3 hard-gate uses this list to verify each task has a single owning context.
+
+If the skill flags any context as `generic` that the team plans to build in-house, treat as a Critical finding — recommend an OTS solution before proceeding.
 
 ---
 

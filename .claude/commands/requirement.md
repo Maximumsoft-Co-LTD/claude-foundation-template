@@ -177,7 +177,8 @@ Fill every section required at this point level using the unified template.
   - [ ] Run test — confirm GREEN → [test command]
   - [ ] Commit: "test: add [X] tests"
   ```
-- **Execution Slices + Plan Drift Guard (1pt+ for non-infra tasks)** — invoke `plan-driven-delivery` after drafting the Implementation Plan. It must:
+- **Domain Model (conditional, before Execution Slices)** — invoke `ddd` in `model` mode when the story touches ANY of: a new aggregate, a new domain term, an invariant beyond field validation, an event consumed/emitted across contexts. The skill appends a `## Domain Model` section (Aggregate Table + Ubiquitous Language Delta) and HARD-GATEs that every invariant maps to at least one AC + at least one TDD test row. If the skill flags escalation (>3 invariants, new bounded context, >2 aggregates), STOP and use the [Aggregate Design Canvas](https://github.com/ddd-crew/aggregate-design-canvas) instead. Skip outright for pure CRUD tasks.
+- **Execution Slices + Plan Drift Guard (1pt+ for non-infra tasks)** — invoke `plan-driven-delivery` after drafting the Implementation Plan (and after `## Domain Model`, when present). It must:
   - collapse the plan into 1–7 `Execution Slices`,
   - name the ACs, files, proof, and exit evidence for each slice,
   - define when `/issue` is enough vs when the task must return to `/requirement`.
