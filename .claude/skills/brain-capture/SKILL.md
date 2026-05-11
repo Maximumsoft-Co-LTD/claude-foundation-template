@@ -34,8 +34,30 @@ If the insight is useful only for the current task, keep it in the retro / issue
 
 Skip:
 - Insight is task-specific only — it goes in the retro doc, not brain
-- Already exists — `grep` first, don't duplicate
+- Already exists — search first (Step 0), don't duplicate
 - It does not change a future decision or checklist — leave it in task docs
+
+Companion skills (responsibility split):
+- **`ask-choice`** and **`solution-options`** are decision *gates* — they surface and confirm options. They do not write to `brain/`.
+- **`brain-capture`** (this skill) is the *only* sanctioned writer to `brain/`. No other skill or command writes brain notes directly.
+
+---
+
+## Step 0 — Search before you create
+
+Before writing any new note, search for an existing one on the same topic:
+
+```bash
+grep -rli "[main keyword]" brain/0[1-6]-*/ 2>/dev/null
+grep -rli "[secondary keyword]" brain/0[1-6]-*/ 2>/dev/null
+```
+
+Three outcomes:
+- **Nothing found** → continue to Step 1; this is genuinely new.
+- **Same insight confirmed** → append a source reference to the existing note. Do not write a new file.
+- **Related but different** → write new note with explicit `related:` cross-link to the existing one. Prefer update + cross-link over near-duplicate notes.
+
+Why: duplicate notes split the search space. Two notes on the same lesson mean the second retro never finds the first one.
 
 ---
 
@@ -53,20 +75,7 @@ Pick exactly one. If torn between LES and PAT → it's a LES; PAT is for things 
 
 ---
 
-## Step 2 — Check for duplicates
-
-```bash
-grep -rli "[main keyword]" brain/0[1-6]-*/ 2>/dev/null
-```
-
-If a note exists:
-- **Same insight, just confirms** → append a "## See also" link to the existing note's source list. Don't write new.
-- **Refines / corrects** → edit the existing note. Add a "## Updated [date]" section.
-- **Truly different** → write new with explicit cross-link.
-
----
-
-## Step 3 — Get next ID
+## Step 2 — Get next ID
 
 ```bash
 ls brain/0[1-6]-*/ | grep -oE '(LES|PAT|DEC|GLO|CON)-[0-9]+' | sort -V | tail -5
@@ -76,7 +85,7 @@ Find the highest existing number for the chosen type, +1. Pad to 3 digits (e.g. 
 
 ---
 
-## Step 4 — Write the note
+## Step 3 — Write the note
 
 Path by type:
 - LES → `brain/04-lessons/LES-NNN-kebab-title.md`
@@ -169,7 +178,7 @@ Body shape varies by type — see templates below.
 
 ---
 
-## Step 5 — Update MOC index
+## Step 4 — Update MOC index
 
 The MOC for the type lives in `brain/00-MOC/`:
 - LES → `MOC-Lessons.md`
@@ -188,7 +197,7 @@ If no MOC exists for the area, create one with a basic header.
 
 ---
 
-## Step 6 — Self-check
+## Step 5 — Self-check
 
 Before declaring done:
 
@@ -204,13 +213,19 @@ Before declaring done:
 
 ---
 
-## Output
+## Output (manual mode)
 
 ```
 brain-capture: [type] [ID]
 File: brain/0X-folder/[ID]-title.md
 MOC updated: [path]
 Cross-links: [N]
+```
+
+```
+Next: choose one
+A) Request changes — describe what to revise
+B) Continue to [caller step — e.g. /retro-task Step 5]
 ```
 
 ---

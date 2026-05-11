@@ -1,7 +1,7 @@
 ---
 name: mongo-review
 description: Review MongoDB queries, aggregations, indexes, and schema changes before ship — catches missing indexes, unanchored regex, $lookup pitfalls, large $in, projection leaks
-allowed-tools: Read, Grep, Glob, Bash(grep:*), Bash(mongosh:*), Bash(git diff:*)
+allowed-tools: Read, Grep, Glob, Bash(grep *), Bash(mongosh *), Bash(git diff *)
 ---
 
 # mongo-review
@@ -23,6 +23,26 @@ Arguments: `[task-id]` or `[file glob]`
 Skip:
 - Diff doesn't touch Mongo code
 - Pure schema doc — no executable change
+
+Companion skills (don't duplicate their work):
+- **`api-contract`** — owns the wire-shape contract (request/response field names, types, status codes). `mongo-review` owns query/index/regex quality and the DB→response projection boundary.
+- **`/code-review`** — the orchestrator that calls both `api-contract` and `mongo-review` when a diff crosses the FE↔BE and DB layers. Neither skill calls the other directly.
+
+---
+
+## Step 0 — Search before you review
+
+Before running the checklist, confirm the queries to review:
+
+```bash
+git diff main...HEAD -- '*.go' '*.ts' '*.py' | grep -nE 'collection|Find|Aggregate|\$lookup|\$regex|createIndex'
+rg -n "mongo|Collection|\.find\(|\.aggregate\(" --type go --type ts [file-path]
+```
+
+Three outcomes:
+- **No Mongo code in diff** → skip this skill entirely; record as N/A.
+- **Mongo code found** → build the per-query list for Step 2; continue.
+- **Only index migration scripts** → focus checklist on the Indexes section of Step 3; skip filter/aggregation rows.
 
 ---
 
@@ -144,7 +164,7 @@ Fix:
 
 ---
 
-## Step 6 — Output
+## Output (manual mode)
 
 ```
 mongo-review: [task-id]
@@ -160,9 +180,14 @@ Findings:
 [paste each CRITICAL/HIGH with fix]
 
 Verdict: BLOCK / PASS-WITH-FOLLOW-UP / PASS
-Next:
-  BLOCK → fix CRITICALs, re-run mongo-review
-  PASS  → /code-review or /git-commit
+```
+
+Then end with the standard 2-option completion message per `.claude/rules/completion-format.md`:
+
+```
+Next: choose one
+A) Request changes — describe what to revise
+B) Continue to [/code-review next step | /git-commit]
 ```
 
 ---

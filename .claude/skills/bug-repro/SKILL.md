@@ -1,7 +1,7 @@
 ---
 name: bug-repro
 description: Write the failing test that reproduces a reported bug — minimal input, exact expected, verified RED — before any fix code is written
-allowed-tools: Read, Grep, Glob, Edit, Write, Bash(git log:*), Bash(git diff:*), Bash(npm test:*), Bash(go test:*), Bash(pytest:*)
+allowed-tools: Read, Grep, Glob, Edit, Write, Bash(git log *), Bash(git diff *), Bash(npm test *), Bash(go test *), Bash(pytest *)
 ---
 
 # bug-repro
@@ -39,6 +39,29 @@ If the bug "can't be tested" — the bug is reported wrong, or the design is too
 Skip:
 - Pure styling / copy bugs with zero behavior — visual diff is enough
 - Bugs in third-party code outside the repo
+
+Companion skills (don't duplicate their work):
+- **`bug-repro`** — produces the artifact: one verified-RED failing test for a single known defect. Stops when the test is RED and regression row is appended.
+- **`debug`** — full 4-phase root-cause protocol (reproduce → hypothesize → verify → fix) that *invokes* `bug-repro` at Phase 4. Use `debug` when the root cause is unknown; use `bug-repro` alone when root cause is already identified and only the test artifact is missing.
+
+---
+
+## Step 0 — Search before you write a new failing test
+
+Before writing a new test, check whether one already exists for this symptom:
+
+```bash
+rg -n "[issue-id]|[short-behavior-keyword]" --glob "*test*" --type ts --type go
+git log --oneline -30 | grep -i "[symptom-keyword]"    # recent commits that may have addressed it
+rg -n "[issue-id]" docs/sprints/                        # retro/issue docs for this bug
+```
+
+Three outcomes:
+- **Nothing found** → continue to Step 1, this test is genuinely new.
+- **Test found but it passes** → the bug was already fixed; verify on current branch and close the issue.
+- **Test found and it fails** → reuse or extend it; don't write a duplicate. Skip to Step 5 to verify the RED signature matches.
+
+Why: a duplicate repro test masks the original and inflates the regression suite without adding coverage.
 
 ---
 
@@ -151,7 +174,7 @@ If the fix requires changing the contract (the expected behavior) — STOP. The 
 
 ---
 
-## Output
+## Output (manual mode)
 
 ```
 bug-repro: [issue-id]

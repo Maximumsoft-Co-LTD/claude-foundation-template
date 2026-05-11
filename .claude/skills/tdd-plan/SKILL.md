@@ -1,12 +1,12 @@
 ---
 name: tdd-plan
-description: Generate the TDD test plan artifact — every AC mapped to failing tests with explicit boundary cases, before any implementation code
-allowed-tools: Read, Grep, Glob, Edit, Write, Bash(git diff:*)
+description: Generate the TDD test plan artifact — every AC mapped to failing tests with explicit boundary cases, before any implementation code. Trigger at /requirement "TDD Test Plan" step and at the start of each /implement slice.
+allowed-tools: Read, Grep, Glob, Edit, Write, Bash(git diff *)
 ---
 
 # tdd-plan
 
-Workflow position: **inside /requirement (last step before sign-off) and /implement (start of each slice) — produces the test plan that drives RED-GREEN-REFACTOR**
+Workflow position: **inside `/requirement` (last step before sign-off) and `/implement` (start of each slice) — produces the test plan that drives RED-GREEN-REFACTOR**
 
 Different from `.claude/rules/testing.md`:
 - Rule = principles ("write test first", "verify RED")
@@ -18,6 +18,7 @@ Arguments: `[task-id]` (or `[task-id]:S[slice-id]` for per-slice plan)
 
 ## When to invoke
 
+Trigger:
 - `/requirement` step "TDD Test Plan" — overall task plan
 - `/implement` start of each slice — slice-scoped plan
 - Before fixing a bug — add a row for the regression test (per `debug` skill)
@@ -25,6 +26,28 @@ Arguments: `[task-id]` (or `[task-id]:S[slice-id]` for per-slice plan)
 Skip:
 - Pure styling / copy change with no behavior
 - Doc-only change
+
+Companion skills (don't duplicate their work):
+- **`bug-repro`** — produces ONE verified-RED failing test for a single known defect. Use `bug-repro` for bug fixes, `tdd-plan` for full AC-to-test mapping on a new feature.
+- **`vertical-slice`** — defines the slice boundary; `tdd-plan` assigns test rows to those slices (Step 5).
+
+---
+
+## Step 0 — Search before you write new test rows
+
+Before creating new rows, check whether tests for overlapping ACs already exist:
+
+```bash
+rg -n "[ac-keyword]|[behavior-keyword]" --type ts --type go --glob "*test*"
+rg -n "AC[N]|[short-behavior]" docs/sprints/[sprint-id]/[task-id]/
+```
+
+Three outcomes:
+- **Nothing found** → continue to Step 1, all rows are genuinely new.
+- **Partial coverage found** → note which ACs have existing tests; write only the missing rows.
+- **Full coverage found** → validate the existing rows meet the boundary rules; augment rather than duplicate.
+
+Why: duplicate test rows mask coverage gaps and inflate the test count. Searching first keeps the plan honest.
 
 ---
 
@@ -65,7 +88,7 @@ Hard rules:
 - **Every operator/quantifier** has a boundary row (n, n+1, n-1, 0, max, max+1)
 - **Every state transition** has a "from valid prev state" row
 - **Layer** column is one of: `BE unit` / `BE integration` / `FE unit` / `FE component` / `FE e2e`
-- Test names are `snake_case`, ≤ 60 chars, describe behavior not implementation
+- Test names describe behavior not implementation (naming convention per `.claude/rules/testing.md`)
 
 ---
 
@@ -159,7 +182,7 @@ Before declaring plan ready:
 
 ---
 
-## Output
+## Output (manual mode)
 
 ```
 tdd-plan: [task-id]
@@ -169,8 +192,14 @@ Total rows: [N]  (BE unit: [n], BE int: [n], FE: [n], e2e: [n])
 
 Plan written: docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md (TDD Test Plan section)
 RED checklist: present for slice [S1]
+```
 
-Next: /implement — start writing row 1's test, watch it fail, then code.
+Then end with the standard 2-option completion message per `.claude/rules/completion-format.md`:
+
+```
+Next: choose one
+A) Request changes — describe what to revise
+B) Continue to /implement (write row 1's test, watch it fail, then code)
 ```
 
 ---

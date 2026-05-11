@@ -6,7 +6,7 @@ allowed-tools: Read, Grep, Glob, Edit, Write, Bash(git status:*), Bash(git diff:
 
 # vertical-slice
 
-Workflow position: **after scope-check (when estimate > 60 min) → before /implement → produces a slice plan**
+**Workflow position: after scope-check (when estimate > 60 min) → BEFORE /implement → produces a slice plan.**
 
 Forces the next chunk of work to be **shippable end-to-end** (UI → API → DB → test) in 15–45 minutes. No "do all the BE first, then all the FE." That's how small tasks balloon to 4 hours.
 
@@ -23,6 +23,23 @@ Arguments: `[task-id]` or scoped description from `scope-check`
 
 Skip when:
 - Task is already < 30 min single-layer (one Go handler, one Vue component, one Mongo migration)
+
+---
+
+## Step 0 — Search existing slice plan
+
+Before generating a new plan, check if one already exists in the requirement doc:
+
+```bash
+rg -n "^## Vertical Slices" docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md
+```
+
+Three outcomes:
+- **Nothing found** → continue to Step 1.
+- **Section exists and is current** → return the existing plan, skip Steps 1–6 (re-running vertical-slice on an unchanged scope is wasteful).
+- **Section exists but estimate or ACs changed** → diff the old slices against the updated ACs, revise only the affected rows, and re-persist in Step 6.
+
+Why: prevents overwriting a carefully-ordered slice plan every time the skill is invoked.
 
 ---
 
@@ -68,11 +85,11 @@ For each behavior, write a slice row:
 | S2 | B1 toast | Toast component on success | — | — | 1 component test | 15 min |
 | S3 | B2 validation | Inline error on submit | Go validator returning 400 | — | 1 e2e + 1 BE unit | 25 min |
 
-Hard rules:
-- **Estimate > 45 min** → slice is too big, split it again
-- **Estimate < 10 min** → merge with adjacent slice
-- **Slice has no test column** → not a slice, it's a chore. Reject.
-- **Slice changes only one layer** → that's fine ONLY if the layer is independently shippable (e.g. logging-only change). Otherwise re-slice.
+Sizing heuristics (aim for 15–45 min):
+- **Slices over 60 min** typically hide a design assumption or unknown dependency — split them again.
+- **Slices under 10 min** are usually setup or configuration, not user value — merge with an adjacent behavior slice.
+- **No test column** = not a slice, it's a chore. Reject.
+- **Single-layer slice** is fine ONLY if that layer is independently shippable (e.g. logging-only change). Otherwise re-slice.
 
 ---
 
@@ -126,15 +143,21 @@ This means a task with 4 slices = 4 commits, 4 pushes, 4 chances to ship/rollbac
 
 ---
 
-## Output
+## Output (manual mode)
 
 ```
 Slices: [N]  |  Total estimate: [sum] min  |  Next slice: S1 — [behavior]
 
 Order: S1 → S2 → S3 → ...
 First slice ships when: [the 4-line "done when" from Step 5]
+```
 
-Next: /implement [task-id]  (work S1 only, then re-check)
+Then end with the standard 2-option completion message per `.claude/rules/completion-format.md`:
+
+```
+Next: choose one
+A) Request changes — describe what to revise
+B) Continue to /implement [task-id] (work S1 only, then re-check)
 ```
 
 ---
@@ -142,10 +165,10 @@ Next: /implement [task-id]  (work S1 only, then re-check)
 ## Behavior in autopilot mode
 
 Per `.claude/rules/autonomous-mode.md`:
-- **Manual mode**: present slice plan + 2-option completion message (per `completion-format.md`).
+- **Manual mode**: present slice plan + 2-option completion message.
 - **Autopilot mode**: emit status line + return. Phase boundary handled by orchestrator after this skill.
 
-## Output (autopilot status line — required)
+### Output (autopilot status line — required)
 
 `> vertical-slice: [N] slices, total [N]min  [✓]`
 
@@ -153,6 +176,20 @@ Example: `> vertical-slice: 4 slices planned (S1=login, S2=callback, S3=session,
 
 ---
 
+## Examples
+
+### 3-behavior task (typical)
+
+| Slice | Behavior | FE | BE | Data | Test | Est |
+|---|---|---|---|---|---|---|
+| S1 | List things | `ThingList.vue` | `GET /things` | `things` find | e2e list test | 30 min |
+| S2 | Create thing | form + composable | `POST /things` | insert | e2e create + unit | 35 min |
+| S3 | Delete thing | delete button | `DELETE /things/:id` | soft-delete | e2e delete | 20 min |
+
+Order: S1 (contract lock) → S2 (highest risk) → S3 (quick win)
+
+---
+
 ## Why this exists
 
-Previous pain: "ใช้เวลานานในการทำ task — task เล็กใหญ่ใช้เวลาเท่ากัน". Root cause: tasks are sliced by layer (all BE, then all FE), not by behavior. Layer-sliced work has no shippable midpoint, so a 1-hour task and a 4-hour task both take "until it's all done." Vertical slicing forces a shippable result every 15–45 min, regardless of total task size.
+Previous pain: "ใช้เวลานานในการทำ task — task เล็กใหญ่ใช้เวลาเท่ากัน" — small and large tasks took the same time. Root cause: tasks sliced by layer (all BE, then all FE) have no shippable midpoint. Vertical slicing forces a shippable result every 15–45 min, regardless of total task size.

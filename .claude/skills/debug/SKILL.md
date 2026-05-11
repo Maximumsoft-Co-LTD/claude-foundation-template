@@ -1,7 +1,7 @@
 ---
 name: debug
-description: Root-cause investigation protocol — reproduce, isolate, hypothesize, verify, fix with TDD — never workaround
-allowed-tools: Read, Grep, Glob, Edit, Bash(git:*), Bash(go test:*), Bash(npm test:*), Bash(npm run:*), Bash(pytest:*), Bash(curl:*), Bash(mongosh:*), Bash(jq:*), Bash(cat:*)
+description: Root-cause investigation protocol — reproduce, isolate, hypothesize, verify, fix with TDD — never workaround. Trigger when a test fails without obvious cause, a UI bug is caught by ui-verify, or a production/staging incident has no clear root cause.
+allowed-tools: Read, Grep, Glob, Edit, Bash(git *), Bash(go test *), Bash(npm test *), Bash(npm run *), Bash(pytest *), Bash(curl *), Bash(mongosh *), Bash(jq *), Bash(cat *)
 ---
 
 # debug
@@ -16,6 +16,7 @@ Arguments: `[task-id] [symptom in quotes]` — e.g. `SP3-T012 "POST /things retu
 
 ## When to invoke
 
+Trigger:
 - Test fails and the failure isn't an obvious typo
 - UI bug that `ui-verify` caught
 - 500 / unexpected response from API
@@ -23,8 +24,34 @@ Arguments: `[task-id] [symptom in quotes]` — e.g. `SP3-T012 "POST /things retu
 - Production / staging incident
 
 Skip:
-- Compile error from a typo in the line you just wrote — fix directly
-- Lint warning — just fix
+- Compile error from a typo in the line you just wrote — fix directly, no protocol needed
+- Lint warning — fix inline, not worth a debug session
+- Bug is reproducible AND root cause is already named (e.g. "off-by-one in line 42") — use `/issue` instead; `debug` is for unknown root causes
+- A `bug-repro` artifact already exists for this defect and only the TDD-implement step remains — skip straight to `/implement`
+- The symptom is in a known-broken third-party dependency with a pending upstream fix — document, don't debug
+
+Companion skills (don't duplicate their work):
+- **`bug-repro`** — produces the single verified-RED failing test artifact. `debug` invokes `bug-repro` at Step 7 (Fix). Don't call `bug-repro` separately if already inside `debug`.
+- **`impact-map`** — after root cause is identified, run `impact-map` if the fix touches more than 1 file (Step 9 scope check).
+
+---
+
+## Step 0 — Search before you investigate
+
+Before starting the reproduce → hypothesize cycle, search for prior art:
+
+```bash
+rg -i "[symptom-keyword]" brain/04-lessons/           # known recurring bugs
+git log --oneline -40 | grep -i "[symptom-keyword]"   # recent commits related to symptom
+rg -n "[error-string]" --type go --type ts             # codebase: where the error originates
+```
+
+Three outcomes:
+- **Brain lesson found** → apply the known fix pattern first; only escalate to full debug if it doesn't apply.
+- **Recent commit matches** → `git show [hash]` — the bug may be a regression from that commit (narrow search space immediately).
+- **Nothing found** → continue to Step 1 with no shortcuts.
+
+Why: the fastest debug session is the one where you recognize the pattern from a past incident. Skipping this search wastes 20–60 minutes rediscovering known bugs.
 
 ---
 
@@ -160,7 +187,7 @@ The note prevents the same bug from happening to future-you.
 
 ---
 
-## Output
+## Output (manual mode)
 
 ```
 debug: [task-id] — RESOLVED  /  ESCALATED
@@ -169,10 +196,14 @@ Fix:        [1 line, file:line]
 Test added: yes (path/to/test) — was RED, now GREEN
 Regressions: 0 / [N caught and fixed]
 Brain note: LES-NNN  /  skipped (not recurring class)
+```
 
-Next:
-  RESOLVED → continue caller command (/implement, /testing, etc.)
-  ESCALATED → /issue [task-id] [description]
+Then end with the standard 2-option completion message per `.claude/rules/completion-format.md`:
+
+```
+Next: choose one
+A) Request changes — describe what to revise
+B) Continue to [/implement | /testing | /issue [task-id] if escalated]
 ```
 
 ---

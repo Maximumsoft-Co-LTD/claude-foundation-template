@@ -6,9 +6,9 @@ allowed-tools: Read, Grep, Glob, Edit
 
 # nfr-plan
 
-Workflow position: **inside `/requirement` step 4 (conditional) when ACs imply non-functional needs OR explicitly invoked**
+**Workflow position: inside `/requirement` step 4 (conditional) when ACs imply non-functional needs — BEFORE `/implement`.**
 
-Forces every requirement doc to commit to **measurable** non-functional targets — perf, security, scalability, reliability — instead of leaving them implicit. AI-DLC adoption.
+Forces every requirement doc to commit to **measurable** non-functional targets — perf, security, scalability, reliability — instead of leaving them implicit.
 
 Arguments: `[task-id]`
 
@@ -30,6 +30,23 @@ Also invoke explicitly when:
 Skip:
 - Internal-only refactor with no user impact
 - Doc-only change
+
+---
+
+## Step 0 — Search existing NFR section
+
+Before appending, check whether an NFR section already exists in the requirement doc:
+
+```bash
+rg -n "^## NFR Plan" docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md
+```
+
+Three outcomes:
+- **Nothing found** → continue to Step 1 and append fresh.
+- **Section exists** → this is a re-run; diff the triggered categories against what's already there and merge only the missing rows. Do NOT overwrite the existing section.
+- **Section exists but is stale/placeholder** → treat as missing, replace with a fresh section.
+
+Why: idempotent runs prevent duplicate NFR blocks that contradict each other.
 
 ---
 
@@ -195,7 +212,7 @@ Open the requirement doc, find the section ordering (after `## Acceptance Criter
 [Step 3 table]
 ```
 
-Do NOT overwrite an existing `## NFR Plan` — if one exists, this is a re-run; show a diff and ask via `ask-choice` whether to merge or replace.
+When NFR section already exists: merge, do not overwrite. Add only the rows for newly-triggered categories; preserve all existing rows as-is.
 
 ---
 
@@ -211,11 +228,35 @@ Invoke Skill("brain-capture") with type=DEC if a target is novel for the project
 
 ---
 
-## Output (autopilot status line — required)
+## Output (manual mode)
 
 ```
-> nfr-plan: [N] categories planned ([list])  ✓
+nfr-plan: [task-id]
+Categories: [list]
+NFR section: [path to requirement doc, "NFR Plan" section]
+Verification rows: [N]
 ```
+
+Then end with the standard 2-option completion message per `.claude/rules/completion-format.md`:
+
+```
+Next: choose one
+A) Request changes — describe what to revise
+B) Continue to tdd-plan
+```
+
+---
+
+## Behavior in autopilot mode
+
+Per `.claude/rules/autonomous-mode.md`:
+- Emit one status line and return.
+- Flag `?` if any NFR target is unknown and no project precedent exists — orchestrator batches into the next `ask-choice`.
+- Otherwise `✓`.
+
+### Output (autopilot status line — required)
+
+`> nfr-plan: [N] categories planned ([list])  [✓|?]`
 
 Examples:
 ```

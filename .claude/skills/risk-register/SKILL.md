@@ -6,7 +6,7 @@ allowed-tools: Read, Grep, Glob, Edit, Write, Bash(git log:*), Bash(git diff:*)
 
 # risk-register
 
-Workflow position: **inside `/implement` Step 0 (after slicing, before first slice) and `/code-review` Step 4 (before approving) — produces the risk table that makes "what could go wrong" explicit and addressable**
+**Workflow position: inside `/implement` Step 0 (after slicing, before first slice) and `/code-review` Step 4 (before approving) — produces the risk table that makes "what could go wrong" explicit and addressable.**
 
 Different from `impact-map`:
 - `impact-map` = WHAT existing code/contracts get touched (mechanical)
@@ -15,6 +15,8 @@ Different from `impact-map`:
 Different from `nfr-plan`:
 - `nfr-plan` = forward-looking targets (latency p95 < 200ms)
 - `risk-register` = downside-looking failures (what if migration partially fails)
+
+**Must-mitigate-before-merge rule:** Any risk row with `Severity = High` AND no rollback plan OR `Severity = High + data-loss tier` blocks merge. `/code-review` treats an unfilled rollback for a High-severity row as an automatic Critical finding.
 
 Arguments: `[task-id]`
 
@@ -31,7 +33,7 @@ Required when the change touches ANY of:
 - Cron / scheduled jobs in production
 
 Recommended when:
-- Impact-map has any 🔴 High or Tier-3 row
+- Impact-map has any High or Tier-3 row
 - The task touches > 5 files or > 200 LOC
 - The change is a refactor of shared utility code
 
@@ -39,6 +41,23 @@ Skip:
 - UI-only changes with no behavior shift
 - Test-only changes
 - Doc / config-comment changes
+
+---
+
+## Step 0 — Search existing risk section
+
+Before building a new register, check whether one already exists in the requirement doc:
+
+```bash
+rg -n "^## Risk Register" docs/sprints/[sprint-id]/[task-id]/[task-id]-requirement.md
+```
+
+Three outcomes:
+- **Nothing found** → continue to Step 1.
+- **Section exists** → diff the existing rows against the current categories (Step 1). Add new rows for any newly-triggered categories; do NOT overwrite existing mitigations.
+- **Section exists but categories changed materially** → annotate changed rows with `[updated YYYY-MM-DD]` and re-run rollback planning for altered High-severity rows.
+
+Why: a risk register written at `/implement` start should survive into `/code-review` without being clobbered by a re-run.
 
 ---
 
@@ -57,100 +76,24 @@ Pick the categories that apply (multi-select OK):
 | **Security** | Input validation, file upload, secret handling, CORS, CSP |
 | **Observability** | Log/metric removal, alert change, tracing change |
 
-Each chosen category triggers its checklist in Step 3.
+Each chosen category triggers its checklist. For per-category prompts, read `references/category-checklists.md`.
 
 ---
 
 ## Step 2 — Inherit from impact-map
 
 If `impact-map` exists for this task:
-- Every 🔴 High row → must appear in the risk register with explicit mitigation
+- Every High row → must appear in the risk register with explicit mitigation
 - Every Tier-3 row → must appear with rollout strategy (versioning, deprecation, mobile fallback)
 - Unknown unknowns from impact-map → carry forward as "Unknown — manual verification required"
 
-If impact-map does NOT exist and you're in a 🔴 category — STOP and run `impact-map` first. The risks can't be assessed without knowing the surface.
+If impact-map does NOT exist and you're in a required category — STOP and run `impact-map` first. The risks can't be assessed without knowing the surface.
 
 ---
 
 ## Step 3 — Apply category checklists
 
-Use the matching checklists below. Each row is `Trigger / Risk / Mitigation`.
-
-### Data (migrations)
-
-| Trigger | Risk | Mitigation |
-|---|---|---|
-| Adding NOT NULL column | Existing rows have no value → fail | Add as nullable, backfill, then add NOT NULL constraint |
-| Dropping a column | App still reads it after deploy | Two-phase: stop reading first, drop after 1 release cycle |
-| Changing column type | Data loss on conversion (e.g. `string→int`) | Add new column, dual-write, migrate, drop old |
-| Renaming a field | Old documents still have old name | Rolling migration, app reads either name during window |
-| Adding unique index | Existing duplicates cause migration failure | Pre-scan for duplicates, dedup, then add index |
-| Dropping an index | Hot query falls back to collection scan | Verify no query depends on it (`EXPLAIN`), drop in low-traffic window |
-| Backfill > 100k rows | Long-running migration locks table | Batch in chunks, monitor, throttle |
-| Deleting documents | Permanent loss if criteria is wrong | Soft-delete first (1 release), then purge |
-
-### Auth
-
-| Trigger | Risk | Mitigation |
-|---|---|---|
-| Session secret rotation | All current sessions invalidated | Dual-secret window, rotate gradually |
-| Token format change | Existing tokens stop working | Versioned tokens (`v2:`), accept v1 during window |
-| Permission tightening | Users locked out of features they had | Audit current grantees, communicate, phase rollout |
-| Adding MFA | Users without device locked out | Grace period, opt-in first, enforce later |
-| OAuth scope change | Existing integrations break | Bump version, run side-by-side |
-
-### Payment
-
-| Trigger | Risk | Mitigation |
-|---|---|---|
-| Money calculation change | Wrong amounts charged/refunded | Property test against the spec, golden-file regression |
-| Currency conversion | Rounding loses cents on aggregate | Use integer cents, never floats; document rounding direction |
-| Invoice format | Customer accounting systems break | Versioned invoices, opt-in to new format |
-| Retry logic | Double-charge | Idempotency key required, dedupe at PSP boundary |
-
-### API (Tier-3 contract)
-
-| Trigger | Risk | Mitigation |
-|---|---|---|
-| Removing a field | Old client crashes | Mark deprecated, keep for 2 release cycles, add Sunset header |
-| Adding required request field | Old client gets 400 | Make optional first, default-fill server-side |
-| Changing status code | Old client error handlers misroute | Add new endpoint version, keep old |
-| Mobile client (can't force update) | Permanent fragmentation | Versioned API, server supports oldest in-app version |
-
-### Performance
-
-| Trigger | Risk | Mitigation |
-|---|---|---|
-| New query in hot path | Latency regression | Benchmark before/after, EXPLAIN, add index if needed |
-| N+1 from join replacement | Hidden fan-out | Test with realistic data volume, not 5-row fixtures |
-| Adding cache | Stale data window | Bound TTL, invalidate on write, document staleness |
-| Removing index | Query hits collection scan | Verify with `EXPLAIN`, no full-scan acceptable on > 10k docs |
-
-### Reliability
-
-| Trigger | Risk | Mitigation |
-|---|---|---|
-| New cron | Misses run during deploy | Idempotent design, tolerate skipped runs |
-| Queue consumer change | Dead-letter buildup | Backward-compatible message format, drain DLQ |
-| External API call | Cascading failure on outage | Timeout + retry + circuit breaker + fallback |
-| Removing healthcheck | Bad pod stays in rotation | Replacement check exists FIRST |
-
-### Security
-
-| Trigger | Risk | Mitigation |
-|---|---|---|
-| New user input | Injection (SQL/NoSQL/cmd/XSS) | Parameterized queries, output encoding, allowlist validation |
-| File upload | Malicious upload | Type sniffing, size cap, scan, served from separate domain |
-| New secret | Leakage in logs/repo | Use secret manager, never `console.log`, scan diffs |
-| CORS change | Cross-site attack | Explicit origin allowlist, no `*` with credentials |
-
-### Observability
-
-| Trigger | Risk | Mitigation |
-|---|---|---|
-| Removing a log line | Loss of investigation breadcrumb | Replace with metric, document why removed |
-| Changing alert threshold | Page misses incidents | Run shadow alert for 1 week before flip |
-| Tracing change | Distributed traces split | Verify trace propagates end-to-end before merge |
+Using the prompts in `references/category-checklists.md`, fill one row per identified risk. Build the register in Step 4.
 
 ---
 
@@ -162,7 +105,7 @@ Append to the requirement doc:
 ## Risk Register ([YYYY-MM-DD])
 
 Categories: [data, payment]
-Linked impact-map: yes — 2 🔴 rows carried forward
+Linked impact-map: yes — 2 High rows carried forward
 
 | # | Risk | Category | Likelihood | Severity | Mitigation | Verification | Must-mitigate before merge? |
 |---|------|----------|------------|----------|------------|--------------|------------------------------|
@@ -195,7 +138,7 @@ If post-deploy errors spike on `orders.discountCode IS NULL`:
 Reversibility: full. Data backfilled stays — re-running migration is idempotent.
 ```
 
-If a row has NO viable rollback (e.g. dropped column, deleted documents) — flag it 🔴🔴 and require sign-off in the 2-option completion (note in summary).
+If a row has NO viable rollback (e.g. dropped column, deleted documents) — flag it with double-red and require sign-off in the 2-option completion (note in summary).
 
 ---
 
@@ -215,7 +158,7 @@ The verification column in the table must be filled BEFORE `/code-review` can ap
 
 ---
 
-## Output
+## Output (manual mode)
 
 ```
 risk-register: [task-id]
@@ -225,17 +168,31 @@ Rollback plans: [K]   (No-rollback flagged: [N])
 
 Highest-severity row: R[X] — [1-line summary]
 Register written: [path to requirement doc, "Risk Register" section]
-
-Next: ensure verification evidence is collected during /implement. /code-review will check it.
 ```
 
-End with the standard 2-option completion:
+Then end with the standard 2-option completion message per `.claude/rules/completion-format.md`:
 
 ```
 Next: choose one
 A) Request changes — describe what to revise
 B) Continue to /implement (with risk register as a guardrail)
 ```
+
+---
+
+## Behavior in autopilot mode
+
+Per `.claude/rules/autonomous-mode.md`:
+- **Manual mode**: write register + rollback plans + 2-option completion.
+- **Autopilot mode**: emit status line + return. Block (`?` flag) if ANY "Must-mitigate" row has no rollback — orchestrator will batch a yes/no destructive-op-style confirmation.
+
+### Output (autopilot status line — required)
+
+`> risk-register: [N] risks ([M] must-mitigate, [K] no-rollback)  [✓|?]`
+
+Examples:
+- `> risk-register: 5 risks (4 must-mitigate, 0 no-rollback)  ✓`
+- `> risk-register: 7 risks (5 must-mitigate, 2 no-rollback)  ?`
 
 ---
 
@@ -246,22 +203,6 @@ B) Continue to /implement (with risk register as a guardrail)
 - ❌ Skipping rollback because "we'll figure it out" — that's how outages get worse
 - ❌ Marking everything Low/Low to fast-track approval — gaming defeats the purpose
 - ❌ Treating risk-register as ceremony — if the task doesn't trigger any category, skip it (per Step 1 rule)
-
----
-
-## Behavior in autopilot mode
-
-Per `.claude/rules/autonomous-mode.md`:
-- **Manual mode**: write register + rollback plans + 2-option completion
-- **Autopilot mode**: emit status line + return. Block (`?` flag) if ANY "Must-mitigate" row has no rollback (orchestrator will batch a yes/no destructive-op-style confirmation)
-
-## Output (autopilot status line — required)
-
-`> risk-register: [N] risks ([M] must-mitigate, [K] no-rollback)  [✓|?]`
-
-Examples:
-- `> risk-register: 5 risks (4 must-mitigate, 0 no-rollback)  ✓`
-- `> risk-register: 7 risks (5 must-mitigate, 2 no-rollback)  ?`
 
 ---
 

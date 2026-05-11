@@ -6,11 +6,9 @@ allowed-tools: Read, Grep, Glob, Bash(npm *), Bash(npx *), Bash(yarn *), Bash(pn
 
 # ui-verify
 
-Workflow position: **invoked from `/testing` Step 6a-uiverify (after /code-review, before /retro-task) → BLOCK commit if any AC path fails**
+**Workflow position: invoked from `/testing` Step 6a-uiverify (after /code-review, before /retro-task) — BLOCK commit if any AC path fails.**
 
 Catches "type-check passes but the button doesn't actually work" before it ships. Stack-aware for Vue3+Nuxt and Next; covers Socket.io flows.
-
-**Note:** This skill does NOT run during `/implement`. It runs once per task at `/testing` time, after all slices have landed and the task is whole. Partial UI from an in-progress task is rarely click-through ready, and a single browser walk after the task is whole is cheaper and more accurate than N partial walks per slice.
 
 Arguments: `[task-id]`
 
@@ -28,7 +26,27 @@ Skip:
 - Pure tooling/config (CI, lint rules)
 - Doc-only changes
 
+Note: This skill does NOT run during `/implement`. It runs once per task at `/testing` time, after all slices have landed and the task is whole. Partial UI from an in-progress task is rarely click-through ready, and a single browser walk after the task is whole is cheaper and more accurate than N partial walks per slice.
+
 If skipping, state explicitly: "ui-verify skipped — no UI surface touched."
+
+Companion skills:
+- **`local-run`** — hard dependency; `ui-verify` requires a running dev server. Run `local-run` first if the server is not already up. `ui-verify` delegates server-start detection to Step 1 but can call `local-run` explicitly when the environment is cold.
+
+---
+
+## Step 0 — Search existing ui-verify evidence
+
+Before running a full walk, check if evidence already exists for this task:
+
+```bash
+ls docs/sprints/[sprint-id]/[task-id]/ui-verify/ 2>/dev/null
+rg -n "Verdict:" docs/sprints/[sprint-id]/[task-id]/ui-verify/notes.md 2>/dev/null
+```
+
+If previous PASS evidence exists AND no AC or implementation has changed since it was captured → refresh only the changed AC paths, not all from scratch. Why: re-running an unchanged AC wastes 10–15 min; targeted refresh catches regressions without full re-walk.
+
+If previous FAIL evidence exists → re-run the failing ACs specifically; treat others as potentially stale and re-verify.
 
 ---
 
@@ -190,16 +208,20 @@ Evidence: docs/sprints/[sprint-id]/[task-id]/ui-verify/
 
 ---
 
-## Output
+## Output (manual mode)
 
 ```
 ui-verify: [PASS | FAIL]
 ACs: [N/N]  |  Edges: [N/N]  |  Tests: [PASS | FAIL]
 Evidence: docs/sprints/[sprint-id]/[task-id]/ui-verify/
+```
 
-Next:
-  PASS → resume /testing Step 6b (journey tracing) → /retro-task → /git-commit
-  FAIL → /debug [task-id] [symptom]
+Then end with the standard 2-option completion message:
+
+```
+Next: choose one
+A) Request changes — describe what to revise
+B) Continue to /retro-task (PASS) or /debug [task-id] [symptom] (FAIL)
 ```
 
 ---
@@ -210,9 +232,9 @@ Per `.claude/rules/autonomous-mode.md`:
 - **Manual mode**: produce verdict block + block /git-commit on FAIL.
 - **Autopilot mode**: emit status line. **FAIL is one of the 3 official block conditions** — auto-trigger `/debug`; if `/debug` resolves to GREEN, continue; otherwise BLOCK with diagnosis.
 
-## Output (autopilot status line — required)
+### Output (autopilot status line — required)
 
-`> ui-verify: PASS [N/N ACs]  [✓]` or `> ui-verify: FAIL on [AC] ([reason])  [✗]`
+`> ui-verify: [PASS|FAIL] [N/N ACs] (FAIL on [AC] if applicable)  [✓|✗]`
 
 Examples:
 - `> ui-verify: PASS 5/5 ACs, 7/7 edges  ✓`
@@ -222,4 +244,4 @@ Examples:
 
 ## Why this exists
 
-Previous pain: "ทำงานไม่ผ่าน UI กดไม่ได้". Root cause: type-check and unit tests pass without proving any path actually works in the browser. This skill makes "open it and click it" a mandatory blocking step, with evidence captured so it can't be skipped silently.
+Previous pain: "ทำงานไม่ผ่าน UI กดไม่ได้" — nothing worked when clicked in the UI. Root cause: type-check and unit tests pass without proving any path actually works in the browser. This skill makes "open it and click it" a mandatory blocking step, with evidence captured so it can't be skipped silently.

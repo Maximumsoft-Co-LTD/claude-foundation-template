@@ -16,15 +16,32 @@ Arguments: `[task-id]` or `[freeform label]`
 
 ## When to invoke
 
-- Context window > 80% used and the work isn't done
-- End of day on a multi-day task
-- Switching to another machine / engineer
-- Before invoking `/clear` — if you must, this is the lifeline
-- After `/debug` discovered a complex root cause that takes time to re-derive
+- Context window > 80% used and the work isn't done.
+- End of day on a multi-day task.
+- Switching to another machine / engineer.
+- Before invoking `/clear` — if you must, this is the lifeline.
+- After `/debug` discovered a complex root cause that takes time to re-derive.
 
 Skip:
-- Task is finished — close it, no handoff needed
-- Single-step work with no carry-over
+- Context < 50% used — premature handoff defeats the purpose; the cost of creating the doc exceeds the risk of losing context.
+- Task is finished — close it, no handoff needed.
+- Single-step work with no carry-over.
+
+---
+
+## Step 0 — Search for an existing handoff
+
+Before creating a new file, check whether a recent handoff already exists for this task:
+
+```bash
+ls docs/sprints/[sprint-id]/[task-id]/handoff.md 2>/dev/null
+ls docs/handoffs/ 2>/dev/null | grep "[task-id or label]"
+```
+
+- **File exists** → refresh it in place: append a new dated section at the top. Do NOT create a second file.
+- **No file** → proceed to Step 1.
+
+Why: creating a second handoff doc for the same task splits the resume context. The next session reads the newest file and misses earlier watchouts.
 
 ---
 
@@ -147,6 +164,8 @@ SP[N]-T[NNN] wip: [1-line state]
 Handoff: docs/sprints/[sprint-id]/[task-id]/handoff.md
 ```
 
+> **Config note:** The default WIP branch prefix is `wip/[task-id]`. Override this in your project's CLAUDE.md if your team uses a different prefix (e.g. `feat/` or `draft/`). The commit message format above is the authoritative convention; the branch prefix is team-configurable.
+
 ---
 
 ## Step 6 — Self-check
@@ -176,7 +195,7 @@ If on a personal branch and the handoff is private → don't push, but tell the 
 
 ---
 
-## Output
+## Output (manual mode)
 
 ```
 session-handoff: [task-id or label]
@@ -184,6 +203,12 @@ File: [path]
 WIP commit: [sha or "none — clean tree"]
 Local stack: [running | stopped]
 Next concrete action: [1 line]
+```
+
+```
+Next: choose one
+A) Request changes — describe what to revise
+B) Continue to [next action — e.g. /clear or end-of-day logout]
 ```
 
 ---

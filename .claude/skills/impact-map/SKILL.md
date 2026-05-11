@@ -1,7 +1,7 @@
 ---
 name: impact-map
 description: Given a planned change (file/function/contract/schema), enumerate every callsite, dependent, and downstream consumer that could break — produces an impact table with risk levels
-allowed-tools: Read, Grep, Glob, Bash(git log:*), Bash(git diff:*), Bash(rg:*)
+allowed-tools: Read, Grep, Glob, Bash(git log *), Bash(git diff *), Bash(rg *)
 ---
 
 # impact-map
@@ -31,6 +31,27 @@ Skip:
 - Net-new file with no callers yet
 - Pure styling / copy
 - Test-only changes
+
+Companion skills (don't duplicate their work):
+- **`risk-register`** — judgement layer: WHAT could go wrong given the impact map's findings. Run `impact-map` first, then `risk-register` if any Tier-1 or Tier-3 rows are 🔴.
+- **`api-contract`** — if the change surface is an endpoint shape, `impact-map` enumerates the consumers; `api-contract` locks the new shape.
+
+---
+
+## Step 0 — Search before you map
+
+Before building the impact table, confirm the change surface is correctly stated:
+
+```bash
+rg -n "[surface-name]" --type ts --type go      # verify the symbol / path exists
+git log --oneline -20 -- [file-path]             # recent change history for context
+rg -n "[surface-name]" docs/sprints/             # check if a prior impact-map exists
+```
+
+Three outcomes:
+- **Symbol not found** → change surface description is wrong; clarify with the caller before Step 1.
+- **Prior impact-map found for this surface** → compare and extend rather than rebuild from scratch.
+- **Symbol found, no prior map** → continue to Step 1.
 
 ---
 
@@ -162,7 +183,7 @@ If `risk-register` does NOT exist yet and any row is 🔴 → recommend running 
 
 ---
 
-## Output
+## Output (manual mode)
 
 ```
 impact-map: [task-id] surface=[surface]

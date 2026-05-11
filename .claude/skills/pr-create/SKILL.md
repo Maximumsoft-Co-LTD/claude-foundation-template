@@ -16,14 +16,29 @@ Arguments: `[task-id]` (single task PR) or `[sprint-id]` (sprint-end PR)
 
 ## When to invoke
 
-- User says "create PR" / "open PR" / "ทำ PR" after a commit
-- End of `/retro-task` if the team policy is "PR per task"
-- End of `/retro-sprint` for the integration PR
+- User says "create PR" / "open PR" / "ทำ PR" after a commit.
+- End of `/retro-task` if the team policy is "PR per task".
+- End of `/retro-sprint` for the integration PR.
 
 Skip:
-- User did NOT explicitly ask for a PR — never spontaneous
-- Branch has no commits ahead of base
-- Branch already has an open PR — UPDATE that one, don't open a duplicate
+- User did NOT explicitly ask for a PR — never spontaneous.
+- Branch has no commits ahead of base.
+- Branch already has an open PR — UPDATE that one via `gh pr edit`, don't open a duplicate.
+
+---
+
+## Step 0 — Search for an existing PR on this branch
+
+Before opening a new PR, check whether one already exists:
+
+```bash
+gh pr list --head "$(git rev-parse --abbrev-ref HEAD)" --state open
+```
+
+- **Open PR found** → surface the URL and offer via `ask-choice`: A) update body + title via `gh pr edit`  B) close + open new  C) abort.
+- **No PR found** → proceed to Step 1.
+
+Why: duplicate PRs confuse reviewers and split CI history. Always update in place unless the user explicitly wants a fresh PR.
 
 ---
 
@@ -56,7 +71,9 @@ git log origin/main..HEAD --oneline       # has commits to PR
 | TDD plan exists (if requirement-driven) | section "TDD Test Plan" in requirement doc |
 | Self-check on requirement doc | no `TBD` / `TODO` left |
 
-If any gate fails → STOP and report which gate. Do NOT push a PR with red CI in advance.
+If any gate fails → STOP and report which gate.
+
+**CI exception:** if CI is red but the failures are confirmed unrelated to this branch (3rd-party service down, shared infra outage, flaky test in an unrelated module), proceed with the PR but add a `[infra-red]` callout in the PR body's **Tests** section: `> [infra-red] CI failure unrelated — [service/test name], tracked in [link]`. The human reviewer decides whether to merge. Do NOT use this exception to bypass genuinely broken tests in the changed code.
 
 ---
 
@@ -177,6 +194,8 @@ mcp__github__create_pull_request(
 )
 ```
 
+**Draft PR flow:** pass `draft: true` when the user asks for WIP / review-while-iterating. Draft PRs are visible to reviewers but cannot be merged until marked ready. Use `gh pr ready [url]` when the branch is complete. Mention `[DRAFT]` in the title so it's obvious at a glance.
+
 Capture the returned PR URL.
 
 ---
@@ -196,7 +215,7 @@ If A → call `mcp__github__subscribe_pr_activity` for the PR.
 
 ---
 
-## Step 9 — Output
+## Output (manual mode)
 
 ```
 pr-create: [task-id or sprint-id]
@@ -205,10 +224,14 @@ Title: [title]
 Base ← Head: [base] ← [branch]
 Draft: yes / no
 Subscribed: yes / no
+```
 
-Next:
-  Wait for review (subscribed → auto-handle activity)
-  Or: /next-task
+Then end with the standard 2-option completion message per `.claude/rules/completion-format.md`:
+
+```
+Next: choose one
+A) Request changes — describe what to revise
+B) Continue to /next-task (or wait for review if subscribed)
 ```
 
 ---

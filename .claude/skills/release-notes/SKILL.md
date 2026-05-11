@@ -27,6 +27,30 @@ Skip:
 
 ---
 
+## Step 0 — Search existing CHANGELOG and recent tags
+
+Before generating a new entry, orient yourself:
+
+```bash
+# Check for existing CHANGELOG.md
+ls CHANGELOG.md 2>/dev/null && head -30 CHANGELOG.md
+
+# Find the most recent release tag
+git tag --sort=-version:refname | head -5
+
+# Confirm version in project files
+grep '"version"' package.json 2>/dev/null || grep '^version' pyproject.toml 2>/dev/null || cat VERSION 2>/dev/null
+```
+
+Three outcomes:
+- **CHANGELOG exists** → match its style (heading format, bullet style, Keep a Changelog vs custom). Prepend new entry.
+- **No CHANGELOG** → create one with the Keep a Changelog header.
+- **Version files conflict** → resolve before proceeding; mismatched versions in different files means the previous bump was partial.
+
+Why: generating a new entry without reading the existing style produces a CHANGELOG that looks like two different humans wrote it.
+
+---
+
 ## Step 1 — Determine the diff range
 
 ```bash
@@ -58,9 +82,15 @@ Parse commit messages — they follow `SP[N]-T[NNN] type: description` (per CLAU
 | `test` | skip | no |
 | `chore` | skip | no |
 
-For ambiguous `refactor` commits, check `git diff` of the commit:
-- Touches public API surface (route, exported function, response shape) → include in **Changed**
-- Internal only (rename private var, extract helper) → skip
+For `refactor` commits, apply this decision tree:
+
+| Refactor type | Classification | Action |
+|---|---|---|
+| Renamed export / removed alias / changed default export behavior | behavior-changing | PATCH bump + **Changed** CHANGELOG entry |
+| Renamed private function / extracted internal helper / moved file with no public import change | pure-internal | no bump, no entry |
+| Mix of both in same commit | mixed | split commits first, then classify each half |
+
+Rule: if a downstream consumer would need to change their code after this refactor, it is behavior-changing. If they can upgrade without touching a line, it is pure-internal.
 
 ---
 
@@ -207,7 +237,7 @@ git tag -a v1.5.0 -m "Release v1.5.0 — see CHANGELOG.md"
 
 ---
 
-## Output
+## Output (manual mode)
 
 ```
 release-notes: [sprint-id] — v[old] → v[new]
@@ -217,12 +247,17 @@ README:    [N] sections updated, [N] OK, [N] manual TODO
 Version:   bumped in [N] files
 Staged:    yes
 
-Open TODOs (manual):
-  - [reshoot dashboard.png after SP3-T015]
+Open TODOs (manual follow-up tasks):
+  - TaskCreate("SP[N]-T[NNN+1] docs: reshoot dashboard.png — SP3-T015 UI changed")
+  - [other screenshot / diagram TODOs]
+```
 
-Next:
-  Review the diff → /git-commit
-  Then: git tag v[new] && git push --tags
+For each manual TODO, a concrete `TaskCreate(...)` entry is emitted so the work lands in BACKLOG.md rather than disappearing into a code comment.
+
+```
+Next: choose one
+A) Request changes — describe what to revise
+B) Continue to /git-commit
 ```
 
 ---

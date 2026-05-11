@@ -6,7 +6,7 @@ allowed-tools: Read, Grep, Glob, Bash(ls:*), Bash(test:*), Bash(cat:*), Bash(git
 
 # workspace-detect
 
-Workflow position: **first stage of `/dev` pipeline; also invoked by `/discovery` and `/new-sprint` step 0**
+**Workflow position: first stage of `/dev` pipeline; also invoked by `/discovery` and `/new-sprint` step 0 — BEFORE any planning or implementation.**
 
 Decides whether the working repo is a fresh greenfield project or an existing brownfield codebase, inventories the stack, and detects any paused autopilot session worth resuming. This drives the rest of the pipeline (e.g. brownfield → trigger `reverse-engineer`).
 
@@ -16,12 +16,32 @@ Arguments: none
 
 ## When to invoke
 
+Trigger:
 - `/dev` step 1 — every autopilot run
 - `/discovery` step 0 — manual mode
 - `/new-sprint` step 0 — to confirm context
 - Manual: when starting work on an unfamiliar repo
 
 Skip: never. This is fast (< 5 sec) and cheap; the cost of skipping it (wrong assumptions about brownfield/greenfield) is much higher.
+
+Companion skills (responsibility split):
+- **`workspace-detect`** — fast greenfield/brownfield detection + stack inventory + paused-session check; sprint-scoped cache (`.workspace-cache.json`). Runs first, every session.
+- **`reverse-engineer`** — deep 30-day codebase scan; spawns parallel Explore agents; owns `docs/discovery/RE-[date].md`. Runs only when `workspace-detect` sets `recommend_re: true` (brownfield + no fresh RE doc).
+
+---
+
+## Step 0 — Search existing workspace cache and paused state
+
+Before doing any file probing, check if a recent result already exists:
+
+```bash
+ls docs/sprints/*/.workspace-cache.json 2>/dev/null | head -1
+ls docs/sprints/*/.autopilot-state.json 2>/dev/null
+```
+
+If `.workspace-cache.json` exists and is < 24 hours old → return its content, skip Steps 1–5. Why: workspace topology rarely changes mid-session; re-probing wastes 5 seconds on every pipeline start.
+
+If a `.autopilot-state.json` exists and is ≤ 7 days old → flag `resumable: true` immediately (confirmed in Step 1 below).
 
 ---
 
@@ -160,11 +180,27 @@ Plus the autopilot status line.
 
 ---
 
-## Output (autopilot status line — required)
+## Output (manual mode)
+
+Emit the YAML block, then return control to caller.
 
 ```
-> workspace-detect: [type] ([stack summary, ≤ 30 chars])  ✓
+Next: choose one
+A) Request changes — describe what to revise
+B) Continue to reverse-engineer (if recommend_re: true) or /discovery
 ```
+
+---
+
+## Behavior in autopilot mode
+
+Per `.claude/rules/autonomous-mode.md`:
+- Never blocks; flags `?` only on conflicting stack signals.
+- Emits one status line and returns.
+
+### Output (autopilot status line — required)
+
+`> workspace-detect: [type] ([stack summary, ≤ 30 chars])  [✓|?]`
 
 Examples:
 ```
@@ -173,13 +209,6 @@ Examples:
 > workspace-detect: brownfield, resumable session @ SP3  ✓
 > workspace-detect: stack signals conflict (Next + Nuxt)  ?
 ```
-
----
-
-## Behavior reference
-
-In manual mode: emit the YAML block + `Output` line, then return control to caller.
-In autopilot mode (per `autonomous-mode.md`): same behavior — never blocks; flags `?` only on conflicting stack signals.
 
 ---
 
@@ -194,4 +223,4 @@ In autopilot mode (per `autonomous-mode.md`): same behavior — never blocks; fl
 
 ## Why this exists
 
-Without this, every command guesses brownfield/greenfield, mis-routes RE, and re-discovers the stack. Centralizing into one fast skill makes the rest of the pipeline deterministic.
+Without this, every command guesses brownfield/greenfield, mis-routes RE, and re-discovers the stack. Centralizing into one fast skill makes the rest of the pipeline deterministic. The companion split with `reverse-engineer` prevents a 30-second deep scan from running on every pipeline start — `workspace-detect` handles the cheap signal check; `reverse-engineer` handles the expensive one only when necessary.

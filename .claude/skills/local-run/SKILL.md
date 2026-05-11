@@ -1,7 +1,7 @@
 ---
 name: local-run
 description: Start the project's full local dev stack (docker-compose / Go / FE / Mongo / Socket) with healthchecks and seed data — dependency of ui-verify
-allowed-tools: Read, Grep, Glob, Bash(docker:*), Bash(docker compose:*), Bash(npm:*), Bash(npx:*), Bash(yarn:*), Bash(pnpm:*), Bash(go run:*), Bash(go build:*), Bash(python:*), Bash(uvicorn:*), Bash(curl:*), Bash(lsof:*), Bash(ss:*), Bash(nc:*), Bash(mongosh:*), Bash(ls:*), Bash(cat:*), Bash(env:*), Bash(diff:*), Bash(grep:*), Bash(sort:*), Bash(cp:*), Bash(node:*), Bash(tail:*)
+allowed-tools: Read, Grep, Glob, Bash(docker *), Bash(docker compose *), Bash(npm *), Bash(npx *), Bash(yarn *), Bash(pnpm *), Bash(go run *), Bash(go build *), Bash(python *), Bash(uvicorn *), Bash(curl *), Bash(lsof *), Bash(ss *), Bash(nc *), Bash(mongosh *), Bash(ls *), Bash(env *), Bash(diff *), Bash(grep *), Bash(sort *), Bash(cp *), Bash(node *)
 ---
 
 # local-run
@@ -10,7 +10,7 @@ Workflow position: **before /implement first slice, before /testing, before /ui-
 
 Stack-aware bootstrap: Go (BE) + Vue3/Nuxt/Next (FE) + MongoDB + Socket.io + Python services. Replaces the archived `env-setup`.
 
-Arguments: none (or `[--with=service1,service2]` to limit scope)
+Arguments: `[--with=service1,service2]` (optional) — start only the listed services instead of the full stack. Example: `local-run --with=mongo,go` starts Mongo and the Go BE without the FE. Useful when running BE-only tests or diagnosing a single service. If omitted, all detected stack services start.
 
 ---
 
@@ -24,6 +24,28 @@ Arguments: none (or `[--with=service1,service2]` to limit scope)
 Skip:
 - Stack already running and healthy this session — record and reuse
 - Pure-doc task with no code execution
+
+Companion skills (don't duplicate their work):
+- **`ui-verify`** — the hard dependency consumer of `local-run`. `ui-verify` reads `/tmp/local-run-status.json` to skip its own startup. `local-run` ONLY provides a healthy running stack; it never performs UI interaction or assertion.
+
+---
+
+## Step 0 — Search before you start
+
+Check whether the stack is already running before doing any startup work:
+
+```bash
+grep -s "" /tmp/local-run-status.json          # session record from a prior run
+curl -fsS http://localhost:8080/healthz         # BE health probe
+curl -fsS http://localhost:3000/               # FE health probe
+```
+
+Three outcomes:
+- **`local-run-status.json` exists and all services healthy** → skip startup entirely; return the existing status to the caller.
+- **File exists but one or more services are unhealthy** → note the failed service, proceed from Step 5 (restart that service only).
+- **No file or all services unreachable** → continue to Step 1 (full startup).
+
+Why: re-running `docker compose up` on an already-running stack is harmless but wastes 10–30 seconds every time. Checking first keeps `ui-verify` invocations snappy.
 
 ---
 
@@ -158,11 +180,13 @@ Common patterns + the right fix:
 
 | Symptom | Fix |
 |---|---|
-| `EADDRINUSE` | Port collision — Step 4 should have caught; rerun |
-| `MongoNetworkError ECONNREFUSED` | Mongo not ready yet; wait 5s and recheck OR mongo container failed |
-| `Cannot find module` | `npm install` not run; run it then retry |
-| `panic: ... env var X required` | `.env` missing var; back to Step 3 |
-| Cors / 404 on FE→BE | proxy config in nuxt/next not pointing at BE port |
+| `EADDRINUSE` | Port collision — find and kill the conflicting process: `lsof -i :PORT` → `kill PID`. Do NOT auto-kill; confirm with user first. |
+| `MongoNetworkError ECONNREFUSED` | Mongo not ready yet; wait 5s and re-ping OR the mongo container failed — check `docker compose logs mongo` |
+| `Cannot find module` | `npm install` not run; run it, then retry the service start |
+| `panic: ... env var X required` | `.env` missing var; back to Step 3 to fill the missing key |
+| CORS error / 404 on FE→BE calls | Dev FE proxies to BE; verify the proxy entry in `vite.config.ts` or `nuxt.config.ts` points to the correct BE port (e.g. `proxy: { '/api': 'http://localhost:8080' }`) |
+| `MongoError: ns not found` or missing collection | Migrations not run before seed; execute `make migrate` (or equivalent) BEFORE `make seed` / `node scripts/seed.js` |
+| `connection refused` on BE health check | BE process crashed on startup — check `/tmp/local-run-be.log` for panic or missing env var |
 
 Report the symptom + suggested fix. Do not auto-fix env or schema issues without user confirm.
 
@@ -188,7 +212,7 @@ This file is read by `ui-verify` to skip its own startup step.
 
 ---
 
-## Output
+## Output (manual mode)
 
 ```
 local-run: UP
@@ -199,7 +223,6 @@ local-run: UP
 
 Logs: /tmp/local-run-*.log
 Seed: [N] docs in [collections]
-Next: /implement   or   /testing (which invokes ui-verify)
 ```
 
 If FAIL:
@@ -208,7 +231,14 @@ If FAIL:
 local-run: FAIL — [service] not ready
 Symptom: [first error from log]
 Suggested fix: [from Step 7 table]
-Next: fix → invoke local-run again
+```
+
+Then end with the standard 2-option completion message per `.claude/rules/completion-format.md`:
+
+```
+Next: choose one
+A) Request changes — describe what to revise
+B) Continue to [/implement | /testing (which invokes ui-verify)]
 ```
 
 ---

@@ -25,6 +25,22 @@ Skip:
 
 ---
 
+## Step 0 — Search existing skills and recent retros
+
+Before analysing friction, orient yourself:
+
+```bash
+# List all installed skills
+ls .claude/skills/ --exclude-dir=_archive
+
+# Check last sprint's skill-evolution log for deferred items
+grep -A 20 "## Skill evolution" docs/sprints/[prev-sprint]/[prev-sprint]-retro.md 2>/dev/null
+```
+
+Why: a deferred proposal from the previous sprint may already solve the friction you're about to propose. Check before writing a new proposal.
+
+---
+
 ## Step 1 — Gather friction signals
 
 Read in this order:
@@ -44,7 +60,7 @@ Build a friction list:
 | 3 | "took 30 min figuring out which port to use" | 3 times | T012, T015, T020 |
 ```
 
-Threshold: a friction must appear **≥ 2 times across ≥ 2 tasks** to qualify.
+Threshold: a friction must appear **≥ 2 times across ≥ 2 tasks AND not already be addressed by an existing skill in `.claude/skills/`** to qualify as a signal for a new or updated skill.
 
 ---
 
@@ -78,6 +94,8 @@ For each existing skill:
   if overlap_score > 0.5:
     flag for merge consideration
 ```
+
+The 0.5 threshold means: half the trigger keywords and output shape overlap — at that point the two skills are more alike than different and one will consistently shadow the other. Below 0.5, they're distinct enough to coexist. Override: if domain experts agree the skills have clearly different invocation contexts despite high word overlap (e.g. `mongo-review` vs `api-contract` both mention "schema"), keep them separate and document the distinction in both `## When to invoke` sections.
 
 Manual rule of thumb (the score is just a hint):
 - Same verb + same object → merge with existing
@@ -189,11 +207,17 @@ Rejected: [N]
 - ...
 ```
 
-Also write a LES via brain-capture if the friction itself is interesting beyond the skill change.
+Also write a LES via brain-capture if the friction itself is interesting beyond the skill change:
+
+```
+Skill("brain-capture", "type=LES, name=friction-[kebab-description], sprint=[sprint-id]")
+```
+
+Example: `Skill("brain-capture", "type=LES, name=friction-mongo-seed-skipped-before-e2e, sprint=SP3")`
 
 ---
 
-## Output
+## Output (manual mode)
 
 ```
 skill-evolution: [sprint-id]
@@ -202,8 +226,12 @@ Applied: [N]   Deferred: [N]   Rejected: [N]
 
 Catalog now: [total skills count] skills
 Wiring TODOs: [N] (logged in retro doc)
+```
 
-Next: /retro-sprint complete → /next-task or close sprint
+```
+Next: choose one
+A) Request changes — describe what to revise
+B) Continue to /retro-sprint complete → /next-task or close sprint
 ```
 
 ---

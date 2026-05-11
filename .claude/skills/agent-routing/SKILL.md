@@ -1,6 +1,6 @@
 ---
 name: agent-routing
-description: Pick the right model (Haiku/Sonnet/Opus), agent type (Explore/general/Plan), and isolation (worktree y/n) for each spawned agent — kills "Opus for grep" waste
+description: Pick the model (haiku/sonnet/opus), subagent_type (Explore/general-purpose/Plan/code-simplifier), isolation (worktree y/n), and parallel flags (run_in_background, name) for every spawned Agent — invoke before any Agent() call that costs more than a one-shot tool use. Kills "Opus for grep" waste and "Haiku for architecture" under-tooling.
 allowed-tools: Read, Grep, Glob, Bash(git status:*), Bash(git log:*)
 ---
 
@@ -8,7 +8,7 @@ allowed-tools: Read, Grep, Glob, Bash(git status:*), Bash(git log:*)
 
 Workflow position: **invoked from /run-tasks and /run-tasks-p before any Agent() call — produces the Agent invocation block**
 
-Stops over-engineering and under-tooling. Routes each task to the cheapest model that can do the job, with the right isolation level.
+Stops over-engineering and under-tooling. Routes each task to the cheapest model that can do the job, with the right isolation level, type, and parallel-flag set.
 
 Arguments: `[task description or task-id]` (one invocation per agent to spawn)
 
@@ -19,11 +19,16 @@ Arguments: `[task description or task-id]` (one invocation per agent to spawn)
 - `/run-tasks` step that decides per-task agent config
 - `/run-tasks-p` ditto for headless agents
 - Anywhere the parent is about to spawn ≥ 2 agents in parallel
-- Manual agent spawn for a non-trivial subtask
+- Manual agent spawn for any non-trivial subtask (multi-file edit, codebase-wide survey, design pass)
 
 Skip:
-- Single-tool one-shot (just call the tool, don't spawn)
-- Trivial lookup that `Bash` + `Read` already does
+- Single-tool one-shot (just call the tool, don't spawn an Agent)
+- Trivial lookup that one `Grep` + one `Read` already answers
+- Continuing an existing spawned agent — use `SendMessage` with the agent's name, not a new Agent() call
+
+Companion skills (don't duplicate their work):
+- **`plan-driven-delivery`** — owns the requirement contract; `agent-routing` owns the spawn config only.
+- **`.claude/rules/parallel-work.md`** — the split unit is **one user story per agent, never one layer per agent**. If the proposed task spans > 1 story or is split by layer (FE agent + BE agent for same task), route back and split the task first.
 
 ---
 
@@ -63,15 +68,16 @@ Anti-pattern: Opus for "lookup which file has X" — pure waste.
 
 ## Step 3 — Pick the agent type
 
-Available types in this harness:
+Available `subagent_type` values in this harness:
 
-| Type | Use for |
-|---|---|
-| `Explore` | Read-only search across codebase. NO edits. |
-| `general-purpose` | Default — research + multi-step + can edit |
-| `Plan` | Architecture / design plans, no code change |
-| `claude-code-guide` | Q&A about Claude Code itself, not the user's repo |
-| `statusline-setup` | Specific config tasks |
+| Type | Use for | Edits files? |
+|---|---|---|
+| `Explore` | Read-only search across codebase, file-pattern lookup, "where is X" | no |
+| `general-purpose` | Default — research + multi-step + edits | yes |
+| `Plan` | Architecture / design plans, tradeoff analysis | no |
+| `code-simplifier` | Refactor recently-modified code for clarity, preserving behavior | yes |
+| `claude-code-guide` | Q&A about Claude Code / Anthropic SDK / API features (not the user's repo) | no |
+| `statusline-setup` | Configure the user's status line setting | yes (settings) |
 
 Routing:
 
@@ -79,10 +85,12 @@ Routing:
 |---|---|
 | lookup | `Explore` |
 | exploration | `Explore` if breadth > depth, `general-purpose` if depth |
-| mechanical | `general-purpose` |
+| mechanical | `general-purpose` (or `code-simplifier` if the goal is clarity/consistency on already-written code) |
 | implementation | `general-purpose` |
 | architecture | `Plan` |
 | review | `general-purpose` |
+
+If unsure between `Explore` and `general-purpose`: pick `Explore` when no edits are required — its read-only sandbox prevents drift, and it returns excerpts instead of whole files (cheaper).
 
 ---
 
@@ -119,38 +127,91 @@ Prefer enumerating specific Bash commands over `Bash(*)`.
 
 ---
 
-## Step 6 — Output the invocation block
+## Step 6 — Parallel flags (`name`, `run_in_background`)
+
+These two Agent params turn a one-shot spawn into something the parent can coordinate with later. Set them when they earn their keep, omit them otherwise.
+
+| Param | Set when | Skip when |
+|---|---|---|
+| `name` | Parent may want to continue the agent via `SendMessage`, OR multiple agents run in parallel and the user will see status lines | Single spawn the parent waits on, then discards |
+| `run_in_background: true` | Parent has genuinely independent work to do while the agent runs (long build, parallel investigation) | Parent needs the result before it can proceed — keep it foreground |
+
+Foreground is the safe default. Background without independent work just delays the result without saving wall-clock.
+
+---
+
+## Step 7 — Assemble the routing decision
+
+Produce the routing block (used by Step 8 / caller):
 
 ```
-### Agent block for: [task / task-id]
-
-Class:       [lookup / exploration / ...]
-Model:       [haiku / sonnet / opus]
-Type:        [Explore / general-purpose / Plan / ...]
-Isolation:   [none / worktree]
-Tools:       [Read, Grep, ...]
+agent-routing: [task / task-id]
+Class:      [class]
+Model:      [haiku / sonnet / opus]
+Type:       [Explore / general-purpose / Plan / code-simplifier / ...]
+Isolation:  [none / worktree]
+Tools:      [Read, Grep, ...]
+Parallel:   [foreground | background], name=[name or omit]
 
 Reasoning (≤ 3 lines):
 - [why this class]
 - [why this model — what about the work demands it]
-- [why this isolation]
+- [why this isolation + parallel flags]
+```
+
+---
+
+## Output (manual mode)
+
+Emit the full Agent call block and end with the standard 2-option completion message per `.claude/rules/completion-format.md`:
+
+```
+Agent({
+  description: "[3–5 word task description]",
+  subagent_type: "[type]",
+  model: "[haiku|sonnet|opus]",
+  name: "[name]",                        // omit if not needed
+  prompt: "[self-contained brief — what to do, what's already known, what to report back, length cap]",
+  isolation: "worktree",                 // omit if not needed
+  run_in_background: true                // omit if foreground
+})
+```
+
+```
+Next: choose one
+A) Request changes — describe what to revise
+B) Continue to Agent() spawn
+```
+
+### Worked example — "find every callsite of `authMiddleware`"
+
+```
+agent-routing: lookup-authMiddleware-callsites
+Class:      lookup
+Model:      haiku
+Type:       Explore
+Isolation:  none
+Tools:      Read, Grep, Glob
+Parallel:   foreground, no name
+
+Reasoning:
+- lookup → cheapest tier; reading + matching only
+- haiku → grep + read, no synthesis; Sonnet would be waste
+- no worktree, no name → read-only, single spawn, parent waits on result
 
 Agent call:
 
 Agent({
-  description: "[3–5 word task description]",
-  subagent_type: "[type]",
-  model: "[model]",
-  prompt: "[self-contained brief — what to do, what's already known, what to report back, length cap]",
-  isolation: "[worktree if applicable, omit otherwise]"
+  description: "Find authMiddleware callsites",
+  subagent_type: "Explore",
+  model: "haiku",
+  prompt: "Find every file that imports or calls `authMiddleware`. Report as a list of `path:line — short context`. Search broadly across the repo (routes, middleware chains, tests). Under 100 words."
 })
 ```
 
-Caller takes this block and either runs `Agent()` directly or includes it in a parallel-spawn batch.
-
 ---
 
-## Step 7 — Anti-pattern guards (refuse to route)
+## Step 8 — Anti-pattern guards (refuse to route)
 
 If any of these are true, STOP and flag instead of producing the block:
 
@@ -161,22 +222,7 @@ If any of these are true, STOP and flag instead of producing the block:
 | Task spans > 1 user story | "Split per parallel-work.md rule (one task per agent), then re-route" |
 | Task needs human confirmation mid-flight | "Don't spawn — keep in main session for the confirmation point" |
 | Opus requested for lookup/mechanical | "Downgrade to Haiku/Sonnet — Opus is cost waste here" |
-
----
-
-## Output
-
-```
-agent-routing: [task / task-id]
-Class:       [class]
-Model:       [model]   Type: [type]   Isolation: [worktree?]
-Tools:       [list]
-
-Agent call block: [embedded above]
-Reasoning: [1–3 lines]
-
-Next: caller runs Agent() with this block
-```
+| `run_in_background: true` with no independent parent work | "Use foreground — background only saves wall-clock if the parent does other work" |
 
 ---
 
@@ -187,6 +233,8 @@ Next: caller runs Agent() with this block
 - ❌ Worktree for read-only agents — pointless overhead
 - ❌ `Bash(*)` everywhere — defeats permission system
 - ❌ Skipping the prompt brief and giving "do task X" — agent has no context
+- ❌ `run_in_background: true` then immediately blocking on the result — defeats the purpose
+- ❌ New Agent() call to continue prior work — use `SendMessage` with the agent's `name` instead
 
 ---
 
@@ -195,10 +243,11 @@ Next: caller runs Agent() with this block
 Per `.claude/rules/autonomous-mode.md`:
 - **Manual mode**: full reasoning + Agent call block.
 - **Autopilot mode**: emit status line + return Agent call block to caller. Never blocks.
+- Flag `?` if the task description spans > 1 user story (per `.claude/rules/parallel-work.md` — cannot auto-split) or if the class is ambiguous between `architecture` and `implementation` (different models).
 
-## Output (autopilot status line — required)
+### Output (autopilot status line — required)
 
-`> agent-routing: [class] → [model] / [type]  [✓]`
+`> agent-routing: [class] → [model] / [type]  [✓|?]`
 
 Example: `> agent-routing: implementation → sonnet / general-purpose  ✓`
 

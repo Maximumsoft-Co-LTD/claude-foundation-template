@@ -16,15 +16,21 @@ Arguments: `[question]` (or context from caller skill/command)
 
 ## When to invoke
 
-- `unknowns` field from `prompt-understand` is non-empty
-- Mid-task decision with > 1 viable approach
-- Before destructive action (delete, force-push, schema change)
-- When `solution-options` produced 2–3 options and user must pick
+- After `solution-options` produced 2–4 options and user must pick one.
+- Freeform ambiguity surfaces mid-task that needs a forced multi-choice question (scope change, schema choice, auth strategy, etc.).
+- `unknowns` field from `prompt-understand` is non-empty.
+- Before destructive action (delete, force-push, schema change).
 
 Skip:
-- Question is binary "yes / no, proceed?" — just ask plainly
-- Only 1 viable answer — don't fake a choice; state the answer
-- Question is about preference Claude can decide (variable name, comment style)
+- `solution-options` is currently running — let it complete first, then `ask-choice` fires once with the completed matrix.
+- Question is binary "yes / no, proceed?" — just ask plainly.
+- Only 1 viable answer — don't fake a choice; state the answer.
+- Question is about preference Claude can decide (variable name, comment style).
+
+Companion skills (responsibility split):
+- **`solution-options`** — generates the 2–3 option blocks + tradeoff matrix + recommendation. Runs BEFORE `ask-choice`.
+- **`ask-choice`** — runs the question and blocks until the user picks. Runs AFTER `solution-options` (or alone for freeform ambiguity).
+- **`brain-capture`** — persists the chosen option as a DEC note if the decision is architectural. Runs AFTER `ask-choice` resolves.
 
 ---
 
@@ -102,6 +108,25 @@ Resume only when user picks a letter or types a different answer.
 - ❌ Options that are actually the same thing reworded
 - ❌ Asking 3 questions in sequence — batch into one `ask-choice` call when possible
 - ❌ Re-asking the same question after the user answers
+
+---
+
+## Output (manual mode)
+
+```
+Question(s) asked: [N]
+Resolved: [option chosen for each, or "user typed: ..."]
+```
+
+Then end with the standard 2-option completion message per `.claude/rules/completion-format.md`:
+
+```
+Next: choose one
+A) Request changes — describe what to revise
+B) Continue to [next-step the caller named]
+```
+
+(For `ask-choice`, "Continue to …" is decided by the *caller*, not this skill — the resolved answers go back to whoever invoked it.)
 
 ---
 

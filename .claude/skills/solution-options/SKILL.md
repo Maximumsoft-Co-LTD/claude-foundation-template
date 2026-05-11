@@ -26,6 +26,11 @@ Skip:
 - Decision is forced (only 1 way works)
 - Decision was already made in `/discovery` or a DEC note in brain — go re-read, don't re-decide
 
+Companion skills (responsibility split):
+- **`solution-options`** (this skill) — generates the option blocks + tradeoff matrix + recommendation. Runs first.
+- **`ask-choice`** — runs the user-facing question once this skill's matrix is ready. Never call from inside this skill in autopilot mode — emit `?` instead.
+- **`brain-capture`** — persists the chosen option as a DEC note if architectural. Runs after `ask-choice` resolves.
+
 ---
 
 ## Step 1 — Check brain first
@@ -110,13 +115,9 @@ Anti-pattern: "Option 2 because it has many pros" → that's not a reason, list 
 
 If the decision affects requirements, architecture, or user-visible behavior:
 
-**Manual mode:**
+**Manual mode:** invoke `Skill("ask-choice")` with the matrix and recommendation already in context.
 
-```
-Invoke Skill("ask-choice") to confirm the recommendation with the user.
-```
-
-**Autopilot mode:** do NOT invoke `ask-choice` directly. Emit `?` in the status line and return so the orchestrator can batch ambiguities (per `.claude/rules/autonomous-mode.md`).
+**Autopilot mode:** do NOT invoke `ask-choice` directly — doing so creates a nested block inside `solution-options` which defeats the orchestrator's batching. Instead, emit `?` in the status line and return; the orchestrator (`/dev`) will batch all pending `?` flags into one `ask-choice` call (per `.claude/rules/autonomous-mode.md`).
 
 If the decision is purely technical and reversible, proceed with the recommended option without asking.
 
@@ -138,7 +139,7 @@ This prevents re-litigating the same choice in 3 sprints.
 
 ---
 
-## Output
+## Output (manual mode)
 
 ```
 Problem: [1-line restatement]
@@ -148,6 +149,12 @@ Tradeoff matrix: [paste]
 Recommended: Option [N] — [reason]
 Asking user: yes / no
 DEC note: [filed / skipped because reversible]
+```
+
+```
+Next: choose one
+A) Request changes — describe what to revise
+B) Continue to ask-choice (or proceed with recommendation)
 ```
 
 ---

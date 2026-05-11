@@ -6,7 +6,7 @@ allowed-tools: Read, Grep, Glob, Edit, Write, Bash(ls:*), Bash(find:*), Bash(sta
 
 # reverse-engineer
 
-Workflow position: **invoked by `/dev` (or `/discovery`) when `workspace-detect` reports brownfield without a fresh RE artifact**
+**Workflow position: invoked by `/dev` (or `/discovery`) when `workspace-detect` reports brownfield without a fresh RE artifact — BEFORE any design or implementation step.**
 
 Produces `docs/discovery/RE-[YYYY-MM-DD].md` — the canonical "what does this codebase do" reference. Used by every subsequent design/implementation step instead of re-deriving context each time.
 
@@ -16,6 +16,7 @@ Arguments: none (or `--force` to ignore cache)
 
 ## When to invoke
 
+Trigger:
 - Brownfield project with no RE artifact, or RE artifact > 30 days old
 - After a major refactor (manual invocation, `--force`)
 - When `/discovery` for a complex epic needs system-wide context
@@ -24,29 +25,38 @@ Skip:
 - Greenfield project (nothing to reverse-engineer)
 - Fresh RE artifact (< 30 days) exists — reuse it
 
+Companion skills (cache ownership):
+- **`workspace-detect`** — owns the fast sprint-scoped cache (`.workspace-cache.json`); handles greenfield/brownfield + stack inventory in < 5 sec every session. Sets `recommend_re: true` when a deep scan is needed.
+- **`reverse-engineer`** — owns the 30-day deep-scan cache (`docs/discovery/RE-[date].md` + `.RE-current` pointer). Runs only when `workspace-detect` says so. Never replaces `workspace-detect`'s fast check.
+
 ---
 
-## Step 1 — Cache check
+## Step 0 — Search existing deep-scan output
+
+Before spawning agents, check the cache:
 
 ```bash
-ls -t docs/discovery/RE-*.md 2>/dev/null | head -1
+cat docs/discovery/.RE-current 2>/dev/null
 ```
 
-If found, check age:
+If the pointer file exists, read the age of the referenced doc:
 
 ```bash
-stat -c '%y' docs/discovery/RE-[date].md   # or %Sm on macOS
+stat -f '%Sm' -t '%Y-%m-%d' docs/discovery/RE-[date].md   # macOS
+# or: stat -c '%y' docs/discovery/RE-[date].md            # Linux
 ```
 
 | Age | Action |
 |---|---|
-| < 30 days | Reuse — return path to existing doc, skip the rest |
-| 30–90 days | Reuse but flag "stale" in output, suggest user run `--force` if recent big changes |
-| > 90 days OR `--force` | Re-run full RE |
+| < 30 days | Return cached path, skip Steps 1–5 entirely |
+| 30–90 days | Return cached path, flag "stale" in output; suggest `--force` if major changes landed |
+| > 90 days OR `--force` | Re-run full RE below |
+
+Why: a 30-day RE doc saves 2–5 min of agent scan time on every pipeline start.
 
 ---
 
-## Step 2 — Spawn parallel Explore agents (4 concerns)
+## Step 1 — Spawn parallel Explore agents (4 concerns)
 
 In autopilot mode, this MUST be parallel — one message with 4 `Agent()` calls:
 
@@ -61,11 +71,11 @@ Each agent uses subagent_type `Explore`, model `haiku` (fast, breadth scan), too
 
 Each agent's prompt is self-contained: lists the repo root, the concern, the output format expected (markdown subsection), and a length cap (≤ 400 words per agent).
 
-Wait for all 4 to complete.
+Wait for all 4 to complete before synthesizing.
 
 ---
 
-## Step 3 — Synthesize into RE doc
+## Step 2 — Synthesize into RE doc
 
 Open `docs/discovery/RE-[YYYY-MM-DD].md` for write. Structure:
 
@@ -90,7 +100,6 @@ Open `docs/discovery/RE-[YYYY-MM-DD].md` for write. Structure:
 |---|---|---|---|
 | auth | `internal/auth/` | JWT issuance + Google OAuth | `Login`, `RefreshToken`, `Logout` |
 | things | `internal/things/` | core business CRUD | `Create`, `List`, `Get`, `Update`, `Delete` |
-| ... | ... | ... | ... |
 
 ## Data model
 [from Agent 3]
@@ -98,7 +107,6 @@ Open `docs/discovery/RE-[YYYY-MM-DD].md` for write. Structure:
 ### Collections (Mongo)
 - `users` — { _id, email, name, googleSub, createdAt, ... }
 - `things` — { _id, name, tags, createdBy → users._id, createdAt, updatedAt }
-- ...
 
 ### Indexes
 - `users.googleSub` (unique)
@@ -116,12 +124,10 @@ Open `docs/discovery/RE-[YYYY-MM-DD].md` for write. Structure:
 3. ...
 
 ### Flow 2: Create a thing
-1. ...
-
-### Flow 3: ...
+...
 
 ## Dependencies
-[external libraries, with version + purpose, only top 10 most-used]
+[external libraries, version + purpose, top 10 most-used]
 
 ## Open questions / TODOs found in code
 [results of grepping `TODO|FIXME|XXX` — top 10 most recent]
@@ -135,7 +141,7 @@ Open `docs/discovery/RE-[YYYY-MM-DD].md` for write. Structure:
 
 ---
 
-## Step 4 — Self-check before saving
+## Step 3 — Self-check before saving
 
 | Check | Pass condition |
 |---|---|
@@ -149,7 +155,7 @@ If any fails → re-spawn the relevant agent, do not ship a partial RE doc.
 
 ---
 
-## Step 5 — Update brain (cross-link)
+## Step 4 — Update brain (cross-link)
 
 If `brain/00-MOC/MOC-Backend.md` or `MOC-Frontend.md` exist, append:
 
@@ -161,7 +167,7 @@ Do NOT auto-create DEC notes from RE — RE is descriptive, decisions need human
 
 ---
 
-## Step 6 — Cache pointer
+## Step 5 — Cache pointer
 
 Update `docs/discovery/.RE-current` (single-line file pointing at latest RE doc):
 
@@ -169,31 +175,46 @@ Update `docs/discovery/.RE-current` (single-line file pointing at latest RE doc)
 docs/discovery/RE-2026-05-06.md
 ```
 
-This lets `workspace-detect` quickly answer "is there a fresh RE?".
+This lets `workspace-detect` quickly answer "is there a fresh RE?" without reading the full doc.
 
 ---
 
-## Output (autopilot status line — required)
+## Output (manual mode)
 
 ```
-> reverse-engineer: [N] components, [N] services, [N] flows  ✓
+reverse-engineer: [N] components, [N] services, [N] flows
+RE doc: docs/discovery/RE-[YYYY-MM-DD].md
+Cache pointer: docs/discovery/.RE-current updated
 ```
+
+Then end with the standard 2-option completion message per `.claude/rules/completion-format.md`:
+
+```
+Next: choose one
+A) Request changes — describe what to revise
+B) Continue to /discovery
+```
+
+---
+
+## Behavior in autopilot mode
+
+Per `.claude/rules/autonomous-mode.md`:
+- Runs Steps 0–5 silently.
+- Emits one `⏳` per parallel Explore agent dispatch start; one `✓` on full completion of all 4. This lets the orchestrator show real progress during a scan that may take 30–60 seconds.
+- Phase boundary after this skill completes is handled by the orchestrator, not this skill.
+- If a step fails (agent error, file write fail) → emit `✗` and BLOCK with diagnosis.
+
+### Output (autopilot status line — required)
+
+`> reverse-engineer: [N] components, [N] services, [N] flows  [✓|⏳|✗]`
 
 Examples:
 ```
 > reverse-engineer: cached RE-2026-04-15 (21d old)  ✓
 > reverse-engineer: 12 components, 3 services, 3 flows  ✓
-> reverse-engineer: scanning 47 components... ⏳
+> reverse-engineer: scanning 47 components...  ⏳
 ```
-
-If a step fails (agent error, file write fail) → emit `✗` and BLOCK with diagnosis.
-
----
-
-## Manual vs autopilot behavior
-
-- Manual mode: same as above; user can review RE doc and request changes via standard completion-format A/B prompt.
-- Autopilot mode (per `autonomous-mode.md`): runs through Step 1–6 silently except for ⏳ progress lines on long scans. Phase boundary AFTER this skill completes (orchestrator handles the boundary, not this skill).
 
 ---
 
@@ -209,4 +230,4 @@ If a step fails (agent error, file write fail) → emit `✗` and BLOCK with dia
 
 ## Why this exists
 
-Brownfield work without an RE artifact means every task starts with 30 minutes of "let me grep around to remember how this works". A 2-minute parallel scan into a single canonical doc replaces that cost with a one-time generation, used dozens of times across the sprint.
+Brownfield work without an RE artifact means every task starts with 30 minutes of "let me grep around to remember how this works." A 2-minute parallel scan into a single canonical doc replaces that cost with a one-time generation, used dozens of times across the sprint. The cache split with `workspace-detect` ensures the expensive 30-day scan never runs unnecessarily — fast check first, deep scan only when stale.

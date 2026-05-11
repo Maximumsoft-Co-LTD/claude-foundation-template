@@ -6,7 +6,7 @@ allowed-tools: Read, Grep, Glob, Bash(git diff:*), Bash(git log:*), Bash(ls:*)
 
 # scope-check
 
-Workflow position: **before /implement, /requirement, or any freeform code change → BLOCK until user confirms**
+**Workflow position: invoked from ANY workflow command that receives freeform user input — BLOCK until user confirms. Triggered at the start of `/discovery`, `/requirement`, `/implement`, `/issue`, `/debug`, and any direct freeform code request.**
 
 Stops you from writing code on a guessed understanding. Forces a "I think you mean X — confirm?" round-trip when the task isn't crystal clear.
 
@@ -25,6 +25,10 @@ Trigger any of:
 Skip when:
 - User gave exact file:line + exact change
 - Single-line edit with obvious intent (typo fix, rename of a clearly-scoped symbol)
+
+Companion skills (responsibility split):
+- **`prompt-understand`** — parse only; reads the prompt and fills a 5-field frame; never blocks, never writes docs.
+- **`scope-check`** — commits to ACs + boundaries + estimate; BLOCKS until user confirms. Always run `prompt-understand` first; run `scope-check` only when ready to commit to the contract.
 
 ---
 
@@ -80,17 +84,9 @@ Confirm to proceed, or correct me.
 
 ---
 
-## Step 3 — Self-check before sending
+## Step 3 — Confidence gate
 
-Run through silently before posting Step 2 output:
-
-| Check | Pass condition |
-|---|---|
-| Each AC observable? | A reviewer can say yes/no without reading code |
-| Boundary cases listed? | At least one for every comparison/threshold/limit in AC |
-| Out-of-scope explicit? | Anything ambiguous from the input is named here |
-| Confidence honest? | Below 90% → flag the specific gap, don't inflate |
-| Estimate sane? | If > 90 min → STOP, route to vertical-slice skill instead |
+Confidence ≥ 90%? Yes → proceed to Step 4 (block and send). No → re-scope the unclear items or escalate via `ask-choice` before sending.
 
 ---
 
@@ -128,12 +124,19 @@ This becomes the source of truth for `/implement` and `/code-review`.
 
 ---
 
-## Output (final, after confirm)
+## Output (manual mode)
 
 ```
 Scope locked: [task-id or label]
 ACs: [N]  |  Boundaries: [N]  |  Estimate: [N] min  |  Confidence: [X]%
-Next: /implement [task-id]   (or vertical-slice if estimate > 90 min)
+```
+
+Then end with the standard 2-option completion message per `.claude/rules/completion-format.md`:
+
+```
+Next: choose one
+A) Request changes — describe what to revise
+B) Continue to /implement [task-id] (or vertical-slice if estimate > 90 min)
 ```
 
 ---
@@ -144,7 +147,7 @@ Per `.claude/rules/autonomous-mode.md`:
 - **Manual mode** (default): BLOCK as documented in steps above; wait for user confirmation.
 - **Autopilot mode** (`AUTOPILOT=1`, set by `/dev`): emit canonical status line and return. Block ONLY on the 3 official conditions (ambiguity / destructive op / ui-verify fail). This skill flags `?` when confidence < 90% — orchestrator batches into `ask-choice`.
 
-## Output (autopilot status line — required)
+### Output (autopilot status line — required)
 
 `> scope-check: [N] ACs, [N] boundaries, ~[N]min, conf [X]%  [✓|?]`
 
@@ -156,4 +159,4 @@ Examples:
 
 ## Why this exists
 
-Previous pain: "ตอนวางแผนต้องคอยเช็คว่าเข้าใจถูกไหม". This skill makes the check **mandatory and structured**, not ad-hoc. One round-trip up-front beats three rounds of "no, I meant..." after code is written.
+Previous pain: "ตอนวางแผนต้องคอยเช็คว่าเข้าใจถูกไหม" — during planning, had to keep checking whether the understanding was correct. This skill makes the check **mandatory and structured**, not ad-hoc. One round-trip up-front beats three rounds of "no, I meant..." after code is written.
