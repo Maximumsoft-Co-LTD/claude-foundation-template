@@ -4,13 +4,14 @@ Workflow position: **START → /new-sprint**
 Conversational discovery via the superpowers:brainstorming skill. An alternative to `/discovery` for open-ended ideation — explores user intent, requirements, and design through natural dialogue before producing a discovery doc.
 
 **When to choose this over `/discovery`:**
-- Idea is rough and needs shaping before structured planning
-- You want one-question-at-a-time exploration with visual companion support
-- You want 2–3 approach proposals with trade-offs before committing
+- Idea is rough and needs free-text shaping before structured planning
+- You want **free-form** one-question-at-a-time conversational exploration with visual companion
+- You want 2–3 approach proposals with trade-offs explored in dialogue before committing
 
 **When to choose `/discovery` instead:**
-- Problem is well-understood and you want to fill the 10-topic structured template directly
-- You already have constraints, users, and goals defined
+- Problem space is concrete enough that the AI can pre-fill most of the 10 topics from input/codebase
+- You prefer a **structured multi-choice interview** (one `AskUserQuestion` per gap topic) over free-text chat
+- You want each gap surfaced as 2-4 concrete options with a recommended default to click through
 
 Arguments: `[disc-id] [name]`  — e.g. `disc-001 payment-notifications`
 

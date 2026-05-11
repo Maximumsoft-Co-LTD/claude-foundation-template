@@ -38,9 +38,28 @@ These inform Step 2 questions: don't re-ask what's already decided; do surface p
 
 ---
 
-## Step 2 — Ask only about the gaps
+## Step 2 — Progressive interview (structured multi-choice)
 
-Analyze the user's arguments. For each of the 10 topics below, decide: already answered → skip; partially answered → ask only the missing part; unknown → include.
+Walk the 10 topics below as a **structured interview**: one focused `AskUserQuestion` call per gap, each with 2-4 inferred options, progressive (each question's options informed by previous answers and codebase scan).
+
+### Sufficiency bar — when to stop
+
+The interview ends when the discovery doc is **detailed enough for `/requirement` to produce a concrete Implementation Plan** (NOT when implementation itself is fully specified — that is `/requirement`'s job).
+
+Concretely, stop only when ALL of these are true:
+
+- Every of the 10 topics is either **answered** or **confidently inferred** from prior answers / codebase / brain.
+- The **Problem Statement** names who, what, and why with no hand-waving.
+- **At least 2 candidate approaches** can be written with real Pros / Cons (not placeholders).
+- **Constraints** the picked approach must respect are explicit (stack, deadline, compliance, design system).
+- **Scope Estimate** is decisive enough to pick single-epic vs multi-epic, with the boundary between in-scope and out-of-scope drawn.
+- **Open Questions** that remain are tagged `blocking-for-planning` or `carry-forward-to-/requirement` — no untagged unknowns.
+
+If any of the above is still vague → **ask another question** (drill-down follow-up on the weakest topic, see "Follow-up drill-downs" below). No fixed cap on question count — ask as many as needed to clear the bar.
+
+If everything in the bar is already satisfied from input alone → skip the interview entirely and go to Step 3.
+
+### The 10 topics
 
 1. **Problem** — What problem? Who experiences it, how often, what happens when unsolved?
 2. **Users & Stakeholders** — Primary users? Other teams, systems, stakeholders?
@@ -53,11 +72,45 @@ Analyze the user's arguments. For each of the 10 topics below, decide: already a
 9. **Unknowns & Open Questions** — What don't we know yet that could affect the solution?
 10. **Risks & Scope** — Biggest risks? Is this 1-sprint, multi-sprint, or larger?
 
-Say: *"Created `docs/discovery/[disc-id]-[name].md`. Here's what I understood — fill in only the gaps:"*
-Show what's inferred, then ask only unanswered questions in **one message**.
-If everything is already clear → skip to Step 3.
+### Per-topic decision
 
-Wait for user's answers.
+For each topic, in order 1 → 10:
+- **Already answered by user's args or codebase scan** → skip, record the inferred value in the doc.
+- **Already implied by an earlier topic's answer** → skip, record the propagated value.
+- **Gap remains** → run ONE `AskUserQuestion` call (see Interview rules below).
+
+### Follow-up drill-downs (within a topic)
+
+After a topic's primary answer, if the answer is still too coarse to clear the Sufficiency Bar → run another `AskUserQuestion` on that same topic to drill in. Examples that warrant a follow-up:
+
+- Problem answer = "users are slow" → drill: which step, how slow, how often?
+- Users answer = "internal team" → drill: which team, how many people, frequency of use?
+- Approaches answer = "use library X" → drill: which integration mode (sidecar vs embedded vs proxy)?
+- Constraints answer = "must respect existing auth" → drill: which roles, which endpoints, hard or soft?
+
+A topic may take 1–4 questions. Stop drilling the moment that topic alone wouldn't hold back `/requirement` from writing its Implementation Plan.
+
+### Interview rules
+
+- **One question = one `AskUserQuestion` call.** Do not batch multiple topics or follow-ups into a single call — later options must be informed by earlier answers.
+- **2-4 concrete options per question.** Options come from: codebase scan, scenario template prompts (`docs/templates/discovery-scenarios/...`), prior topic answers, brain lessons from Step 0. No placeholders like "TBD" or "Some users".
+- **First option is the recommendation** when one is clearly stronger — append ` (Recommended)` to the label. Otherwise list options in a natural order (most-likely-first).
+- **Use `description` to surface tradeoffs** — one sentence per option naming what changes if the user picks it.
+- **Use `preview` for diagrams/code/mockups** when the choice is structural (e.g. options for the To-Be journey can include a small ASCII flow per option).
+- **Skip "Other"** — the harness adds it automatically; do not list it manually.
+- **Record the answer in the doc immediately** after each question, in the matching section. Move to the next gap or drill-down.
+
+### Preamble (before the first question)
+
+Print once, before the first `AskUserQuestion`:
+
+> *Created `docs/discovery/[disc-id]-[name].md`. Inferred from input: [list topics with inferred values, 1 line each]. Starting interview — one topic at a time, asking until the doc is detailed enough for `/requirement`. Pending topics: [list].*
+
+Do NOT promise a specific question count — follow-ups may extend it. Quality of the resulting spec > number of questions asked.
+
+### Why not batch all gaps into one message
+
+The old batched-gap pattern asked the user to write prose for every unanswered topic at once. That trains minimal-effort answers ("idk", "see above") and forces the user to think about all 10 topics simultaneously. Progressive multi-choice flips the cost: the AI commits to inferences (visible as the recommended option), the user clicks to confirm or override in one tap, and each answer narrows the option space for the next question. Follow-up drill-downs are cheap (one more click) but indispensable when an answer is still too coarse to feed `/requirement`.
 
 ---
 
