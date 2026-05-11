@@ -4,6 +4,16 @@ All notable changes to claude-foundation-template are documented here.
 
 ---
 
+## [0.17.6] — 2026-05-11
+
+### Added
+- **`SKILLS-SUMMARY.md` at repo root.** Single-page reference for all 25 skills in `.claude/skills/`, grouped by the five categories used in `CLAUDE.md` (Intent atom · Pre-implementation gates · Bug & quality · Delivery · Meta). Each skill row has three columns — what it does, when it triggers, which command(s) use it — so a reader can jump from "I need X" to the right skill without opening every `SKILL.md`.
+
+### Rationale
+- **Skill catalog grew to 25 with no top-level index.** The `CLAUDE.md` Atomic Skills table groups skills by category but only names them; each `SKILL.md` is detailed but local. New contributors had to read 25 files to learn the catalog. `SKILLS-SUMMARY.md` is the missing middle layer: short enough to scan in one minute, specific enough to identify the right skill for a given trigger.
+
+---
+
 ## [0.17.5] — 2026-05-08
 
 ### Changed
