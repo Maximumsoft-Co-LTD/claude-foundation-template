@@ -1,3 +1,9 @@
+---
+name: Discovery → Epic Mapping Rule
+description: Maps one discovery doc to one or more epics, each producing exactly one `/new-sprint` invocation with explicit dependency ordering.
+scope: universal
+---
+
 # Discovery → Epic Mapping Rule
 
 Authoritative mapping between a discovery doc and the sprints (epics) it produces. Apply when running `/discovery` Step 4 and `/new-sprint` Step 1.

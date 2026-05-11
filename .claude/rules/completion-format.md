@@ -1,3 +1,9 @@
+---
+name: Completion Format Rules
+description: Standardizes every artifact-producing step to end with a 2-option A/B exit (Request changes / Continue to [next-step]).
+scope: universal
+---
+
 # Completion Format Rules
 
 Every artifact-producing step in a workflow command (manual `/discovery`, `/requirement`, `/implement`, etc., AND every phase boundary in `/dev` autopilot) MUST end with a standardized 2-option completion message.

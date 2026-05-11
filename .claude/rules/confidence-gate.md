@@ -1,3 +1,9 @@
+---
+name: Confidence Gate Rules
+description: Requires >=90% confidence before any workflow command executes; otherwise STOP and emit the structured "not enough to proceed" block.
+scope: universal
+---
+
 # Confidence Gate Rules
 
 **Before executing any workflow command or making changes, you MUST assess your confidence that you can complete the task successfully. If confidence is below 90%, STOP and gather more information.**

@@ -1,4 +1,7 @@
 ---
+name: Frontend Rules
+description: Conventions enforced when editing UI code — PascalCase components, co-located tests, no inline styles, a11y labels, server state via React Query/SWR.
+scope: path
 paths:
   - "src/**/*.{ts,tsx}"
   - "src/components/**/*"

@@ -1,3 +1,9 @@
+---
+name: Superpowers Integration Rules
+description: Establishes priority (template commands win), file-path overrides, sprint-context propagation, and graceful degradation when superpowers is absent.
+scope: universal
+---
+
 # Superpowers Integration Rules
 
 This template integrates with the [obra/superpowers](https://github.com/obra/superpowers) plugin. These rules govern how superpowers skills interact with template commands.

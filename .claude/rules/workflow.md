@@ -1,3 +1,9 @@
+---
+name: Workflow Rules
+description: Top-level orchestrator — canonical command sequence, phase gates, plan-driven execution contract, and decision matrix.
+scope: universal
+---
+
 # Workflow Rules
 
 Top-level orchestrator rule. Governs the order of commands, what each phase must produce before advancing, and how the per-step rules in this directory compose. When in doubt about *which command runs next* or *whether a step can be skipped*, this rule wins.

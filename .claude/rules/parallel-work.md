@@ -1,3 +1,9 @@
+---
+name: Parallel Work Rule
+description: Requires sub-agent dispatch to split at the user-story level (one task per agent), never by layer (FE/BE split forbidden).
+scope: universal
+---
+
 # Parallel Work Rule
 
 When dispatching multiple sub-agents for parallel implementation, the unit of split is **one user story (task) per agent** — never one layer per agent.

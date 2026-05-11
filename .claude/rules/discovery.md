@@ -1,3 +1,9 @@
+---
+name: Discovery Rules
+description: Requires `/discovery` to infer answers from input, batch all gaps into a single question, and skip asking entirely when the input is clear.
+scope: universal
+---
+
 # Discovery Rules
 
 When running `/discovery`:

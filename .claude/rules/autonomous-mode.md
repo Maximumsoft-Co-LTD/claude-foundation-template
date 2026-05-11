@@ -1,3 +1,9 @@
+---
+name: Autonomous Mode Rules
+description: Governs `/dev` autopilot — the only 3 reasons to block (ambiguity, destructive op, ui-verify fail), mandatory 1-line status format, and phase-boundary continue-by-default.
+scope: universal
+---
+
 # Autonomous Mode Rules
 
 When `/dev` invokes the autonomous workflow pipeline, these rules govern when to block, how to report progress, and how to hand control back to the user. Skills MUST honor this rule when they detect autopilot mode.

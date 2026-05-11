@@ -1,3 +1,9 @@
+---
+name: Brain (Knowledge Vault) Rules
+description: Restricts knowledge-vault access to task-relevant MOCs and defines when a note is durable enough to be written.
+scope: universal
+---
+
 # Brain (Knowledge Vault) Rules
 
 **Do NOT read the brain at the start of every session.** Read it only when the task requires it.

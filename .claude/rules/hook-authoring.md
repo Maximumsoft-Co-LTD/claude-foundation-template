@@ -1,4 +1,7 @@
 ---
+name: Hook Authoring Rules
+description: Conventions for `.claude/hooks/*.py` — fast/bounded/fail-safe, no source mutation in validators, narrow path routing, actionable output.
+scope: path
 paths:
   - ".claude/hooks/*.py"
 ---

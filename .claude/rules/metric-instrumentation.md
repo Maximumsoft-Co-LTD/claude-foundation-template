@@ -1,3 +1,9 @@
+---
+name: Metric Instrumentation Rules
+description: Enforces 3 hard gates so every Success Metric has a measurable artifact at sprint definition, requirement, and retro time.
+scope: universal
+---
+
 # Metric Instrumentation Rules
 
 **Every Success Metric in a sprint overview MUST trace to a concrete instrumentation artifact at `/requirement` time and to an actual measured value at `/retro-sprint` time.**

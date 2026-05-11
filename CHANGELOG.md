@@ -4,6 +4,16 @@ All notable changes to claude-foundation-template are documented here.
 
 ---
 
+## [0.17.7] — 2026-05-11
+
+### Changed
+- **All 19 rule files in `.claude/rules/` now carry a uniform lean YAML frontmatter.** Each file opens with `name`, `description` (one-sentence purpose ≤150 chars), `scope` (`universal` | `path`), and — only when `scope: path` — a `paths` glob list. Previously only 4 of 19 rules had frontmatter (and those carried just `paths`); the remaining 15 had none. Universal scope (15): `autonomous-mode.md`, `brain.md`, `clarification.md`, `completion-format.md`, `confidence-gate.md`, `context7-cache.md`, `discovery.md`, `discovery-epic-mapping.md`, `metric-instrumentation.md`, `new-sprint.md`, `parallel-work.md`, `self-check.md`, `superpowers.md`, `testing.md`, `workflow.md`. Path scope (4, existing `paths` preserved verbatim): `backend.md`, `frontend.md`, `hook-authoring.md`, `skill-authoring.md`. No rule body content changed — additive metadata only (102 insertions across 19 files, 0 deletions).
+
+### Rationale
+- **Rule discoverability was uneven.** A reader (human or model) browsing `.claude/rules/` had to open every file to learn its purpose; only 4 rules carried any structured metadata, and even those only documented their file-glob scope. With every rule now declaring `name`, `description`, and `scope` in the same shape, a single `grep -h '^description:' .claude/rules/*.md` returns the whole rule catalogue, and a future hook-driven loader can act on `scope` directly instead of parsing prose. Body content was deliberately left untouched in this pass to keep blast radius minimal — no terminology unification, no de-duplication, no new index file.
+
+---
+
 ## [0.17.6] — 2026-05-11
 
 ### Added

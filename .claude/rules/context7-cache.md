@@ -1,3 +1,9 @@
+---
+name: Context7 Cache Rule
+description: Defines the sprint-scoped JSON cache for context7 library-doc lookups and the read-then-fetch-then-write protocol.
+scope: universal
+---
+
 # Context7 Cache Rule
 
 Sprint-scoped cache for context7 library docs. Avoids re-fetching the same library + query across `/requirement`, `/implement`, `/code-review`, `/testing`, `/debug`, `/issue` within a sprint.

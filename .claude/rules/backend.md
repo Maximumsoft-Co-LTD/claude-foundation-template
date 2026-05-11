@@ -1,4 +1,7 @@
 ---
+name: Backend Rules
+description: Conventions enforced when editing server-side code — boundary validation, layering, real-DB tests, REST verbs/codes, no unbounded lists.
+scope: path
 paths:
   - "src/api/**/*"
   - "src/services/**/*"

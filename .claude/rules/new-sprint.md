@@ -1,3 +1,9 @@
+---
+name: New Sprint Rules
+description: Restricts `/new-sprint` to planning only — fill the sprint overview and BACKLOG, never scaffold per-task files.
+scope: universal
+---
+
 # New Sprint Rules
 
 When running `/new-sprint`:

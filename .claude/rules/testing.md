@@ -1,3 +1,9 @@
+---
+name: Testing Rules
+description: Encodes TDD discipline — failing-test-first, verify RED, real dependencies at the integration layer, Iron Law (code before test = delete it).
+scope: universal
+---
+
 # Testing Rules
 
 ## Core rules

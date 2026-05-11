@@ -1,3 +1,9 @@
+---
+name: Clarification Rules
+description: Requires gaps to be collected and asked in one message, never one-by-one, and recorded as a Clarifications table in the output doc.
+scope: universal
+---
+
 # Clarification Rules
 
 When a command includes a "Clarify ambiguities" step:

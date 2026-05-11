@@ -1,3 +1,9 @@
+---
+name: Self-Check Rules
+description: Requires re-reading any workflow file after every Write/Edit before reporting done, against a 5-point integrity checklist.
+scope: universal
+---
+
 # Self-Check Rules
 
 **After every Write or Edit tool call on any workflow file, you MUST re-read the file before confirming done.**

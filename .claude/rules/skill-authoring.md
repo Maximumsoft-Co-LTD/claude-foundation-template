@@ -1,4 +1,7 @@
 ---
+name: Skill Authoring Rules
+description: Conventions for `.claude/skills/**/SKILL.md` — frontmatter contract, trigger clarity, progressive disclosure, anti-patterns.
+scope: path
 paths:
   - ".claude/skills/**/SKILL.md"
   - ".claude/skills/**/agents/openai.yaml"
