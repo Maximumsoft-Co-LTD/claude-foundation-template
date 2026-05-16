@@ -26,6 +26,42 @@ These inform Step 2 questions: don't re-ask what's already decided; do surface p
 
 ---
 
+## Step 0.5 — Triage Gate (size check, runs before doc creation)
+
+Before running the full interview, classify the discovery scope from the user's input + codebase scan + any brain notes loaded in Step 0. Pick exactly one mode:
+
+**Minimal Mode** — use when ALL of these are true:
+- Input names exactly **1 feature / capability** (not "a system", not "a flow")
+- **1 primary user type**, no stakeholder negotiation needed
+- Estimated effort **≤ 5 SP** (fits in one task or a small batch within a single sprint)
+- **Single bounded context** (no cross-domain integration: e.g. not auth + payments + reporting)
+- Approach is **obvious enough** that the user could already name it
+
+**Full Mode** — use when ANY of these are true:
+- ≥ 2 distinct features bundled together
+- Multiple user types with different journeys
+- Effort estimate > 5 SP or genuinely unsure
+- Crosses ≥ 2 bounded contexts
+- Requires stakeholder alignment on rules / policy / data ownership
+
+If the size is genuinely ambiguous → default to **Full Mode**. Bias is "fewer questions when clearly small," not "always ask more."
+
+Record the chosen mode in the doc metadata at Step 1 (`Mode: minimal` or `Mode: full`). The rest of the command behaves differently per mode:
+
+| Step | Minimal Mode | Full Mode |
+|---|---|---|
+| Step 2 interview | At most 1 `AskUserQuestion` to confirm inferred Problem + Approach + Scope as one bundle. Skip the 10-topic walk. | Full 10-topic interview as written. |
+| Step 3 doc fill | Fill ONLY: Problem Statement, Affected Users (1 row), Goals & Success (1 row), Constraints, Proposed Approaches (1 SELECTED + 1 brief alternative), Scope Estimate, Next Steps. Leave optional sections (Personas, Event Storming, SIPOC, Glossary) untouched. | Fill every applicable section. |
+| Step 3.4 Epic Breakdown | Always empty. Always single-epic. | Apply `.claude/rules/discovery-epic-mapping.md` triggers — multi-epic only if a trigger fires. |
+| Step 3c DDD | Skip entirely. | Run per the conditions in Step 3c. |
+| Self-check | Treat optional sections (Personas, Event Storming, SIPOC, Glossary) as "intentionally empty" — not failures. | Full self-check as written. |
+
+### Why this gate exists
+
+Without it, the 10-topic interview pulls "งานง่าย ๆ" (simple work) toward speculative scope: stakeholders surface from prompts that don't apply, future scope expands during As-Is/To-Be questions, and the AI ends up inferring `Estimated sprints > 1` for what was really a 1-week task. Triaging first prevents the inflation.
+
+---
+
 ## Step 1 — Pick scenario + create doc
 
 1. **Detect scenario type** from the user's input. Default to `new-feature` when unclear; ask only if the choice would change the prompts materially.
@@ -33,12 +69,16 @@ These inform Step 2 questions: don't re-ask what's already decided; do surface p
    - `refactor` — restructuring code with behavior preserved
    - `bug-investigation` — recurring or multi-system bug worth its own epic
    - `integration` — connecting to an external system / vendor / API
-2. Create `docs/discovery/[disc-id]-[name].md` from `docs/templates/DISCOVERY-TEMPLATE.md` with all sections set to `TBD`. Set the doc metadata `Scenario: [type]`.
+2. Create `docs/discovery/[disc-id]-[name].md` from `docs/templates/DISCOVERY-TEMPLATE.md` with all sections set to `TBD`. Set the doc metadata `Scenario: [type]` and `Mode: minimal | full` (from Step 0.5).
 3. Read the matching scenario prompt template — `docs/templates/discovery-scenarios/[NEW-FEATURE|REFACTOR|BUG-INVESTIGATION|INTEGRATION].md` — and use its scenario-specific prompts when running Step 2 (gap-asking) and Step 3 (filling). The 10 topic structure stays the same; the prompts inside each topic come from the scenario template.
 
 ---
 
 ## Step 2 — Progressive interview (structured multi-choice)
+
+**Minimal Mode short-circuit (from Step 0.5):** if `Mode: minimal`, do NOT walk the 10 topics. Instead, run AT MOST ONE `AskUserQuestion` call that bundles the inferred **Problem statement + chosen Approach + Scope** as one confirm-or-redirect option set (2-4 options). If the user confirms the recommended option → jump straight to Step 2b. Skip Steps 2 (rest of), 3c. Multi-epic is **not allowed** in Minimal Mode.
+
+For `Mode: full`, continue with the full interview below.
 
 Walk the 10 topics below as a **structured interview**: one focused `AskUserQuestion` call per gap, each with 2-4 inferred options, progressive (each question's options informed by previous answers and codebase scan).
 
@@ -139,9 +179,12 @@ Key dimensions:
    - Tag each question as either `blocking-for-planning` or `carry-forward-to-/requirement`.
    - `blocking-for-planning` means `/new-sprint` should not commit to task breakdown until answered.
    - `carry-forward-to-/requirement` means the sprint can be planned, but the owning task must resolve it before implementation.
-4. **Epic Breakdown section** (apply `.claude/rules/discovery-epic-mapping.md`): inspect Scope Estimate → `Estimated sprints`.
-   - **= 1 sprint** → leave the Epic Breakdown table empty.
-   - **> 1 sprint** → enumerate each epic as a row (E1, E2, ...). Each row: title, one-line scope, `Depends On` (another epic's ID or `—`), priority. Order by dependency (E1 has no epic deps; E2 may depend on E1, etc.). Also fill **Shared entities / cross-epic concerns** with anything used by more than one epic — ownership goes to the first epic that introduces each.
+4. **Epic Breakdown section** (apply `.claude/rules/discovery-epic-mapping.md`): the rule defaults to **single-epic** — multi-epic only when at least one explicit trigger fires.
+   - **Minimal Mode** (from Step 0.5) → always single-epic. Leave the Epic Breakdown table empty. Do not evaluate triggers.
+   - **Full Mode + no multi-epic trigger fires** → single-epic. Leave the Epic Breakdown table empty.
+   - **Full Mode + ≥ 1 multi-epic trigger fires** → enumerate each epic as a row (E1, E2, ...). Each row: title, one-line scope, `Depends On` (another epic's ID or `—`), priority. Order by dependency (E1 has no epic deps; E2 may depend on E1, etc.). Also fill **Shared entities / cross-epic concerns** with anything used by more than one epic — ownership goes to the first epic that introduces each. Record **which trigger(s) fired** as a one-line note above the Epic Breakdown table so reviewers can audit the decision.
+
+   See `discovery-epic-mapping.md` for the full trigger list. "Estimated sprints > 1" alone is **not** a multi-epic trigger — it is a symptom; a trigger is the underlying reason that forces a split.
 5. Next Steps section:
    - **Single-epic** → `"/new-sprint [sprint-id] \"[epic description]\""`.
    - **Multi-epic** → one line per epic row in Epic Breakdown, in dependency order, with sequential `[sprint-id]`s (SP[N], SP[N+1], ...).
@@ -185,8 +228,10 @@ Wait for user's choice. Once chosen:
 
 ## Step 3c — DDD bounded contexts (conditional)
 
-Invoke `ddd` in `discovery` mode when ANY of:
-- Scope Estimate > 1 sprint (multi-epic discovery), OR
+**Minimal Mode (from Step 0.5):** skip this step entirely. By definition Minimal Mode is single-context.
+
+**Full Mode:** invoke `ddd` in `discovery` mode when ANY of:
+- Multi-epic discovery (≥ 1 multi-epic trigger from `discovery-epic-mapping.md` fired in Step 3.4), OR
 - Problem statement names ≥ 2 distinct stakeholder roles, OR
 - Epic Breakdown lists shared concepts between epics.
 
@@ -208,13 +253,25 @@ Add to the **Discovery Backlog** section:
 ## Self-check
 
 Before reporting output, re-read `docs/discovery/[disc-id]-[name].md` in full and verify:
-- [ ] All 10 topic sections are filled — no section left as `TBD` unless explicitly unanswerable.
-- [ ] At least 2 options exist in Approaches section, each with Description / Pros / Cons / Recommended.
+
+**Universal checks (both modes):**
 - [ ] One approach is marked `✓ SELECTED` — approach approval gate was completed.
 - [ ] All open questions are formatted as `- [ ]` checkboxes.
 - [ ] Each open question is labeled `blocking-for-planning` or `carry-forward-to-/requirement`.
-- [ ] If Scope Estimate > 1 sprint → Epic Breakdown has ≥ 2 rows and Next Steps lists one `/new-sprint` per epic in dependency order.
-- [ ] If Scope Estimate = 1 sprint → Epic Breakdown is empty and Next Steps has a single `/new-sprint` invocation.
+- [ ] Next Steps has at least one `/new-sprint` invocation; sprint IDs are sequential if multi-epic.
+
+**Full Mode only:**
+- [ ] All 10 topic sections are filled — no section left as `TBD` unless explicitly unanswerable.
+- [ ] At least 2 options exist in Approaches section, each with Description / Pros / Cons / Recommended.
+- [ ] If ≥ 1 multi-epic trigger fired → Epic Breakdown has ≥ 2 rows AND the firing trigger(s) noted above the table AND Next Steps lists one `/new-sprint` per epic in dependency order.
+- [ ] If no multi-epic trigger fired → Epic Breakdown is empty and Next Steps has a single `/new-sprint` invocation.
+
+**Minimal Mode only:**
+- [ ] Doc metadata `Mode: minimal` is set.
+- [ ] Required sections only — Problem Statement, Affected Users, Goals & Success, Constraints, Proposed Approaches (1 SELECTED + 1 brief alternative), Scope Estimate, Next Steps — are filled.
+- [ ] Optional sections (Personas, Event Storming, SIPOC, Glossary) intentionally left empty — this is **not** a failure.
+- [ ] Epic Breakdown is empty. Single `/new-sprint` invocation in Next Steps.
+- [ ] No `ddd` skill output appended (Step 3c was skipped).
 
 Fix any issue found. Re-read the affected section to confirm the fix before proceeding.
 
